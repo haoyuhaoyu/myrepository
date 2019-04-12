@@ -1,1 +1,3 @@
-psvm sout  'Hw' ÄãºÃ£¡
+public static void main(String[] args){
+ //this is a method;
+}
