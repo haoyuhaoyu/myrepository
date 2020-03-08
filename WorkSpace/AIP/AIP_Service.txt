@@ -1,0 +1,6 @@
+[Id] [nvarchar],
+[Platform] [nvarchar],
+[Name] [nvarchar],
+[ServiceFamilyId] [int],
+[LastModifiedTimeStamp] [datetime],
+[Version] [nvarchar],

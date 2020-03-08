@@ -1,0 +1,8 @@
+[Id] [nvarchar],
+[Name] [nvarchar],
+[Title] [nvarchar],
+[ServiceId] [nvarchar],
+[Type] [nvarchar],
+[LastModifiedTimeStamp] [datetime],
+[IsDeleted] [bool],
+[Version] [nvarchar],

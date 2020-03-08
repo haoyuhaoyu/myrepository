@@ -1,0 +1,11 @@
+.set-or-replace AIP_CSP_ProductSku  <| 
+   AIP_CSP_ProductSku_Staging
+   | extend InsertDateTime = now()
+   |project CaymanSkuId,Id,InsertDateTime,Name,ProductId,Title,Version
+
+   
+.append AIP_CSP_ProductSku with(tags='["drop-by:@{item().Tag}"]') <|
+	AIP_CSP_ProductSku_Staging
+	|where strcat(Name,"_",Version)==@{item().Tag}
+	|extend InsertDateTime=now()
+   |project CaymanSkuId,Id,InsertDateTime,Name,ProductId,Title,Version

@@ -1,0 +1,1 @@
+Eligibility:string,ExclusionDetail:string,Id:string,InsertDateTime:datetime,IsActive:bool,IsRestricted:bool,Name:string,PartNumber:int,SkuId:string,State:string,Type:string,TypeDescription:string,UnitOfMeasure:string,Version:string

@@ -1,0 +1,1 @@
+ArmRegionName:string,CurrencyCode:string,EffectiveStartDate:datetime,Id:string,InsertDateTime:datetime,IsPrimaryMeterRegion:bool,Location:string,MeterId:string,PartNumber:string,ReservationTerm:string,RetailPrice:real,SkuId:string,TierMinimumUnits:real,Type:string,UnitPrice:real,Version:string

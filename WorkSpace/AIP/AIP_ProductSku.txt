@@ -1,0 +1,6 @@
+	[Id] [nvarchar],
+	[ProductId] [nvarchar],
+	[CaymanSkuId] [nvarchar],
+	[Name] [nvarchar],
+	[Title] [nvarchar],
+	[Version] [nvarchar],

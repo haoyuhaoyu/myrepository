@@ -1,0 +1,4 @@
+.set-or-replace AIP_CSP_ServiceFamily  <| 
+   AIP_CSP_ServiceFamily_Staging
+   | extend InsertDateTime = now()
+   |project Id,InsertDateTime,Name

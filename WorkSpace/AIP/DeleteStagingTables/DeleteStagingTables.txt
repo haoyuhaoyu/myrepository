@@ -1,0 +1,8 @@
+.drop tables(
+CSP_AIP_AzureCustomAttribute_Staging,
+CSP_AIP_AzureProductMeter_Staging,
+CSP_AIP_AzureProductPrice_Staging,
+CSP_AIP_AzureProductSku_Staging,
+CSP_AIP_AzureService_Staging,
+CSP_AIP_AzureServiceFamily_Staging,
+CSP_AIP_AzureServiceProduct_Staging) ifexists

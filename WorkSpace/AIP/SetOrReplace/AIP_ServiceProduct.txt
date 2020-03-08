@@ -1,0 +1,11 @@
+.set-or-replace AIP_CSP_ServiceProduct  <| 
+   AIP_CSP_ServiceProduct_Staging
+   | extend InsertDateTime = now()
+   |project Id,InsertDateTime,IsDeleted,LastModifiedTimeStamp,Name,ServiceId,Title,Type,Version
+
+   
+.append AIP_CSP_ServiceProduct with(tags='["drop-by:@{item().Tag}"]') <|
+	AIP_CSP_ServiceProduct_Staging
+	|where strcat(Name,"_",Version)==@{item().Tag}
+	|extend InsertDateTime=now()
+   |project Id,InsertDateTime,IsDeleted,LastModifiedTimeStamp,Name,ServiceId,Title,Type,Version

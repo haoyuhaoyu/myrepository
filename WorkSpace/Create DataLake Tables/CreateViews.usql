@@ -1,0 +1,854 @@
+USE DATABASE TnR;
+
+CREATE VIEW [dbo].[vw_SecurityMappingX] AS
+	SELECT 	p.SecCode,
+			p.VenType,
+			p.typ,
+			p.VenCode,
+			p.Rank,
+			p.Exchange,
+			p.StartDate,
+			p.EndDate
+	FROM (SELECT SecCode,VenType,1 AS typ,VenCode,Rank,Exchange,StartDate,EndDate FROM SecMapX UNION ALL SELECT SecCode,VenType,6 AS Typ,VenCode,Rank,Exchange,StartDate,EndDate FROM GSecMapX) AS p;
+
+
+CREATE VIEW [dbo].[vw_Ds2FxCross] AS
+	SELECT 
+		gbp.FromCurrCode,
+		tgt.FromCurrCode AS ToCurrCode,
+		gbp.RateTypeCode AS RateType,
+		gbpFx.ExRateDate,
+		gbpFx.MidRate / tgtFx.MidRate AS MidRate,
+		gbpFx.BidRate / tgtFx.BidRate AS BidRate,
+		gbpFx.OfferRate / tgtFx.OfferRate AS OfferRate
+	FROM (SELECT * FROM DS2FXCode WHERE ToCurrCode == "GBP") AS gbp
+		JOIN DS2FXRate AS gbpFx
+			ON	gbpFx.ExRateIntCode == gbp.ExRateIntCode
+		JOIN DS2FXCode AS tgt
+			ON	tgt.ToCurrCode == gbp.ToCurrCode
+			AND	tgt.RateTypeCode == gbp.RateTypeCode
+		JOIN DS2FXRate AS tgtFx
+			ON	tgtFx.ExRateIntCode == tgt.ExRateIntCode
+			AND	tgtFx.ExRateDate == gbpFx.ExRateDate
+		WHERE tgtFx.MidRate > 0;
+		
+
+CREATE VIEW [dbo].[vw_Ds2Mapping] AS
+	SELECT
+		SecCode,
+		typ,
+		Rank,
+		Exchange,
+		VenCode
+	FROM (
+		SELECT *,ROW_NUMBER() OVER(PARTITION BY SecCode,typ,Exchange ORDER BY Rank ASC) AS rn FROM vw_SecurityMappingX WHERE VenType == 33
+		) AS exchReRank WHERE exchReRank.rn == 1;
+		
+
+CREATE VIEW [dbo].[vw_IBES2ActSurpr] AS
+	SELECT			  i.IBESTicker
+					, d.EstPermID
+					, d.IsParent
+					, d.Measure
+					, m.[Description]		AS Measure_Code
+					, p.[Description]		AS Measure_Desc
+					, d.PerType
+					, t.[Description]		AS Period_Desc
+					, d.FYEMonth
+					, d.PerEndDate
+					, d.WinType
+					, d.WinLength
+					, d.WinEndDate
+					, d.WinEndOffset
+					, d.ActivationDate
+					, d.DefActSurprise
+					, d.DefActSUEScore
+					, d.RegionPermID
+					, r.[Description]		AS Region_Desc
+
+		FROM		(SELECT *, Measure.ToString() AS Measure_str,PerType.ToString() AS PerType_str,
+							RegionPermID IS NULL ? "":RegionPermID.ToString() AS RegionPermID_str
+					FROM [dbo].[TREActSurpWin])	AS d
+		
+		LEFT JOIN	[dbo].[TREInfo]			AS i
+			ON		d.EstPermID				== i.EstPermID
+			
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 4)			AS m		
+			ON		m.Code					== d.Measure_str
+		
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 5)			AS p		
+			ON		p.Code					== d.Measure_str
+		
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 2)			AS t		
+			ON		t.Code					== d.PerType_str
+			
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 12)		AS r		
+			ON		r.Code					== d.RegionPermID_str;
+
+
+CREATE VIEW [dbo].[vw_IBES2Actuals] AS
+	SELECT			  i.IBESTicker
+					, d.EstPermID
+					, d.IsParent
+					, d.ActType
+					, d.Measure
+					, m.[Description]		AS Measure_Code
+					, p.[Description]		AS Measure_Desc
+					, d.PerType
+					, t.[Description]		AS Period_Desc
+					, d.FYEMonth
+					, d.PerEndDate
+					, d.EffectiveDate
+					, d.EffectiveOffset
+					, d.[ExpireDate]
+					, d.ExpireOffset
+					, d.AnnounceDate
+					, d.AnnounceOffset
+					, d.ActivationDate
+					, d.UnitType
+					, d.DefActValue
+					, d.DefCurrPermID
+					, dn.[Description]		AS DefCurr_Desc
+					, d.DefScale
+					, d.DefCurrAdj
+					, d.NormActValue
+					, d.NormCurrPermID
+					, cn.[Description]		AS NormCurr_Desc
+					, d.NormScale
+					, d.NormSplitFactor
+					, d.NormCurrAdj
+					, d.AsContribActValue
+					, d.AsContribCurrPermID
+					, an.[Description]		AS AsContribCurr_Desc
+					, d.AsContribScale
+					, d.RegionPermID
+					, r.[Description]		AS Region_Desc
+
+		FROM		(	
+						SELECT *,t.Measure.ToString() AS Measure_str,
+								t.PerType.ToString() AS PerType_str,
+								t.DefCurrPermID IS NULL ? "" : t.DefCurrPermID.ToString() AS DefCurrPermID_str,
+								t.NormCurrPermID IS NULL ? "" : t.NormCurrPermID.ToString() AS NormCurrPermID_str,
+								t.AsContribCurrPermID IS NULL ? "" : t.AsContribCurrPermID.ToString() AS AsContribCurrPermID_str,
+								t.RegionPermID IS NULL ? "" : t.RegionPermID.ToString() AS RegionPermID_str
+						FROM(
+						SELECT *
+								,"Reported" AS ActType
+						FROM [dbo].[TREActRpt]		
+							UNION ALL
+						SELECT *
+								,"Restated" AS ActType
+						FROM [dbo].[TREActRst]
+							UNION ALL
+						SELECT *
+								,"GoForward" AS ActType
+						FROM [dbo].[TREActGoFwd]) AS t
+					)						AS d
+		
+		LEFT JOIN	[dbo].[TREInfo]			AS i
+			ON		d.EstPermID				== i.EstPermID
+			
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 4)			AS m		
+			ON		m.Code					== d.Measure_str
+		
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 5)			AS p		
+			ON		p.Code					== d.Measure_str
+		
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 2)			AS t		
+			ON		t.Code					== d.PerType_str
+
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 7)			AS dn		
+			ON		dn.Code					== d.DefCurrPermID_str
+
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 7)			AS cn		
+			ON		cn.Code					== d.NormCurrPermID_str
+
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 7)			AS an		
+			ON		an.Code					== d.AsContribCurrPermID_str	
+		
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 12)		AS r		
+			ON		r.Code					== d.RegionPermID_str;
+
+			
+
+CREATE VIEW [dbo].[vw_IBES2Mapping] AS
+
+	SELECT	SecCode
+			,RegCode
+			,Typ
+			,IBESTicker
+			,EstPermID
+			,QuotePermID
+			,InstrPermID
+			,CtryPermID
+			,Source_
+	FROM (
+		SELECT
+				i.RegCode,
+				i.RegCode == 1 ? 1:(i.RegCode == 0 ? 6:-1) AS Typ,
+				i.SecCode,
+				i.EntType,
+				i.[Rank],
+				i.MapStartDt,
+				i.MapEndDt,
+				i.IBESTicker,
+				i.EstPermID,
+				i.InstrPermID,
+				i.QuotePermID,
+				i.EffectiveDate,
+				i.[ExpireDate],
+				i.CtryPermID,
+				q.IsPrimary,
+				ROW_NUMBER() OVER (PARTITION BY i.RegCode,i.SecCode ORDER BY i.[Rank] ASC,q.IsPrimary DESC,i.[ExpireDate] DESC,[EffectiveDate] DESC,i.EntType DESC) AS ReRank,
+				(i.EntType == 49 AND (q.IsPrimary IS NULL ? false : bool.Parse(q.IsPrimary.ToString()))) ? "instrPrimaryQuote":(i.EntType == 55 ? "quote":(i.EntType == 49 ? "instrument":"")) AS Source_
+
+			FROM (
+				SELECT p.RegCode
+						,p.SecCode
+						,p.EntType
+						,p.[Rank]
+						,p.StartDate AS MapStartDt
+						,p.EndDate AS MapEndDt
+						,i.IBESTicker
+						,i.EstPermID
+						,i.InstrPermID
+						,i.QuotePermID
+						,i.EffectiveDate IS NULL ? DateTime.Parse("2079-12-31"):DateTime.Parse(i.EffectiveDate.ToString()).AddMinutes(-(i.EffectiveOffset IS NULL ? 0 : int.Parse(i.EffectiveOffset.ToString()))) AS EffectiveDate
+						,i.ExpireDate IS NULL ? DateTime.Parse("2079-12-31"):DateTime.Parse(i.ExpireDate.ToString()).AddMinutes(-(i.ExpireOffset IS NULL ? 0 : int.Parse(i.ExpireOffset.ToString()))) AS ExpireDate
+						,i.CtryPermID
+						,i.QuotePermID IS NULL ? long.Parse("-1") : long.Parse(i.QuotePermID.ToString()) AS QuotePermID_l
+				FROM (SELECT * FROM PermSecMapX WHERE EntType == 49) AS p 
+				JOIN (SELECT *,InstrPermID IS NULL ? long.Parse("-1") : long.Parse(InstrPermID.ToString()) AS InstrPermID_l FROM TREInfo) AS i 
+					ON p.EntPermID == i.InstrPermID 
+				JOIN PermInstrInfo AS ii 
+					ON ii.InstrPermID == i.InstrPermID_l
+				WHERE i.CtryPermID IN (100052,100319)
+						UNION 
+				SELECT p.RegCode
+						,p.SecCode
+						,p.EntType
+						,p.[Rank]
+						,p.StartDate AS MapStartDt
+						,p.EndDate AS MapEndDt
+						,i.IBESTicker
+						,i.EstPermID
+						,i.InstrPermID
+						,i.QuotePermID
+						,i.EffectiveDate IS NULL ? DateTime.Parse("2079-12-31"):DateTime.Parse(i.EffectiveDate.ToString()).AddMinutes(-(i.EffectiveOffset IS NULL ? 0 : int.Parse(i.EffectiveOffset.ToString()))) AS EffectiveDate
+						,i.ExpireDate IS NULL ? DateTime.Parse("2079-12-31"):DateTime.Parse(i.ExpireDate.ToString()).AddMinutes(-(i.ExpireOffset IS NULL ? 0 : int.Parse(i.ExpireOffset.ToString()))) AS ExpireDate
+						,i.CtryPermID 
+						,i.QuotePermID IS NULL ? long.Parse("-1") : long.Parse(i.QuotePermID.ToString()) AS QuotePermID_l
+				FROM (SELECT * FROM PermSecMapX WHERE EntType == 55) AS p 
+				JOIN TREInfo AS i 
+					ON p.EntPermID == i.QuotePermID 
+			) AS i
+			LEFT JOIN PermQuoteRef AS q
+				ON	q.QuotePermID == i.QuotePermID_l
+		) AS aa
+	WHERE aa.ReRank == 1;
+
+
+CREATE VIEW [dbo].[vw_IBES2RecSum] AS
+
+	SELECT			 i.[IBESTicker]
+					,e.[EstPermID]
+					,e.[EffectiveDate]
+					,e.[EffectiveOffset]
+					,e.[ExpireDate]
+					,e.[ExpireOffset]
+					,e.[ActivationDate]
+					,e.[IsRealtime]
+					,e.[HighRec]
+					,e.[LowRec]
+					,e.[MeanRec]
+					,e.[MedianRec]
+					,e.[NumRecs]
+					,e.[NumNoRec]
+					,e.[NumRecs1]
+					,e.[NumRecs2]
+					,e.[NumRecs3]
+					,e.[NumRecs4]
+					,e.[NumRecs5]
+					,e.[RegionPermID]
+					,r.[Description]		AS Region_Desc
+
+		FROM		(SELECT *,RegionPermID IS NULL ? "" : RegionPermID.ToString() AS RegionPermID_str FROM [dbo].[TRERecSum])		AS e
+		
+		LEFT JOIN	[dbo].[TREInfo]			AS i
+			ON		e.EstPermID				== i.EstPermID
+		
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 12)			AS r		
+			ON		r.Code					== e.RegionPermID_str;
+			
+
+CREATE VIEW [dbo].[vw_IBES2SumAper] AS
+
+	SELECT			  i.IBESTicker
+					, e.EstPermID
+					, e.IsParent
+					, e.Measure
+					, m.[Description] 		AS Measure_Code
+					, p.[Description]		AS Measure_Desc
+					, e.PerType
+					, t.[Description]		AS Period_Desc
+					, e.EffectiveDate
+					, e.EffectiveOffset
+					, e.[ExpireDate]
+					, e.ExpireOffset
+					, e.ActivationDate
+					, e.IsRealtime
+					, e.UnitType
+					, e.DefStdDev
+					, e.DefHighEst
+					, e.DefLowEst
+					, e.DefMeanEst
+					, e.DefMedianEst
+					, e.DefCurrPermID
+					, dn.[Description]		AS DefCurr_Desc
+					, e.DefScale
+					, e.NormStdDev
+					, e.NormHighEst
+					, e.NormLowEst
+					, e.NormMeanEst
+					, e.NormMedianEst
+					, e.NormCurrPermID
+					, cn.[Description]		AS NormCurr_Desc
+					, e.NormScale
+					, e.NormSplitFactor
+					, e.NormCurrAdj
+					, e.MarginPct
+					, e.NumIncEsts
+					, e.NumEsts
+					, e.RegionPermID
+					, r.[Description]		AS Region_Desc
+
+		FROM		(SELECT *,
+							PerType.ToString() AS PerType_str,
+							NormCurrPermID IS NULL ? "" : NormCurrPermID.ToString() AS NormCurrPermID_str,
+							DefCurrPermID IS NULL ? "" : DefCurrPermID.ToString() AS DefCurrPermID_str,
+							Measure.ToString() AS Measure_str,
+							RegionPermID IS NULL ? "" : RegionPermID.ToString() AS RegionPermID_str
+					 FROM [dbo].[TRESumAper])		AS e
+		
+		LEFT JOIN	[dbo].[TREInfo]			AS i
+			ON		e.EstPermID				== i.EstPermID
+		
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 2)			AS t
+			ON		t.Code					== e.PerType_str
+		
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 7)			AS cn		
+			ON		cn.Code					== e.NormCurrPermID_str
+
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 7)			AS dn		
+			ON		dn.Code					== e.DefCurrPermID_str
+
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 4)			AS m		
+			ON		m.Code					== e.Measure_str
+			
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 5)			AS p		
+			ON		p.Code					== e.Measure_str
+		
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 12)		AS r		
+			ON		r.Code					== e.RegionPermID_str;
+
+			
+
+CREATE VIEW [dbo].[vw_IBES2SumHzn] AS
+
+
+	SELECT			  i.IBESTicker
+					, e.EstPermID
+					, e.IsParent
+					, e.Measure
+					, m.[Description] 		AS Measure_Code
+					, p.[Description]		AS Measure_Desc
+					, e.PerType
+					, t.[Description]		AS Period_Desc
+					, e.PerLength
+					, e.EffectiveDate
+					, e.EffectiveOffset
+					, e.[ExpireDate]
+					, e.ExpireOffset
+					, e.ActivationDate
+					, e.IsRealtime
+					, e.UnitType
+					, e.DefStdDev
+					, e.DefHighEst
+					, e.DefLowEst
+					, e.DefMeanEst
+					, e.DefMedianEst
+					, e.DefCurrPermID
+					, dn.[Description]		AS DefCurr_Desc
+					, e.DefScale
+					, e.NormStdDev
+					, e.NormHighEst
+					, e.NormLowEst
+					, e.NormMeanEst
+					, e.NormMedianEst
+					, e.NormCurrPermID
+					, cn.[Description]		AS NormCurr_Desc
+					, e.NormScale
+					, e.NormSplitFactor
+					, e.NormCurrAdj
+					, e.MarginPct
+					, e.NumIncEsts
+					, e.NumEsts
+					, e.RegionPermID
+					, r.[Description]		AS Region_Desc
+
+		FROM		(SELECT *,
+							PerType.ToString() AS PerType_str,
+							NormCurrPermID IS NULL ? "" : NormCurrPermID.ToString() AS NormCurrPermID_str,
+							DefCurrPermID IS NULL ? "" : DefCurrPermID.ToString() AS DefCurrPermID_str,
+							Measure.ToString() AS Measure_str,
+							RegionPermID IS NULL ? "" : RegionPermID.ToString() AS RegionPermID_str
+					 FROM [dbo].[TRESumHzn])		AS 	e
+		
+		LEFT JOIN	[dbo].[TREInfo]			AS i
+			ON		e.EstPermID				== i.EstPermID
+
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 2)			AS t
+			ON		t.Code					== e.PerType_str
+		
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 7)			AS cn		
+			ON		cn.Code					== e.NormCurrPermID_str
+
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 7)			AS dn		
+			ON		dn.Code					== e.DefCurrPermID_str
+
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 4)			AS m		
+			ON		m.Code					== e.Measure_str
+			
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 5)			AS p		
+			ON		p.Code					== e.Measure_str
+		
+		LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 12)		AS r		
+			ON		r.Code					== e.RegionPermID_str;
+
+			
+
+CREATE VIEW [dbo].[vw_IBES2SumPer] AS
+
+	SELECT 
+	i_IBESTicker AS IBESTicker
+	, e_EstPermID AS EstPermID
+	, e_IsParent AS IsParent
+	, e_Measure AS Measure
+	, m.[Description] 		AS Measure_Code
+	, p.[Description]		AS Measure_Desc
+	, e_PerType AS PerType
+	, t.[Description]		AS Period_Desc
+	, pa_PerLength AS PerLength
+	, p1_PerIndex-p0_PerIndex	AS HistoricalPeriodIndex
+	,e_PerType == 3?"FQ":
+		(e_PerType == 4?"FY":
+			(e_PerType == 5?"FS":
+				(e_PerType == 1?"LTG":
+					(e_PerType == 2?"FM":""
+					)
+				)
+			)
+		) + ((p1_PerIndex-p0_PerIndex).ToString()) AS HPIShort_Desc
+	, e_FYEMonth AS FYEMonth
+	, e_PerEndDate AS PerEndDate
+	, e_EffectiveDate AS EffectiveDate
+	, e_EffectiveOffset AS EffectiveOffset
+	, e_ExpireDate AS ExpireDate
+	, e_ExpireOffset AS ExpireOffset
+	, e_ActivationDate AS ActivationDate
+	, e_IsRealtime AS IsRealtime
+	, e_UnitType AS UnitType
+	, e_DefStdDev AS DefStdDev
+	, e_DefHighEst AS DefHighEst
+	, e_DefLowEst AS DefLowEst
+	, e_DefMeanEst AS DefMeanEst
+	, e_DefMedianEst AS DefMedianEst
+	, e_DefCurrPermID AS DefCurrPermID
+	, dn.[Description]		AS DefCurr_Desc
+	, e_DefScale AS DefScale
+	, e_NormStdDev AS NormStdDev
+	, e_NormHighEst AS NormHighEst
+	, e_NormLowEst AS NormLowEst
+	, e_NormMeanEst AS NormMeanEst
+	, e_NormMedianEst AS NormMedianEst
+	, e_NormCurrPermID AS NormCurrPermID
+	, cn.[Description]		AS NormCurr_Desc
+	, e_NormScale AS NormScale
+	, e_NormSplitFactor AS NormSplitFactor
+	, e_NormCurrAdj AS NormCurrAdj
+	, e_MarginPct AS MarginPct
+	, e_NumIncEsts AS NumIncEsts
+	, e_NumEsts AS NumEsts
+	, e_RegionPermID AS RegionPermID
+	, r.[Description]		AS Region_Desc
+
+FROM (
+SELECT t1.* ,
+		p1.EstPermID.GetValueOrDefault(-1) AS p1_EstPermID,
+		p1.Periodicity.GetValueOrDefault(-1) AS p1_Periodicity,
+		p1.PerType.GetValueOrDefault(-1) AS p1_PerType,
+		p1.PerEndDate.GetValueOrDefault(DateTime.Parse("9999-12-31")) AS p1_PerEndDate,
+		p1.PerLength.GetValueOrDefault(-1) AS p1_PerLength,
+		p1.FYEMonth.GetValueOrDefault(-1) AS p1_FYEMonth,
+		p1.EffectiveDate AS p1_EffectiveDate,
+		p1.EffectiveOffset AS p1_EffectiveOffset,
+		p1.ExpireDate AS p1_ExpireDate,
+		p1.ExpireOffset AS p1_ExpireOffset,
+		p1.ActivationDate AS p1_ActivationDate,
+		p1.FiscalYear AS p1_FiscalYear,
+		p1.FiscalIndex AS p1_FiscalIndex,
+		p1.PerIndex AS p1_PerIndex,
+		p1.RegionPermID AS p1_RegionPermID
+FROM (
+SELECT t.*,
+		p0.EstPermID.GetValueOrDefault(-1) AS p0_EstPermID,
+		p0.Periodicity.GetValueOrDefault(-1) AS p0_Periodicity,
+		p0.PerType.GetValueOrDefault(-1) AS p0_PerType,
+		p0.PerEndDate.GetValueOrDefault(DateTime.Parse("1111-11-11")) AS p0_PerEndDate,
+		p0.PerLength.GetValueOrDefault(-1) AS p0_PerLength,
+		p0.FYEMonth.GetValueOrDefault(-1) AS p0_FYEMonth,
+		p0.EffectiveDate AS p0_EffectiveDate,
+		p0.EffectiveOffset AS p0_EffectiveOffset,
+		p0.ExpireDate AS p0_ExpireDate,
+		p0.ExpireOffset AS p0_ExpireOffset,
+		p0.ActivationDate AS p0_ActivationDate,
+		p0.FiscalYear AS p0_FiscalYear,
+		p0.FiscalIndex AS p0_FiscalIndex,
+		p0.PerIndex AS p0_PerIndex,
+		p0.RegionPermID AS p0_RegionPermID
+FROM (
+SELECT 	e.EstPermID AS e_EstPermID,
+		e.Measure AS e_Measure,
+		e.IsParent AS e_IsParent,
+		e.PerType AS e_PerType,
+		e.PerEndDate AS e_PerEndDate,
+		e.FYEMonth AS e_FYEMonth,
+		e.EffectiveDate AS e_EffectiveDate,
+		e.EffectiveOffset AS e_EffectiveOffset,
+		e.ExpireDate AS e_ExpireDate,
+		e.ExpireOffset AS e_ExpireOffset,
+		e.ActivationDate AS e_ActivationDate,
+		e.IsRealtime AS e_IsRealtime,
+		e.DefStdDev AS e_DefStdDev,
+		e.DefHighEst AS e_DefHighEst,
+		e.DefLowEst AS e_DefLowEst,
+		e.DefMeanEst AS e_DefMeanEst,
+		e.DefMedianEst AS e_DefMedianEst,
+		e.DefCurrPermID AS e_DefCurrPermID,
+		e.DefScale AS e_DefScale,
+		e.UnitType AS e_UnitType,
+		e.NormStdDev AS e_NormStdDev,
+		e.NormHighEst AS e_NormHighEst,
+		e.NormLowEst AS e_NormLowEst,
+		e.NormMeanEst AS e_NormMeanEst,
+		e.NormMedianEst AS e_NormMedianEst,
+		e.NormCurrPermID AS e_NormCurrPermID,
+		e.NormScale AS e_NormScale,
+		e.NormSplitFactor AS e_NormSplitFactor,
+		e.NormCurrAdj AS e_NormCurrAdj,
+		e.MarginPct AS e_MarginPct,
+		e.NumIncEsts AS e_NumIncEsts,
+		e.NumEsts AS e_NumEsts,
+		e.RegionPermID AS e_RegionPermID,
+		
+		i.IBESTicker AS i_IBESTicker,
+		
+		pa.EstPermID.GetValueOrDefault(-1) AS pa_EstPermID,
+		pa.Periodicity.GetValueOrDefault(-1) AS pa_Periodicity,
+		pa.PerType.GetValueOrDefault(-1) AS pa_PerType,
+		pa.PerEndDate.GetValueOrDefault(DateTime.Parse("1111-11-11")) AS pa_PerEndDate,
+		pa.PerLength.GetValueOrDefault(-1) AS pa_PerLength,
+		pa.FYEMonth.GetValueOrDefault(-1) AS pa_FYEMonth,
+		pa.EffectiveDate AS pa_EffectiveDate,
+		pa.EffectiveOffset AS pa_EffectiveOffset,
+		pa.ExpireDate AS pa_ExpireDate,
+		pa.ExpireOffset AS pa_ExpireOffset,
+		pa.ActivationDate AS pa_ActivationDate,
+		pa.RegionPermID AS pa_RegionPermID,
+		
+		e.PerType.ToString() AS PerType_str,
+		e.NormCurrPermID IS NULL ? "" : e.NormCurrPermID.ToString() AS NormCurrPermID_str,
+		e.DefCurrPermID IS NULL ? "" : e.DefCurrPermID.ToString() AS DefCurrPermID_str,
+		e.Measure.ToString() AS Measure_str,
+		e.RegionPermID IS NULL ? "" : e.RegionPermID.ToString() AS RegionPermID_str
+FROM [dbo].[TRESumPer] AS e
+LEFT JOIN [dbo].[TREInfo] AS i ON e.EstPermID == i.EstPermID
+LEFT JOIN (SELECT * FROM [dbo].[TREPerAdvance] WHERE Periodicity == 3 AND EffectiveDate IS NOT NULL) AS pa ON e.EstPermID == pa.EstPermID AND e.PerType == pa.PerType AND e.FYEMonth == pa.FYEMonth
+) AS t 
+LEFT JOIN (SELECT * FROM [dbo].[TREPerIndex] WHERE EffectiveDate IS NOT NULL) AS p0
+ON t.pa_EstPermID == p0.EstPermID
+AND t.pa_PerType == p0.PerType
+AND t.pa_FYEMonth == p0.FYEMonth
+AND t.pa_PerEndDate == p0.PerEndDate	
+AND t.pa_PerLength == p0.PerLength		
+AND t.pa_Periodicity == p0.Periodicity
+) AS t1
+LEFT JOIN (SELECT * FROM [dbo].[TREPerIndex] WHERE EffectiveDate IS NOT NULL) AS p1
+ON t1.e_EstPermID == p1.EstPermID
+AND t1.e_PerType == p1.PerType
+AND t1.e_FYEMonth == p1.FYEMonth
+AND t1.e_PerEndDate == p1.PerEndDate
+AND t1.pa_PerLength == p1.PerLength	
+AND t1.pa_Periodicity == p1.Periodicity
+) AS t2
+LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 2)			AS t
+			ON		t.Code					== t2.PerType_str
+		
+LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 7)			AS cn		
+	ON		cn.Code					== t2.NormCurrPermID_str
+
+LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 7)			AS dn		
+	ON		dn.Code					== t2.DefCurrPermID_str
+
+LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 4)			AS m		
+	ON		m.Code					== t2.Measure_str
+	
+LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 5)			AS p		
+	ON		p.Code					== t2.Measure_str
+
+LEFT JOIN	(SELECT * FROM [dbo].[TRECode] WHERE CodeType == 12)		AS r		
+	ON		r.Code					== t2.RegionPermID_str
+
+WHERE 		e_EffectiveDate.AddMinutes(-(e_EffectiveOffset IS NULL ? 0 : int.Parse(e_EffectiveOffset.ToString()))) >= DateTime.Parse(p1_EffectiveDate IS NULL ? "9999-12-31" : p1_EffectiveDate.ToString()).AddMinutes(-(p1_EffectiveOffset IS NULL ? 0 : int.Parse(p1_EffectiveOffset.ToString())))
+	AND		e_EffectiveDate.AddMinutes(-(e_EffectiveOffset IS NULL ? 0 : int.Parse(e_EffectiveOffset.ToString()))) < (p1_ExpireDate IS NULL ? DateTime.Parse("2079-09-09") : DateTime.Parse(p1_ExpireDate.ToString()).AddMinutes(-(p1_ExpireOffset IS NULL ? 0 : int.Parse(p1_ExpireOffset.ToString()))))
+	AND		e_EffectiveDate.AddMinutes(-(e_EffectiveOffset IS NULL ? 0 : int.Parse(e_EffectiveOffset.ToString()))) >= DateTime.Parse(p0_EffectiveDate IS NULL ? "9999-12-31" : p0_EffectiveDate.ToString()).AddMinutes(-(p0_EffectiveOffset IS NULL ? 0 : int.Parse(p0_EffectiveOffset.ToString())))
+	AND		e_EffectiveDate.AddMinutes(-(e_EffectiveOffset IS NULL ? 0 : int.Parse(e_EffectiveOffset.ToString()))) < (p0_ExpireDate IS NULL ? DateTime.Parse("2079-09-09") : DateTime.Parse(p0_ExpireDate.ToString()).AddMinutes(-(p0_ExpireOffset IS NULL ? 0 : int.Parse(p0_ExpireOffset.ToString()))))
+	AND		e_EffectiveDate.AddMinutes(-(e_EffectiveOffset IS NULL ? 0 : int.Parse(e_EffectiveOffset.ToString()))) >= DateTime.Parse(pa_EffectiveDate IS NULL ? "9999-12-31" : pa_EffectiveDate.ToString()).AddMinutes(-(pa_EffectiveOffset IS NULL ? 0 : int.Parse(pa_EffectiveOffset.ToString())))
+	AND		e_EffectiveDate.AddMinutes(-(e_EffectiveOffset IS NULL ? 0 : int.Parse(e_EffectiveOffset.ToString()))) < (pa_ExpireDate IS NULL ? DateTime.Parse("2079-09-09") : DateTime.Parse(pa_ExpireDate.ToString()).AddMinutes(-(pa_ExpireOffset IS NULL ? 0 : int.Parse(pa_ExpireOffset.ToString()))));
+
+		
+
+CREATE VIEW [dbo].[vw_PermInstrMappingX] AS
+SELECT 
+	aa.RegCode == 1 ? 1:(aa.RegCode == 0?6:-1) AS typ
+	,aa.*
+FROM PermSecMapX AS aa
+LEFT JOIN (	SELECT MIN(Rank) AS mr, SecCode, EntType, RegCode
+			FROM PermSecMapX GROUP BY SecCode, EntType, RegCode) AS bb
+ON aa.SecCode == bb.SecCode AND aa.EntType == bb.EntType AND aa.RegCode == bb.RegCode
+WHERE aa.EntType == 49 AND (bb.mr IS NULL ? false : aa.Rank == int.Parse(bb.mr.ToString()));
+
+
+
+CREATE VIEW [dbo].[vw_PermQuoteMappingX] AS
+SELECT 
+	aa.RegCode == 1 ? 1:(aa.RegCode == 0?6:-1) AS typ
+	,aa.*
+FROM PermSecMapX AS aa
+LEFT JOIN (SELECT MIN(Rank) AS mr, SecCode, EntType, RegCode
+			FROM PermSecMapX GROUP BY SecCode, EntType, RegCode) AS bb
+ON aa.SecCode == bb.SecCode AND aa.EntType == bb.EntType AND aa.RegCode == bb.RegCode
+WHERE aa.EntType == 55 AND (bb.mr IS NULL ? false : aa.Rank == int.Parse(bb.mr.ToString()));
+
+
+CREATE VIEW [dbo].[vw_RDCInstrMappingX] AS
+	SELECT 1 AS typ
+			,aa.*
+	FROM RDCSecMapX AS aa
+	LEFT JOIN (SELECT MIN(Rank) AS mr,SecCode,VenType,Exchange
+				FROM RDCSecMapX GROUP BY SecCode,VenType,Exchange) AS bb
+ON aa.SecCode == bb.SecCode AND aa.VenType == bb.VenType AND aa.Exchange == bb.Exchange
+	WHERE aa.VenType == 49 AND (bb.mr IS NULL ? false : aa.Rank == int.Parse(bb.mr.ToString()))
+			UNION ALL
+	SELECT 6 AS typ
+			,aa.*
+	FROM RDCGSecMapX AS aa
+	LEFT JOIN (SELECT MIN(Rank) AS mr,SecCode,VenType,Exchange
+				FROM RDCGSecMapX GROUP BY SecCode,VenType,Exchange) AS bb
+ON aa.SecCode == bb.SecCode AND aa.VenType == bb.VenType AND aa.Exchange == bb.Exchange
+	WHERE aa.VenType == 49 AND (bb.mr IS NULL ? false : aa.Rank == int.Parse(bb.mr.ToString()));
+
+
+CREATE VIEW [dbo].[vw_RDCOrgMappingX] AS
+	SELECT 1 AS typ
+			,aa.*
+	FROM RDCSecMapX AS aa
+	LEFT JOIN (SELECT MIN(Rank) AS mr,SecCode,VenType,Exchange
+				FROM RDCSecMapX GROUP BY SecCode,VenType,Exchange) AS bb
+ON aa.SecCode == bb.SecCode AND aa.VenType == bb.VenType AND aa.Exchange == bb.Exchange
+	WHERE aa.VenType == 57 AND (bb.mr IS NULL ? false : aa.Rank == int.Parse(bb.mr.ToString()))
+			UNION ALL
+	SELECT 6 AS typ
+			,aa.*
+	FROM RDCGSecMapX AS aa
+	LEFT JOIN (SELECT MIN(Rank) AS mr,SecCode,VenType,Exchange
+				FROM RDCGSecMapX GROUP BY SecCode,VenType,Exchange) AS bb
+ON aa.SecCode == bb.SecCode AND aa.VenType == bb.VenType AND aa.Exchange == bb.Exchange
+	WHERE aa.VenType == 57 AND (bb.mr IS NULL ? false : aa.Rank == int.Parse(bb.mr.ToString()));
+
+
+CREATE VIEW [dbo].[vw_RDCQuoteMappingX] AS
+	SELECT 1 AS typ
+			,aa.*
+	FROM RDCSecMapX AS aa
+	LEFT JOIN (SELECT MIN(Rank) AS mr,SecCode,VenType,Exchange
+				FROM RDCSecMapX GROUP BY SecCode,VenType,Exchange) AS bb
+ON aa.SecCode == bb.SecCode AND aa.VenType == bb.VenType AND aa.Exchange == bb.Exchange
+	WHERE aa.VenType == 55 AND (bb.mr IS NULL ? false : aa.Rank == int.Parse(bb.mr.ToString()))
+			UNION ALL
+	SELECT 6 AS typ
+			,aa.*
+	FROM RDCGSecMapX AS aa
+	LEFT JOIN (SELECT MIN(Rank) AS mr,SecCode,VenType,Exchange
+				FROM RDCGSecMapX GROUP BY SecCode,VenType,Exchange) AS bb
+ON aa.SecCode == bb.SecCode AND aa.VenType == bb.VenType AND aa.Exchange == bb.Exchange
+	WHERE aa.VenType == 55 AND (bb.mr IS NULL ? false : aa.Rank == int.Parse(bb.mr.ToString()));
+
+
+CREATE VIEW [dbo].[vw_SecurityMasterX] AS
+	SELECT m.SecCode,m.Id,m.typ,m.Name,m.Country
+	FROM (
+		SELECT SecCode,Id,1 AS typ,Name,Country FROM SecMstrX WHERE Type_ == 1 
+		UNION ALL 
+		SELECT SecCode,Id,6 AS typ,Name,Country FROM GSecMstrX WHERE Type_ == 10) AS m;
+
+CREATE VIEW [dbo].[vw_SM2MappingDaily] AS
+	SELECT SecCode
+		,typ
+		,Rank
+		,Exchange
+		,VenCode 
+	FROM (	SELECT *
+				,ROW_NUMBER() OVER(PARTITION BY SecCode,typ,Exchange ORDER BY Rank ASC) AS reRank 
+			FROM vw_SecurityMappingX 
+			WHERE VenType == 23) AS exchReRank 
+	WHERE exchReRank.reRank == 1;
+
+	
+
+CREATE VIEW [dbo].[vw_SM2MappingHist] AS
+	SELECT SecCode
+		,typ
+		,Rank
+		,Exchange
+		,VenCode 
+	FROM (	SELECT *
+				,ROW_NUMBER() OVER(PARTITION BY SecCode,typ,Exchange ORDER BY Rank ASC) AS reRank 
+			FROM vw_SecurityMappingX 
+			WHERE VenType == 24) AS exchReRank 
+	WHERE exchReRank.reRank == 1;
+	
+	
+CREATE VIEW [dbo].[vw_TRBCInstrInfo] AS 
+SELECT
+	t.InstrID
+,	t.InstrStatusCode
+,   (t.InstrStatusCode == "DE") ? "Defaulted" : 
+    (t.InstrStatusCode == "EX") ? "Exchanged" :
+    (t.InstrStatusCode == "ME") ? "Merged" :
+    (t.InstrStatusCode == "MA") ? "Matured" :
+	(t.InstrStatusCode == "RE") ? "Redenominated" :
+    (t.InstrStatusCode == "AC") ? "Active" :
+    (t.InstrStatusCode == "DC") ? "De-activated" :
+    (t.InstrStatusCode == "NA") ? "Not applicable" : NULL AS InstrStatus
+,	t.ComName AS CommonName
+,	t.InstrType
+,	t.IssueISOCurrCode
+,	r80867.Desc_ AS IssueCurrency
+,	t.RCSAssetCla
+,	t.OrgID
+FROM RDCInstrInfo AS t
+JOIN (SELECT * FROM RDCDesc WHERE Type_ == 80867) AS r80867
+	ON t.IssueISOCurrCode == r80867.Code;
+
+	
+CREATE VIEW [dbo].[vw_TRBCMapping] AS
+// issues with not direct mapping
+SELECT p1.IsrCode,p1.Code AS SecCode,p1.Typ, si.OrgID, -1 AS IssueVenCode
+FROM (SELECT s.IsrCode,s.Code,s.Type_ AS Typ,s.Rank AS Rank,p.Rank AS mapRank,p.VenCode
+	FROM prc.PrcIss AS s
+	LEFT JOIN (SELECT SecCode,VenType,1 AS typ,VenCode,Rank,Exchange,StartDate,EndDate FROM RDCSecMapX 
+				WHERE VenType == 49 AND Rank == 1
+					UNION ALL
+				SELECT SecCode,VenType,6 AS typ,VenCode,Rank,Exchange,StartDate,EndDate FROM RDCGSecMapX
+				WHERE VenType == 49 AND Rank == 1) AS p
+		ON p.SecCode == s.Code 
+		AND p.typ == s.Type_ 
+	WHERE s.Type_ IN (1,6)) AS p1
+	JOIN (SELECT *, int.Parse(VenCode.ToString()) AS VenCode_int FROM (SELECT m1.IsrCode,m1.VenCode
+	FROM (SELECT s.IsrCode,s.Code,s.Type_ AS Typ,s.Rank AS Rank,p.Rank AS mapRank,p.VenCode
+	FROM prc.PrcIss AS s
+	LEFT JOIN (SELECT SecCode,VenType,1 AS typ,VenCode,Rank,Exchange,StartDate,EndDate FROM RDCSecMapX 
+				WHERE VenType == 49 AND Rank == 1
+					UNION ALL
+				SELECT SecCode,VenType,6 AS typ,VenCode,Rank,Exchange,StartDate,EndDate FROM RDCGSecMapX
+				WHERE VenType == 49 AND Rank == 1) AS p
+		ON p.SecCode == s.Code 
+		AND p.typ == s.Type_ 
+	WHERE s.Type_ IN (1,6)) AS m1
+	JOIN (SELECT t.IsrCode,MIN(t.Rank) AS Rank FROM (SELECT s.IsrCode,s.Code,s.Type_ AS Typ,s.Rank AS Rank,p.Rank AS mapRank,p.VenCode
+	FROM prc.PrcIss AS s
+	LEFT JOIN (SELECT SecCode,VenType,1 AS typ,VenCode,Rank,Exchange,StartDate,EndDate FROM RDCSecMapX 
+				WHERE VenType == 49 AND Rank == 1
+					UNION ALL
+				SELECT SecCode,VenType,6 AS typ,VenCode,Rank,Exchange,StartDate,EndDate FROM RDCGSecMapX
+				WHERE VenType == 49 AND Rank == 1) AS p
+		ON p.SecCode == s.Code 
+		AND p.typ == s.Type_ 
+	WHERE s.Type_ IN (1,6)) AS t WHERE t.VenCode IS NOT NULL GROUP BY t.IsrCode) AS m2
+		ON m2.IsrCode == m1.IsrCode AND m2.Rank == m1.Rank) AS t WHERE t.VenCode IS NOT NULL) AS p2
+		ON	p1.IsrCode == p2.IsrCode
+	JOIN RDCInstrInfo AS si 
+		ON si.InstrID == p2.VenCode_int
+WHERE p1.VenCode IS NULL
+
+UNION
+
+SELECT p1.IsrCode IS NULL ? -1 : int.Parse(p1.IsrCode.ToString()) AS IsrCode,sp.SecCode,sp.typ AS Typ, si.OrgID, sp.VenCode IS NULL ? -2 : int.Parse(sp.VenCode.ToString()) AS IssueVenCode
+FROM (SELECT *,int.Parse(VenCode.ToString()) AS VenCode_int FROM (SELECT SecCode,VenType,1 AS typ,VenCode,Rank,Exchange,StartDate,EndDate FROM RDCSecMapX 
+	WHERE VenType == 49 AND Rank == 1
+		UNION ALL
+	SELECT SecCode,VenType,6 AS typ,VenCode,Rank,Exchange,StartDate,EndDate FROM RDCGSecMapX
+	WHERE VenType == 49 AND Rank == 1) AS t WHERE t.VenCode IS NOT NULL) AS sp
+JOIN RDCInstrInfo AS si
+	ON	si.InstrID == sp.VenCode_int
+LEFT JOIN (SELECT s.IsrCode,s.Code,s.Type_ AS Typ,s.Rank AS Rank,p.Rank AS mapRank,p.VenCode
+	FROM prc.PrcIss AS s
+	LEFT JOIN (SELECT SecCode,VenType,1 AS typ,VenCode,Rank,Exchange,StartDate,EndDate FROM RDCSecMapX 
+				WHERE VenType == 49 AND Rank == 1
+					UNION ALL
+				SELECT SecCode,VenType,6 AS typ,VenCode,Rank,Exchange,StartDate,EndDate FROM RDCGSecMapX
+				WHERE VenType == 49 AND Rank == 1) AS p
+		ON p.SecCode == s.Code 
+		AND p.typ == s.Type_ 
+	WHERE s.Type_ IN (1,6)) AS p1
+	ON	p1.Typ == sp.typ
+	AND	p1.Code == sp.SecCode	
+WHERE sp.Rank == 1;
+	
+CREATE VIEW [dbo].[vw_TRBCOrgInfo] AS 
+SELECT
+	t.OrgId
+,	t.ComName AS CommonName
+,	t.LegalName
+,	t.ShortName
+,   (t.OrgStatus == "AC") ? "Active" : 
+    (t.OrgStatus == "DC") ? "Inactive" : NULL AS orgStatus
+,	t.CntryHQISOCode
+,	r27165.Desc_ AS CntryHQ
+,	t.CntryOfIncCode
+,	r30986.Desc_ AS CntryOfInc
+,	t.ISOCurrCode
+,	r80867.Desc_ AS Currency
+,	t.OrgTypeCode
+,   (t.OrgTypeCode == "CO") ? "Corporation" : 
+    (t.OrgTypeCode == "FD") ? "Fund" :
+    (t.OrgTypeCode == "GA") ? "Government Agency" :
+    (t.OrgTypeCode == "GP") ? "State & Provincial" :
+	(t.OrgTypeCode == "GT") ? "Government" :
+    (t.OrgTypeCode == "SP") ? "Supranational" :
+    (t.OrgTypeCode == "CF") ? "Closed End Fund" :
+    (t.OrgTypeCode == "OF") ? "Open End Fund" :
+    (t.OrgTypeCode == "NC") ? "Not Categorized" :
+	(t.OrgTypeCode == "PC") ? "Private Corporation" :
+    (t.OrgTypeCode == "CTLB") ? "Central Bank" :
+    (t.OrgTypeCode == "MUNI") ? "Municipal" :
+    (t.OrgTypeCode == "TREA") ? "Treasury" :
+    (t.OrgTypeCode == "PS") ? "Pseudo Organization" : NULL AS OrgType
+FROM RDCOrgInfo AS t
+LEFT JOIN (SELECT * FROM RDCDesc WHERE Type_ == 27165) AS r27165
+	ON r27165.Code == t.CntryHQISOCode
+LEFT JOIN (SELECT * FROM RDCDesc WHERE Type_ == 30986) AS r30986
+	ON r30986.Code == t.CntryOfIncCode
+LEFT JOIN (SELECT * FROM RDCDesc WHERE Type_ == 80867) AS r80867
+	ON r80867.Code == t.ISOCurrCode;

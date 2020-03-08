@@ -1,0 +1,1 @@
+Id:string,InsertDateTime:datetime,LastModifiedTimeStamp:datetime,Name:string,Platform:string,ServiceFamilyId:int,Version:string

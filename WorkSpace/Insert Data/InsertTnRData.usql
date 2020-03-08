@@ -1,0 +1,2932 @@
+DECLARE @filePath string = "/CGAThirdParty/Staging/Refinitiv/";
+DECLARE @insertDateTime DateTime? = DateTime.Now;
+USE DATABASE TnR;
+@AdjFctr = 
+	EXTRACT
+		Database_ int,
+		Factor float?,
+		VendorCode int
+	FROM @filePath + "AdjFctr.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.AdjFctr;
+
+INSERT INTO dbo.AdjFctr(Database_, Factor, VendorCode, InsertDateTime)
+SELECT Database_, Factor, VendorCode, @insertDateTime FROM @AdjFctr;
+
+@canary_table = 
+	EXTRACT
+		[Currenttime] DateTime,
+		[FixedId] int
+	FROM @filePath + "canary_table.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.canary_table;
+
+INSERT INTO dbo.canary_table(Currenttime, FixedId, InsertDateTime)
+SELECT Currenttime, FixedId, @insertDateTime FROM @canary_table;
+
+@CSGSec = 
+	EXTRACT
+		[DLDTEI] DateTime?,
+		[DLRSNI] string,
+		[DSCI] string,
+		[EPF] string,
+		[EXCHG] int?,
+		[EXCNTRY] string,
+		[GVKEY] int,
+		[IBTIC] string,
+		[IID] string,
+		[ISIN] string,
+		[NAME] string,
+		[SECID] int?,
+		[SECSTAT] string,
+		[TIC] string,
+		[TPCI] string
+	FROM @filePath + "CSGSec.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.CSGSec;
+
+INSERT INTO dbo.CSGSec([DLDTEI],[DLRSNI],[DSCI],[EPF],[EXCHG],[EXCNTRY],[GVKEY],[IBTIC],[IID],[ISIN],[NAME],[SECID],[SECSTAT],[TIC],[TPCI],[InsertDateTime])
+SELECT [DLDTEI],[DLRSNI],[DSCI],[EPF],[EXCHG],[EXCNTRY],[GVKEY],[IBTIC],[IID],[ISIN],[NAME],[SECID],[SECSTAT],[TIC],[TPCI],@insertDateTime FROM @CSGSec;
+
+@DS2Company = 
+	EXTRACT
+		[CmpyCtryCode] string,
+		[CmpyCtryType] int?,
+		[DsCmpyCode] int,
+		[DsCmpyName] string,
+		[DsCompCode] string,
+		[IndusIsDef] string
+	FROM @filePath + "DS2Company.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2Company;
+
+INSERT INTO dbo.DS2Company(CmpyCtryCode, CmpyCtryType, DsCmpyCode, DsCmpyName,DsCompCode,IndusIsDef,InsertDateTime)
+SELECT CmpyCtryCode, CmpyCtryType, DsCmpyCode, DsCmpyName,DsCompCode,IndusIsDef, @insertDateTime FROM @DS2Company;
+
+@DS2CtryQtInfo = 
+	EXTRACT
+		[CovergCode] string,
+		[DelistDate] DateTime?,
+		[DsCode] string,
+		[DsLocalCode] string,
+		[DsMnem] string,
+		[DsQtName] string,
+		[DsSecCode] int?,
+		[InfoCode] int,
+		[IsPrimQt] int?,
+		[PermID] string,
+		[PrimISOCurrCode] string,
+		[RegCodeTypeId] int?,
+		[Region] string,
+		[StatusCode] string,
+		[TypeCode] string
+	FROM @filePath + "DS2CtryQtInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2CtryQtInfo;
+
+INSERT INTO dbo.DS2CtryQtInfo([CovergCode],[DelistDate],[DsCode],[DsLocalCode],[DsMnem],[DsQtName],[DsSecCode],[InfoCode],[IsPrimQt],[PermID],[PrimISOCurrCode],[RegCodeTypeId],[Region],[StatusCode],[TypeCode],InsertDateTime)
+SELECT [CovergCode],[DelistDate],[DsCode],[DsLocalCode],[DsMnem],[DsQtName],[DsSecCode],[InfoCode],[IsPrimQt],[PermID],[PrimISOCurrCode],[RegCodeTypeId],[Region],[StatusCode],[TypeCode],@insertDateTime FROM @DS2CtryQtInfo;
+
+@DS2DataType = 
+	EXTRACT
+		[ColnName] string,
+		[DataTypeMnem] string,
+		[Descn] string,
+		[EntityTypeId] string,
+		[TableName] string
+	FROM @filePath + "DS2DataType.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2DataType;
+
+INSERT INTO dbo.DS2DataType(ColnName, DataTypeMnem, Descn, EntityTypeId, TableName, InsertDateTime)
+SELECT ColnName, DataTypeMnem, Descn, EntityTypeId, TableName, @insertDateTime FROM @DS2DataType;
+
+@DS2EquityIndex = 
+	EXTRACT
+		[BaseDate] DateTime?,
+		[DSIndexCode] int,
+		[DSIndexMnem] string,
+		[IndexDesc] string,
+		[IndexListCode] int?,
+		[IndexStatusCode] string,
+		[IsLocalCurrency] string,
+		[ISOCurrCode] string,
+		[LDB] string,
+		[LicFlag] int?,
+		[RegCodeTypeID] int?,
+		[Region] string,
+		[SourceCode] string
+	FROM @filePath + "DS2EquityIndex.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2EquityIndex;
+
+INSERT INTO dbo.DS2EquityIndex([BaseDate],[DSIndexCode],[DSIndexMnem],[IndexDesc],[IndexListCode],[IndexStatusCode],[IsLocalCurrency],[ISOCurrCode],[LDB],[LicFlag],[RegCodeTypeID],[Region],[SourceCode],InsertDateTime)
+SELECT [BaseDate],[DSIndexCode],[DSIndexMnem],[IndexDesc],[IndexListCode],[IndexStatusCode],[IsLocalCurrency],[ISOCurrCode],[LDB],[LicFlag],[RegCodeTypeID],[Region],[SourceCode],@insertDateTime FROM @DS2EquityIndex;
+
+@DS2Exchange = 
+	EXTRACT
+		[CtryCodeType] int?,
+		[DsExchCode] string,
+		[ExchCtryCode] string,
+		[ExchIntCode] int,
+		[ExchMnem] string,
+		[ExchName] string,
+		[ExchType] string
+	FROM @filePath + "DS2Exchange.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2Exchange;
+
+INSERT INTO dbo.DS2Exchange([CtryCodeType],[DsExchCode],[ExchCtryCode],[ExchIntCode],[ExchMnem],[ExchName],[ExchType],InsertDateTime)
+SELECT [CtryCodeType],[DsExchCode],[ExchCtryCode],[ExchIntCode],[ExchMnem],[ExchName],[ExchType],@insertDateTime FROM @DS2Exchange;
+
+@DS2FXCode = 
+	EXTRACT
+		[ExRateCode] string,
+		[ExRateDesc] string,
+		[ExRateIntCode] int,
+		[FromCurrCode] string,
+		[RateTypeCode] string,
+		[SourceCode] string,
+		[ToCurrCode] string
+	FROM @filePath + "DS2FXCode.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2FXCode;
+
+INSERT INTO dbo.DS2FXCode([ExRateCode],[ExRateDesc],[ExRateIntCode],[FromCurrCode],[RateTypeCode],[SourceCode],[ToCurrCode],InsertDateTime)
+SELECT [ExRateCode],[ExRateDesc],[ExRateIntCode],[FromCurrCode],[RateTypeCode],[SourceCode],[ToCurrCode],@insertDateTime FROM @DS2FXCode;
+
+@DS2FXRate = 
+	EXTRACT
+		[BidRate] float?,
+		[ExRateDate] DateTime,
+		[ExRateIntCode] int,
+		[MidRate] float?,
+		[OfferRate] float?
+	FROM @filePath + "DS2FXRate.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2FXRate;
+
+INSERT INTO dbo.DS2FXRate([BidRate],[ExRateDate],[ExRateIntCode],[MidRate],[OfferRate],InsertDateTime)
+SELECT [BidRate],[ExRateDate],[ExRateIntCode],[MidRate],[OfferRate],@insertDateTime FROM @DS2FXRate;
+
+
+@DS2IndexAddlData = 
+	EXTRACT
+		[DataTypeMnem] string,
+		[DataTypeValue] float?,
+		[DSIndexCode] int,
+		[LicFlag] int?,
+		[ValueDate] DateTime
+	FROM @filePath + "DS2IndexAddlData.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+
+@DS2IndexAddlData =
+	SELECT *,ValueDate.Year AS ValueYear FROM @DS2IndexAddlData;
+	
+TRUNCATE TABLE dbo.DS2IndexAddlData
+	PARTITION(1951), PARTITION(1952), PARTITION(1953), PARTITION(1954), PARTITION(1955), PARTITION(1956), PARTITION(1957), PARTITION(1958), 
+	PARTITION(1959), PARTITION(1960), PARTITION(1961), PARTITION(1962), PARTITION(1963), PARTITION(1964), PARTITION(1965), PARTITION(1966), 
+	PARTITION(1967), PARTITION(1968), PARTITION(1969), PARTITION(1970), PARTITION(1971), PARTITION(1972), PARTITION(1973), PARTITION(1974), 
+	PARTITION(1975), PARTITION(1976), PARTITION(1977), PARTITION(1978), PARTITION(1979), PARTITION(1980), PARTITION(1981), PARTITION(1982), 
+	PARTITION(1983), PARTITION(1984), PARTITION(1985), PARTITION(1986), PARTITION(1987), PARTITION(1988), PARTITION(1989), PARTITION(1990), 
+	PARTITION(1991), PARTITION(1992), PARTITION(1993), PARTITION(1994), PARTITION(1995), PARTITION(1996), PARTITION(1997), PARTITION(1998), 
+	PARTITION(1999), PARTITION(2000), PARTITION(2001), PARTITION(2002), PARTITION(2003), PARTITION(2004), PARTITION(2005), PARTITION(2006), 
+	PARTITION(2007), PARTITION(2008), PARTITION(2009), PARTITION(2010), PARTITION(2011), PARTITION(2012), PARTITION(2013), PARTITION(2014), 
+	PARTITION(2015), PARTITION(2016), PARTITION(2017), PARTITION(2018), PARTITION(2019), PARTITION(2020), PARTITION(2021), PARTITION(2022),
+	PARTITION(2023), PARTITION(2024), PARTITION(2025), PARTITION(2026), PARTITION(2027), PARTITION(2028), PARTITION(2029), PARTITION(2030) ;
+;
+
+INSERT INTO dbo.DS2IndexAddlData([DataTypeMnem],[DataTypeValue],[DSIndexCode],[LicFlag],[ValueDate],[ValueYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1951)
+SELECT [DataTypeMnem],[DataTypeValue],[DSIndexCode],[LicFlag],[ValueDate],[ValueYear],@insertDateTime FROM @DS2IndexAddlData;
+
+
+@DS2IndexData = 
+	EXTRACT
+		[DSIndexCode] int,
+		[LicFlag] int?,
+		[MV] float?,
+		[PI_] float?,
+		[RI] float?,
+		[ValueDate] DateTime
+	FROM @filePath + "DS2IndexData.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@DS2IndexData = 
+	SELECT *, ValueDate.Year AS ValueYear FROM @DS2IndexData;
+	
+TRUNCATE TABLE dbo.DS2IndexData
+	PARTITION(1951),PARTITION(1952),PARTITION(1953),PARTITION(1954),PARTITION(1955),PARTITION(1956),
+	PARTITION(1957),PARTITION(1958),PARTITION(1959),PARTITION(1960),PARTITION(1961),PARTITION(1962),
+	PARTITION(1963),PARTITION(1964),PARTITION(1965),PARTITION(1966),PARTITION(1967),PARTITION(1968),
+	PARTITION(1969),PARTITION(1970),PARTITION(1971),PARTITION(1972),PARTITION(1973),PARTITION(1974),
+	PARTITION(1975),PARTITION(1976),PARTITION(1977),PARTITION(1978),PARTITION(1979),PARTITION(1980),
+	PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),
+	PARTITION(1987),PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),
+	PARTITION(1993),PARTITION(1994),PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),
+	PARTITION(1999),PARTITION(2000),PARTITION(2001),PARTITION(2002),PARTITION(2003),PARTITION(2004),
+	PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),PARTITION(2009),PARTITION(2010),
+	PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),PARTITION(2016),
+	PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),
+	PARTITION(2029),PARTITION(2030)
+;
+
+INSERT INTO dbo.DS2IndexData([DSIndexCode],[LicFlag],[MV],[PI_],[RI],[ValueDate],[ValueYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1951)
+SELECT [DSIndexCode],[LicFlag],[MV],[PI_],[RI],[ValueDate],[ValueYear],@insertDateTime FROM @DS2IndexData;
+
+
+@DS2IndexDataType = 
+	EXTRACT
+		[DataTypeMnem] string,
+		[DSIndexCode] int,
+		[EntityTypeId] int?,
+		[Frequency] string,
+		[ISOCurrCode] string,
+		[LicFlag] int?
+	FROM @filePath + "DS2IndexDataType.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2IndexDataType;
+
+INSERT INTO dbo.DS2IndexDataType([DataTypeMnem],[DSIndexCode],[EntityTypeId],[Frequency],[ISOCurrCode],[LicFlag],InsertDateTime)
+SELECT [DataTypeMnem],[DSIndexCode],[EntityTypeId],[Frequency],[ISOCurrCode],[LicFlag],@insertDateTime FROM @DS2IndexDataType;
+
+
+@DS2ISINChg = 
+	EXTRACT
+		[DsSecCode] int,
+		[EndDate] DateTime?,
+		[ISIN] string,
+		[ISIN2] string,
+		[LicFlagC] int?,
+		[StartDate] DateTime
+	FROM @filePath + "DS2ISINChg.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2ISINChg;
+
+INSERT INTO dbo.DS2ISINChg([DsSecCode],[EndDate],[ISIN],[ISIN2],[LicFlagC],[StartDate],InsertDateTime)
+SELECT [DsSecCode],[EndDate],[ISIN],[ISIN2],[LicFlagC],[StartDate],@insertDateTime FROM @DS2ISINChg;
+
+
+@Ds2LocalCodeChg = 
+	EXTRACT
+		[DSLocalCode] string,
+		[EndDate] DateTime?,
+		[InfoCode] int,
+		[StartDate] DateTime
+	FROM @filePath + "Ds2LocalCodeChg.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.Ds2LocalCodeChg;
+
+INSERT INTO dbo.Ds2LocalCodeChg([DSLocalCode], [EndDate], [InfoCode], [StartDate], InsertDateTime)
+SELECT [DSLocalCode], [EndDate], [InfoCode], [StartDate], @insertDateTime FROM @Ds2LocalCodeChg;
+
+
+@Ds2MnemChg = 
+	EXTRACT
+		[DsMnem] string,
+		[EndDate] DateTime?,
+		[InfoCode] int,
+		[StartDate] DateTime,
+		[Ticker] string
+	FROM @filePath + "Ds2MnemChg.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.Ds2MnemChg;
+
+INSERT INTO dbo.Ds2MnemChg([DsMnem],[EndDate],[InfoCode],[StartDate],[Ticker],InsertDateTime)
+SELECT [DsMnem],[EndDate],[InfoCode],[StartDate],[Ticker],@insertDateTime FROM @Ds2MnemChg;
+
+
+@DS2QtNameChg = 
+	EXTRACT
+		[DSQtName] string,
+		[EndDate] DateTime?,
+		[InfoCode] int,
+		[StartDate] DateTime
+	FROM @filePath + "DS2QtNameChg.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2QtNameChg;
+
+INSERT INTO dbo.DS2QtNameChg([DSQtName],[EndDate],[InfoCode],[StartDate],InsertDateTime)
+SELECT [DSQtName],[EndDate],[InfoCode],[StartDate],@insertDateTime FROM @DS2QtNameChg;
+
+
+@DS2Region = 
+	EXTRACT
+		[DsGeoCode] string,
+		[ISOCurrCode] string,
+		[Name_] string,
+		[PermRegion] string,
+		[RegCodeTypeID] int,
+		[Region] string
+	FROM @filePath + "DS2Region.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2Region;
+
+INSERT INTO dbo.DS2Region([DsGeoCode],[ISOCurrCode],[Name_],[PermRegion],[RegCodeTypeID],[Region],InsertDateTime)
+SELECT [DsGeoCode],[ISOCurrCode],[Name_],[PermRegion],[RegCodeTypeID],[Region],@insertDateTime FROM @DS2Region;
+
+
+@DS2Security = 
+	EXTRACT
+		[DelistDate] DateTime?,
+		[DivUnit] string,
+		[DsCmpyCode] int?,
+		[DsSctyCode] string,
+		[DsSecCode] int,
+		[DsSecName] string,
+		[IBESTicker] string,
+		[IBESTicker2] string,
+		[IsMajorSec] string,
+		[ISOCurrCode] string,
+		[PrimExchMnem] string,
+		[PrimQtInfoCode] int?,
+		[PrimQtSedol] string,
+		[WSSctyPPI] string,
+		[WSSctyPPI2] string
+	FROM @filePath + "DS2Security.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2Security;
+
+INSERT INTO dbo.DS2Security([DelistDate],[DivUnit],[DsCmpyCode],[DsSctyCode],[DsSecCode],[DsSecName],[IBESTicker],[IBESTicker2],[IsMajorSec],[ISOCurrCode],[PrimExchMnem],[PrimQtInfoCode],[PrimQtSedol],[WSSctyPPI],[WSSctyPPI2],InsertDateTime)
+SELECT [DelistDate],[DivUnit],[DsCmpyCode],[DsSctyCode],[DsSecCode],[DsSecName],[IBESTicker],[IBESTicker2],[IsMajorSec],[ISOCurrCode],[PrimExchMnem],[PrimQtInfoCode],[PrimQtSedol],[WSSctyPPI],[WSSctyPPI2],@insertDateTime FROM @DS2Security;
+
+
+@DS2XRef = 
+	EXTRACT
+		[Code] string,
+		[Desc_] string,
+		[Type_] int
+	FROM @filePath + "DS2XRef.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.DS2XRef;
+
+INSERT INTO dbo.DS2XRef([Code],[Desc_],[Type_],InsertDateTime)
+SELECT [Code],[Desc_],[Type_],@insertDateTime FROM @DS2XRef;
+
+
+@GSecMap = 
+	EXTRACT
+		[SecCode] int,
+		[VenCode] int?,
+		[VenType] int
+	FROM @filePath + "GSecMap.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.GSecMap;
+
+INSERT INTO dbo.GSecMap([SecCode], [VenCode], [VenType], InsertDateTime)
+SELECT [SecCode], [VenCode], [VenType], @insertDateTime FROM @GSecMap;
+
+
+@GSecMapX = 
+	EXTRACT
+		[EndDate] DateTime?,
+		[Exchange] int?,
+		[Rank] int,
+		[SecCode] int,
+		[StartDate] DateTime?,
+		[VenCode] int?,
+		[VenType] int
+	FROM @filePath + "GSecMapX.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.GSecMapX;
+
+INSERT INTO dbo.GSecMapX([EndDate],[Exchange],[Rank],[SecCode],[StartDate],[VenCode],[VenType],InsertDateTime)
+SELECT [EndDate],[Exchange],[Rank],[SecCode],[StartDate],[VenCode],[VenType],@insertDateTime FROM @GSecMapX;
+
+
+@GSecMstr = 
+	EXTRACT
+		[Country] string,
+		[GsId] string,
+		[IdBase] string,
+		[IdSeq] int?,
+		[Isin] string,
+		[Name] string,
+		[SecCode] int,
+		[Vendors] string
+	FROM @filePath + "GSecMstr.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.GSecMstr;
+
+INSERT INTO dbo.GSecMstr([Country],[GsId],[IdBase],[IdSeq],[Isin],[Name],[SecCode],[Vendors],InsertDateTime)
+SELECT [Country],[GsId],[IdBase],[IdSeq],[Isin],[Name],[SecCode],[Vendors],@insertDateTime FROM @GSecMstr;
+
+
+@GSecMstrX = 
+	EXTRACT
+		[Country] string,
+		[Id] string,
+		[IdBase] string,
+		[IdSeq] int?,
+		[Isin] string,
+		[Name] string,
+		[SecCode] int,
+		[Type_] int,
+		[Vendors1] long?,
+		[Vendors2] long?,
+		[Vendors3] long?,
+		[Vendors4] long?
+	FROM @filePath + "GSecMstrX.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.GSecMstrX;
+
+INSERT INTO dbo.GSecMstrX([Country],[Id],[IdBase],[IdSeq],[Isin],[Name],[SecCode],[Type_],[Vendors1],[Vendors2],[Vendors3],[Vendors4],InsertDateTime)
+SELECT [Country],[Id],[IdBase],[IdSeq],[Isin],[Name],[SecCode],[Type_],[Vendors1],[Vendors2],[Vendors3],[Vendors4],@insertDateTime FROM @GSecMstrX;
+
+
+@IBDAnl = 
+	EXTRACT
+		[Code] int,
+		[Name] string
+	FROM @filePath + "IBDAnl.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.IBDAnl;
+
+INSERT INTO dbo.IBDAnl([Code], [Name], InsertDateTime)
+SELECT [Code], [Name], @insertDateTime FROM @IBDAnl;
+
+
+@IdxInfo = 
+	EXTRACT
+		[Code] int,
+		[Cusip] string,
+		[Name] string,
+		[Ticker] string,
+		[Type_] int?
+	FROM @filePath + "IdxInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.IdxInfo;
+
+INSERT INTO dbo.IdxInfo([Code],[Cusip],[Name],[Ticker],[Type_],InsertDateTime)
+SELECT [Code],[Cusip],[Name],[Ticker],[Type_],@insertDateTime FROM @IdxInfo;
+
+
+@IdxRlClsCode = 
+	EXTRACT
+		[Code] int,
+		[CodeDesc] string,
+		[EndDate] DateTime?,
+		[StartDate] DateTime
+	FROM @filePath + "IdxRlClsCode.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.IdxRlClsCode;
+
+INSERT INTO dbo.IdxRlClsCode([Code],[CodeDesc],[EndDate],[StartDate],InsertDateTime)
+SELECT [Code],[CodeDesc],[EndDate],[StartDate],@insertDateTime FROM @IdxRlClsCode;
+
+
+@IdxSec = 
+	EXTRACT
+		[Code] int,
+		[Cusip] string,
+		[FirstDate] DateTime?,
+		[LastDate] DateTime?,
+		[Name] string,
+		[PrcCode] int?,
+		[Ticker] string,
+		[Vendor] int
+	FROM @filePath + "IdxSec.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE prc.IdxSec;
+
+INSERT INTO prc.IdxSec([Code],[Cusip],[FirstDate],[LastDate],[Name],[PrcCode],[Ticker],[Vendor],InsertDateTime)
+SELECT [Code],[Cusip],[FirstDate],[LastDate],[Name],[PrcCode],[Ticker],[Vendor],@insertDateTime FROM @IdxSec;
+
+
+@PermCode = 
+	EXTRACT
+		[Code] string,
+		[CodeType] int,
+		[Description] string
+	FROM @filePath + "PermCode.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.PermCode;
+
+INSERT INTO dbo.PermCode([Code],[CodeType],[Description],InsertDateTime)
+SELECT [Code],[CodeType],[Description],@insertDateTime FROM @PermCode;
+
+
+@PermInstrInfo = 
+	EXTRACT
+		[Category] string,
+		[InstrPermID] long,
+		[RCSAssetCla] string,
+		[ShortName] string
+	FROM @filePath + "PermInstrInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.PermInstrInfo;
+
+INSERT INTO dbo.PermInstrInfo([Category],[InstrPermID],[RCSAssetCla],[ShortName],InsertDateTime)
+SELECT [Category],[InstrPermID],[RCSAssetCla],[ShortName],@insertDateTime FROM @PermInstrInfo;
+
+
+@PermInstrRef = 
+	EXTRACT
+		[ComName] string,
+		[CurrPermID] long?,
+		[InstrPermID] long,
+		[IsPrimary] bool?,
+		[OrgPermID] long?,
+		[PriTrdQuotePermID] long?,
+		[Status] string,
+		[TypeCode] string,
+		[ValQuotePermID] long?
+	FROM @filePath + "PermInstrRef.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.PermInstrRef;
+
+INSERT INTO dbo.PermInstrRef([ComName],[CurrPermID],[InstrPermID],[IsPrimary],[OrgPermID],[PriTrdQuotePermID],[Status],[TypeCode],[ValQuotePermID],InsertDateTime)
+SELECT [ComName],[CurrPermID],[InstrPermID],[IsPrimary],[OrgPermID],[PriTrdQuotePermID],[Status],[TypeCode],[ValQuotePermID],@insertDateTime FROM @PermInstrRef;
+
+
+@PermOrgInfo = 
+	EXTRACT
+		[AddrLine1] string,
+		[AddrLine2] string,
+		[AddrTypeCode] int,
+		[City] string,
+		[CntryGeoID] long?,
+		[IPODate] DateTime?,
+		[ISO2CntryCode] string,
+		[IsPublic] bool?,
+		[LegalName] string,
+		[OrgPermID] long,
+		[PostalCode] string,
+		[PriTRBCIndPermID] long?,
+		[StateProv] string
+	FROM @filePath + "PermOrgInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.PermOrgInfo;
+
+INSERT INTO dbo.PermOrgInfo([AddrLine1],[AddrLine2],[AddrTypeCode],[City],[CntryGeoID],[IPODate],[ISO2CntryCode],[IsPublic],[LegalName],[OrgPermID],[PostalCode],[PriTRBCIndPermID],[StateProv],InsertDateTime)
+SELECT [AddrLine1],[AddrLine2],[AddrTypeCode],[City],[CntryGeoID],[IPODate],[ISO2CntryCode],[IsPublic],[LegalName],[OrgPermID],[PostalCode],[PriTRBCIndPermID],[StateProv],@insertDateTime FROM @PermOrgInfo;
+
+
+@PermOrgRef = 
+	EXTRACT
+		[ComName] string,
+		[DomCntryPermID] long?,
+		[IncCntryPermID] long?,
+		[OrgPermID] long,
+		[PriInstrPermID] long?,
+		[Status] string,
+		[TypeCode] string,
+		[ValQuotePermID] long?
+	FROM @filePath + "PermOrgRef.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.PermOrgRef;
+
+INSERT INTO dbo.PermOrgRef([ComName],[DomCntryPermID],[IncCntryPermID],[OrgPermID],[PriInstrPermID],[Status],[TypeCode],[ValQuotePermID],InsertDateTime)
+SELECT [ComName],[DomCntryPermID],[IncCntryPermID],[OrgPermID],[PriInstrPermID],[Status],[TypeCode],[ValQuotePermID],@insertDateTime FROM @PermOrgRef;
+
+
+@PermQuoteInfo = 
+	EXTRACT
+		[Category] string,
+		[Is144aReg] bool?,
+		[Opol] string,
+		[QuotePermID] long,
+		[RetireDate] DateTime?,
+		[RSCAssetCla] string,
+		[ShortName] string,
+		[TrdWhenIssued] bool?
+	FROM @filePath + "PermQuoteInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.PermQuoteInfo;
+
+INSERT INTO dbo.PermQuoteInfo([Category],[Is144aReg],[Opol],[QuotePermID],[RetireDate],[RSCAssetCla],[ShortName],[TrdWhenIssued],InsertDateTime)
+SELECT [Category],[Is144aReg],[Opol],[QuotePermID],[RetireDate],[RSCAssetCla],[ShortName],[TrdWhenIssued],@insertDateTime FROM @PermQuoteInfo;
+
+
+@PermQuoteRef = 
+	EXTRACT
+		[ComName] string,
+		[CurrPermID] long?,
+		[ExchCode] string,
+		[InstrPermID] long?,
+		[IsPrimary] bool?,
+		[Mic] string,
+		[QuotePermID] long,
+		[Status] string,
+		[Ticker] string,
+		[TypeCode] string
+	FROM @filePath + "PermQuoteRef.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.PermQuoteRef;
+
+INSERT INTO dbo.PermQuoteRef([ComName],[CurrPermID],[ExchCode],[InstrPermID],[IsPrimary],[Mic],[QuotePermID],[Status],[Ticker],[TypeCode],InsertDateTime)
+SELECT [ComName],[CurrPermID],[ExchCode],[InstrPermID],[IsPrimary],[Mic],[QuotePermID],[Status],[Ticker],[TypeCode],@insertDateTime FROM @PermQuoteRef;
+
+
+@PermRICData = 
+	EXTRACT
+		[EndDate] DateTime?,
+		[QuotePermID] long,
+		[RIC] string,
+		[StartDate] DateTime
+	FROM @filePath + "PermRICData.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@PermRICData = 
+	SELECT *, StartDate.Year AS StartYear FROM @PermRICData;
+	
+TRUNCATE TABLE dbo.PermRICData
+	PARTITION(1900), PARTITION(1968), PARTITION(1974), PARTITION(1977), PARTITION(1981), PARTITION(1984),
+	PARTITION(1986), PARTITION(1987), PARTITION(1989), PARTITION(1990), PARTITION(1991), PARTITION(1992),
+	PARTITION(1993), PARTITION(1994), PARTITION(1995), PARTITION(1996), PARTITION(1997), PARTITION(1998), 
+	PARTITION(1999), PARTITION(2000), PARTITION(2001), PARTITION(2002), PARTITION(2003), PARTITION(2004), 
+	PARTITION(2005), PARTITION(2006), PARTITION(2007), PARTITION(2008), PARTITION(2009), PARTITION(2010), 
+	PARTITION(2011), PARTITION(2012), PARTITION(2013), PARTITION(2014), PARTITION(2015), PARTITION(2016), 
+	PARTITION(2017), PARTITION(2018), PARTITION(2019), PARTITION(2020), PARTITION(2021), PARTITION(2022), 
+	PARTITION(2023), PARTITION(2024), PARTITION(2025), PARTITION(2026), PARTITION(2027), PARTITION(2028), 
+	PARTITION(2029), PARTITION(2030);
+
+INSERT INTO dbo.PermRICData([EndDate],[QuotePermID],[RIC],[StartDate],[StartYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1900)
+SELECT [EndDate],[QuotePermID],[RIC],[StartDate],[StartYear],@insertDateTime FROM @PermRICData;
+
+
+@PermSecMapX = 
+	EXTRACT
+		[EndDate] DateTime?,
+		[EntPermID] long?,
+		[EntType] int,
+		[Rank] int,
+		[RegCode] int,
+		[SecCode] int,
+		[StartDate] DateTime?
+	FROM @filePath + "PermSecMapX.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.PermSecMapX;
+
+INSERT INTO dbo.PermSecMapX([EndDate],[EntPermID],[EntType],[Rank],[RegCode],[SecCode],[StartDate],InsertDateTime)
+SELECT [EndDate],[EntPermID],[EntType],[Rank],[RegCode],[SecCode],[StartDate],@insertDateTime FROM @PermSecMapX;
+
+
+@PrcCode2 = 
+	EXTRACT
+		[Code] int,
+		[Desc_] string,
+		[Type_] int
+	FROM @filePath + "PrcCode2.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.PrcCode2;
+
+INSERT INTO dbo.PrcCode2([Code], [Desc_], [Type_], InsertDateTime)
+SELECT [Code], [Desc_], [Type_], @insertDateTime FROM @PrcCode2;
+
+
+@PrcIsr = 
+	EXTRACT
+		[EndDate] DateTime,
+		[FyeMonth] int?,
+		[IsoCtry] string,
+		[IsrCode] int,
+		[IsrName] string,
+		[NAICS] int?,
+		[ParIsrCode] int?,
+		[SIC] int?,
+		[StartDate] DateTime?
+	FROM @filePath + "PrcIsr.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE prc.PrcIsr;
+
+INSERT INTO prc.PrcIsr([EndDate],[FyeMonth],[IsoCtry],[IsrCode],[IsrName],[NAICS],[ParIsrCode],[SIC],[StartDate],InsertDateTime)
+SELECT [EndDate],[FyeMonth],[IsoCtry],[IsrCode],[IsrName],[NAICS],[ParIsrCode],[SIC],[StartDate],@insertDateTime FROM @PrcIsr;
+
+
+@PrcIss = 
+	EXTRACT
+		[Code] int,
+		[EndDate] DateTime,
+		[IsrCode] int,
+		[Rank] int?,
+		[StartDate] DateTime?,
+		[Type_] int
+	FROM @filePath + "PrcIss.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE prc.PrcIss;
+
+INSERT INTO prc.PrcIss([Code],[EndDate],[IsrCode],[Rank],[StartDate],[Type_],InsertDateTime)
+SELECT [Code],[EndDate],[IsrCode],[Rank],[StartDate],[Type_],@insertDateTime FROM @PrcIss;
+
+
+@PrcTxtCode = 
+	EXTRACT
+		[Code] string,
+		[Desc_] string,
+		[Type_] string
+	FROM @filePath + "PrcTxtCode.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.PrcTxtCode;
+
+INSERT INTO dbo.PrcTxtCode([Code], [Desc_], [Type_], InsertDateTime)
+SELECT [Code], [Desc_], [Type_], @insertDateTime FROM @PrcTxtCode;
+
+
+@RDCCode = 
+	EXTRACT
+		[Code] int,
+		[Desc_] string,
+		[Type_] int
+	FROM @filePath + "RDCCode.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RDCCode;
+
+INSERT INTO dbo.RDCCode([Code], [Desc_], [Type_], InsertDateTime)
+SELECT [Code], [Desc_], [Type_], @insertDateTime FROM @RDCCode;
+
+
+@RDCDesc = 
+	EXTRACT
+		[Code] string,
+		[Desc_] string,
+		[Type_] int
+	FROM @filePath + "RDCDesc.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RDCDesc;
+
+INSERT INTO dbo.RDCDesc([Code], [Desc_], [Type_], InsertDateTime)
+SELECT [Code], [Desc_], [Type_], @insertDateTime FROM @RDCDesc;
+
+
+@RDCGSecMapX = 
+	EXTRACT
+		[EndDate] DateTime?,
+		[Exchange] int?,
+		[Rank] int,
+		[SecCode] int,
+		[StartDate] DateTime?,
+		[VenCode] int?,
+		[VenType] int
+	FROM @filePath + "RDCGSecMapX.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RDCGSecMapX;
+
+INSERT INTO dbo.RDCGSecMapX([EndDate],[Exchange],[Rank],[SecCode],[StartDate],[VenCode],[VenType],InsertDateTime)
+SELECT [EndDate],[Exchange],[Rank],[SecCode],[StartDate],[VenCode],[VenType],@insertDateTime FROM @RDCGSecMapX;
+
+
+@RDCInstrInfo = 
+	EXTRACT
+		[ComName] string,
+		[GemPermId] long?,
+		[InstrCatCode] string,
+		[InstrID] int,
+		[InstrStatusCode] string,
+		[InstrType] string,
+		[IsCDSConv] int?,
+		[IssueISOCurrCode] string,
+		[MifidStatusCode] string,
+		[MostReleMrkt] string,
+		[OrgID] int?,
+		[PrimTrdQuotePI] int?,
+		[RCSAssetCla] string,
+		[ShortName] string,
+		[TMTPermId] string
+	FROM @filePath + "RDCInstrInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RDCInstrInfo;
+
+INSERT INTO dbo.RDCInstrInfo([ComName],[GemPermId],[InstrCatCode],[InstrID],[InstrStatusCode],[InstrType],[IsCDSConv],[IssueISOCurrCode],[MifidStatusCode],[MostReleMrkt],[OrgID],[PrimTrdQuotePI],[RCSAssetCla],[ShortName],[TMTPermId],InsertDateTime)
+SELECT [ComName],[GemPermId],[InstrCatCode],[InstrID],[InstrStatusCode],[InstrType],[IsCDSConv],[IssueISOCurrCode],[MifidStatusCode],[MostReleMrkt],[OrgID],[PrimTrdQuotePI],[RCSAssetCla],[ShortName],[TMTPermId],@insertDateTime FROM @RDCInstrInfo;
+
+
+@RDCOrgAddr = 
+	EXTRACT
+		[AddrTypeCode] string,
+		[CityTown] string,
+		[EmailId] string,
+		[FaxNo] string,
+		[IndiEmailId] string,
+		[IndiFaxNo] string,
+		[IndiName] string,
+		[IndiTelNo] string,
+		[OrgId] int,
+		[PostalCode] string,
+		[StateCntry] string,
+		[StrAddr] string,
+		[TelNo] string,
+		[TollFreeNo] string,
+		[WebAddr] string
+	FROM @filePath + "RDCOrgAddr.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RDCOrgAddr;
+
+INSERT INTO dbo.RDCOrgAddr([AddrTypeCode],[CityTown],[EmailId],[FaxNo],[IndiEmailId],[IndiFaxNo],[IndiName],[IndiTelNo],[OrgId],[PostalCode],[StateCntry],[StrAddr],[TelNo],[TollFreeNo],[WebAddr],InsertDateTime)
+SELECT [AddrTypeCode],[CityTown],[EmailId],[FaxNo],[IndiEmailId],[IndiFaxNo],[IndiName],[IndiTelNo],[OrgId],[PostalCode],[StateCntry],[StrAddr],[TelNo],[TollFreeNo],[WebAddr],@insertDateTime FROM @RDCOrgAddr;
+
+
+@RDCOrgInfo = 
+	EXTRACT
+		[ClSiteLocCode] string,
+		[CntryHQISOCode] string,
+		[CntryOfIncCode] string,
+		[ComName] string,
+		[ContriCode] string,
+		[ContriTypeCode] string,
+		[DFlag] int?,
+		[GEMPermID] long?,
+		[ISOCurrCode] string,
+		[LegalName] string,
+		[NDAOrgID] long?,
+		[OrgId] int,
+		[OrgStatus] string,
+		[OrgTypeCode] string,
+		[ShortName] string,
+		[TMTPermID] string
+	FROM @filePath + "RDCOrgInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RDCOrgInfo;
+
+INSERT INTO dbo.RDCOrgInfo([ClSiteLocCode],[CntryHQISOCode],[CntryOfIncCode],[ComName],[ContriCode],[ContriTypeCode],[DFlag],[GEMPermID],[ISOCurrCode],[LegalName],[NDAOrgID],[OrgId],[OrgStatus],[OrgTypeCode],[ShortName],[TMTPermID],InsertDateTime)
+SELECT [ClSiteLocCode],[CntryHQISOCode],[CntryOfIncCode],[ComName],[ContriCode],[ContriTypeCode],[DFlag],[GEMPermID],[ISOCurrCode],[LegalName],[NDAOrgID],[OrgId],[OrgStatus],[OrgTypeCode],[ShortName],[TMTPermID],@insertDateTime FROM @RDCOrgInfo;
+
+
+@RDCQuoteInfo = 
+	EXTRACT
+		[ComName] string,
+		[GemPermId] long?,
+		[InstrID] int?,
+		[IsSuspended] string,
+		[Mic] string,
+		[Opol] string,
+		[QuoteCatCode] string,
+		[QuoteCla] string,
+		[QuoteGrpByPsExch] string,
+		[QuoteID] int,
+		[QuoteISOCurrCode] string,
+		[QuoteStatusCode] string,
+		[QuoteType] string,
+		[RateTypeCode] string,
+		[RSCAssetCla] string,
+		[ShortName] string,
+		[TagCla] string,
+		[Ticker] string,
+		[TMTPermId] string
+	FROM @filePath + "RDCQuoteInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RDCQuoteInfo;
+
+INSERT INTO dbo.RDCQuoteInfo([ComName],[GemPermId],[InstrID],[IsSuspended],[Mic],[Opol],[QuoteCatCode],[QuoteCla],[QuoteGrpByPsExch],[QuoteID],[QuoteISOCurrCode],[QuoteStatusCode],[QuoteType],[RateTypeCode],[RSCAssetCla],[ShortName],[TagCla],[Ticker],[TMTPermId],InsertDateTime)
+SELECT [ComName],[GemPermId],[InstrID],[IsSuspended],[Mic],[Opol],[QuoteCatCode],[QuoteCla],[QuoteGrpByPsExch],[QuoteID],[QuoteISOCurrCode],[QuoteStatusCode],[QuoteType],[RateTypeCode],[RSCAssetCla],[ShortName],[TagCla],[Ticker],[TMTPermId],@insertDateTime FROM @RDCQuoteInfo;
+
+
+@RDCRICData = 
+	EXTRACT
+		[EndDate] DateTime?,
+		[EndTime] int?,
+		[QuoteID] int,
+		[RIC] string,
+		[SeqNo] int,
+		[StartDate] DateTime,
+		[StartTime] int
+	FROM @filePath + "RDCRICData.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@RDCRICData = 
+	SELECT *, StartDate.Year AS StartYear FROM @RDCRICData;
+	
+TRUNCATE TABLE dbo.RDCRICData
+	PARTITION(1900), PARTITION(1968), PARTITION(1974), PARTITION(1977), PARTITION(1981), PARTITION(1984),
+	PARTITION(1986), PARTITION(1987), PARTITION(1989), PARTITION(1990), PARTITION(1991), PARTITION(1992),
+	PARTITION(1993), PARTITION(1994), PARTITION(1995), PARTITION(1996), PARTITION(1997), PARTITION(1998), 
+	PARTITION(1999), PARTITION(2000), PARTITION(2001), PARTITION(2002), PARTITION(2003), PARTITION(2004), 
+	PARTITION(2005), PARTITION(2006), PARTITION(2007), PARTITION(2008), PARTITION(2009), PARTITION(2010), 
+	PARTITION(2011), PARTITION(2012), PARTITION(2013), PARTITION(2014), PARTITION(2015), PARTITION(2016), 
+	PARTITION(2017), PARTITION(2018), PARTITION(2019), PARTITION(2020), PARTITION(2021), PARTITION(2022), 
+	PARTITION(2023), PARTITION(2024), PARTITION(2025), PARTITION(2026), PARTITION(2027), PARTITION(2028), 
+	PARTITION(2029), PARTITION(2030);
+
+INSERT INTO dbo.RDCRICData([EndDate],[EndTime],[QuoteID],[RIC],[SeqNo],[StartDate],[StartTime],[StartYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1900)
+SELECT [EndDate],[EndTime],[QuoteID],[RIC],[SeqNo],[StartDate],[StartTime],[StartYear],@insertDateTime FROM @RDCRICData;
+
+
+@RDCSecMapX = 
+	EXTRACT
+		[EndDate] DateTime?,
+		[Exchange] int?,
+		[Rank] int,
+		[SecCode] int,
+		[StartDate] DateTime?,
+		[VenCode] int?,
+		[VenType] int
+	FROM @filePath + "RDCSecMapX.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RDCSecMapX;
+
+INSERT INTO dbo.RDCSecMapX([EndDate],[Exchange],[Rank],[SecCode],[StartDate],[VenCode],[VenType],InsertDateTime)
+SELECT [EndDate],[Exchange],[Rank],[SecCode],[StartDate],[VenCode],[VenType],@insertDateTime FROM @RDCSecMapX;
+
+
+@RKDFndBGSeg = 
+	EXTRACT
+		[Code] int,
+		[LicFlag] int?,
+		[SegDesc] string,
+		[SegID] int
+	FROM @filePath + "RKDFndBGSeg.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndBGSeg;
+
+INSERT INTO dbo.RKDFndBGSeg([Code],[LicFlag],[SegDesc],[SegID],InsertDateTime)
+SELECT [Code],[LicFlag],[SegDesc],[SegID],@insertDateTime FROM @RKDFndBGSeg;
+
+
+@RKDFndBGSegData = 
+	EXTRACT
+		[CalPerEndDt] DateTime?,
+		[CalStmtDt] DateTime?,
+		[Code] int,
+		[LicFlag] int?,
+		[PerEndDt] DateTime,
+		[PerTypeCode] int,
+		[SegCode] int,
+		[SegID] int?,
+		[SegOrder] int,
+		[SegTypeCode] int,
+		[StmtDt] DateTime
+	FROM @filePath + "RKDFndBGSegData.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndBGSegData;
+
+INSERT INTO dbo.RKDFndBGSegData([CalPerEndDt],[CalStmtDt],[Code],[LicFlag],[PerEndDt],[PerTypeCode],[SegCode],[SegID],[SegOrder],[SegTypeCode],[StmtDt],InsertDateTime)
+SELECT [CalPerEndDt],[CalStmtDt],[Code],[LicFlag],[PerEndDt],[PerTypeCode],[SegCode],[SegID],[SegOrder],[SegTypeCode],[StmtDt],@insertDateTime FROM @RKDFndBGSegData;
+
+
+@RKDFndBGSegItem = 
+	EXTRACT
+		[COA] string,
+		[DataType] string,
+		[Desc_] string,
+		[Item] int,
+		[LineID] int,
+		[Table_] string
+	FROM @filePath + "RKDFndBGSegItem.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndBGSegItem;
+
+INSERT INTO dbo.RKDFndBGSegItem([COA],[DataType],[Desc_],[Item],[LineID],[Table_],InsertDateTime)
+SELECT [COA],[DataType],[Desc_],[Item],[LineID],[Table_],@insertDateTime FROM @RKDFndBGSegItem;
+
+
+@RKDFndBGSegVal = 
+	EXTRACT
+		[CalPerEndDt] DateTime?,
+		[CalStmtDt] DateTime?,
+		[Code] int,
+		[Item] int,
+		[LicFlag] int?,
+		[PerEndDt] DateTime,
+		[PerTypeCode] int,
+		[SegOrder] int,
+		[SegTypeCode] int,
+		[StmtDt] DateTime,
+		[Value_] float?
+	FROM @filePath + "RKDFndBGSegVal.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@RKDFndBGSegVal = 
+	SELECT *, PerEndDt.Year AS PerEndYear FROM @RKDFndBGSegVal;
+	
+TRUNCATE TABLE dbo.RKDFndBGSegVal
+	PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),PARTITION(1988),
+	PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),
+	PARTITION(2001),PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),
+	PARTITION(2007),PARTITION(2008),PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),
+	PARTITION(2013),PARTITION(2014),PARTITION(2015),PARTITION(2016),PARTITION(2017),PARTITION(2018),
+	PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),PARTITION(2023),PARTITION(2024),
+	PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),PARTITION(2030);
+
+INSERT INTO dbo.RKDFndBGSegVal([CalPerEndDt],[CalStmtDt],[Code],[Item],[LicFlag],[PerEndDt],[PerTypeCode],[SegOrder],[SegTypeCode],[StmtDt],[Value_],[PerEndYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1983)
+SELECT [CalPerEndDt],[CalStmtDt],[Code],[Item],[LicFlag],[PerEndDt],[PerTypeCode],[SegOrder],[SegTypeCode],[StmtDt],[Value_],[PerEndYear],@insertDateTime FROM @RKDFndBGSegVal;
+
+
+@RKDFndCmpDet = 
+	EXTRACT
+		[AuditorCode] string,
+		[City] string,
+		[CntPerName] string,
+		[CntPerTitle] string,
+		[Code] int,
+		[ComShHldr] int?,
+		[ComShHldrDt] DateTime?,
+		[ConstOfGSPC] string,
+		[ConstOfNDX] string,
+		[Email] string,
+		[EmpLastUpdDt] DateTime?,
+		[Employees] int?,
+		[IncIn] string,
+		[IncInCtryCode] string,
+		[IncInDt] DateTime?,
+		[ISOCntryCode] string,
+		[LicFlag] int?,
+		[Post] string,
+		[PrimaryName] string,
+		[ProductionDt] DateTime?,
+		[PublicSince] DateTime?,
+		[StAdd1] string,
+		[StAdd2] string,
+		[StAdd3] string,
+		[StateOrReg] string,
+		[TotFloat] float?,
+		[TotShOut] float?,
+		[TotShOutDt] DateTime?,
+		[TxAgentCode] int?,
+		[TxAgentPh] string
+	FROM @filePath + "RKDFndCmpDet.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCmpDet;
+
+INSERT INTO dbo.RKDFndCmpDet([AuditorCode],[City],[CntPerName],[CntPerTitle],[Code],[ComShHldr],[ComShHldrDt],[ConstOfGSPC],[ConstOfNDX],[Email],[EmpLastUpdDt],[Employees],[IncIn],[IncInCtryCode],[IncInDt],[ISOCntryCode],[LicFlag],[Post],[PrimaryName],[ProductionDt],[PublicSince],[StAdd1],[StAdd2],[StAdd3],[StateOrReg],[TotFloat],[TotShOut],[TotShOutDt],[TxAgentCode],[TxAgentPh],InsertDateTime)
+SELECT [AuditorCode],[City],[CntPerName],[CntPerTitle],[Code],[ComShHldr],[ComShHldrDt],[ConstOfGSPC],[ConstOfNDX],[Email],[EmpLastUpdDt],[Employees],[IncIn],[IncInCtryCode],[IncInDt],[ISOCntryCode],[LicFlag],[Post],[PrimaryName],[ProductionDt],[PublicSince],[StAdd1],[StAdd2],[StAdd3],[StateOrReg],[TotFloat],[TotShOut],[TotShOutDt],[TxAgentCode],[TxAgentPh],@insertDateTime FROM @RKDFndCmpDet;
+
+
+@RKDFndCmpFiling = 
+	EXTRACT
+		[Code] int,
+		[Language_] string,
+		[LastUpdDt] DateTime?,
+		[LicFlag] int,
+		[SrcFilingDt] DateTime?,
+		[SrcFilingType] string,
+		[TxtInfo] string,
+		[TxtInfoTypeCode] int
+	FROM @filePath + "RKDFndCmpFiling.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCmpFiling;
+
+INSERT INTO dbo.RKDFndCmpFiling([Code],[Language_],[LastUpdDt],[LicFlag],[SrcFilingDt],[SrcFilingType],[TxtInfo],[TxtInfoTypeCode],InsertDateTime)
+SELECT [Code],[Language_],[LastUpdDt],[LicFlag],[SrcFilingDt],[SrcFilingType],[TxtInfo],[TxtInfoTypeCode],@insertDateTime FROM @RKDFndCmpFiling;
+
+
+@RKDFndCmpInd = 
+	EXTRACT
+		[Code] int,
+		[Desc_] string,
+		[LicFlag] int?,
+		[TxoCode] long?,
+		[TxoOrder] int,
+		[TxoTypeCode] int
+	FROM @filePath + "RKDFndCmpInd.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCmpInd;
+
+INSERT INTO dbo.RKDFndCmpInd([Code],[Desc_],[LicFlag],[TxoCode],[TxoOrder],[TxoTypeCode],InsertDateTime)
+SELECT [Code],[Desc_],[LicFlag],[TxoCode],[TxoOrder],[TxoTypeCode],@insertDateTime FROM @RKDFndCmpInd;
+
+
+@RKDFndCmpIssDet = 
+	EXTRACT
+		[Code] int,
+		[ConvFactor] float?,
+		[FloatDt] DateTime?,
+		[ISOParCurrCode] string,
+		[IssueFloat] float?,
+		[IssueID] int,
+		[IssueOrder] int?,
+		[IssueTypeCode] int?,
+		[LicFlag] int?,
+		[ParValue] float?,
+		[ShAuth] float?,
+		[ShAuthDt] DateTime?,
+		[ShIssued] float?,
+		[ShIssuedDt] DateTime?,
+		[ShOut] float?,
+		[ShOutDt] DateTime?,
+		[TreasurySh] float?,
+		[TreasuryShDt] DateTime?,
+		[Votes] float?
+	FROM @filePath + "RKDFndCmpIssDet.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCmpIssDet;
+
+INSERT INTO dbo.RKDFndCmpIssDet([Code],[ConvFactor],[FloatDt],[ISOParCurrCode],[IssueFloat],[IssueID],[IssueOrder],[IssueTypeCode],[LicFlag],[ParValue],[ShAuth],[ShAuthDt],[ShIssued],[ShIssuedDt],[ShOut],[ShOutDt],[TreasurySh],[TreasuryShDt],[Votes],InsertDateTime)
+SELECT [Code],[ConvFactor],[FloatDt],[ISOParCurrCode],[IssueFloat],[IssueID],[IssueOrder],[IssueTypeCode],[LicFlag],[ParValue],[ShAuth],[ShAuthDt],[ShIssued],[ShIssuedDt],[ShOut],[ShOutDt],[TreasurySh],[TreasuryShDt],[Votes],@insertDateTime FROM @RKDFndCmpIssDet;
+
+
+@RKDFndCmpOfficer = 
+	EXTRACT
+		[Age] int?,
+		[Code] int,
+		[DirEndDt] DateTime?,
+		[DirStartDt] DateTime?,
+		[FirstName] string,
+		[LastName] string,
+		[LicFlag] int,
+		[Midinitial] string,
+		[OfficerEndDt] DateTime?,
+		[Officerid] int,
+		[OfficerLang] string,
+		[OfficerRank] int?,
+		[OfficerStartDt] DateTime?,
+		[OfficerStatus] string,
+		[PerID] int?,
+		[Prefix] string,
+		[PrefName] string,
+		[Sex] string,
+		[SubmitDt] DateTime?,
+		[SubmitType] string,
+		[Suffix] string
+	FROM @filePath + "RKDFndCmpOfficer.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCmpOfficer;
+
+INSERT INTO dbo.RKDFndCmpOfficer([Age],[Code],[DirEndDt],[DirStartDt],[FirstName],[LastName],[LicFlag],[Midinitial],[OfficerEndDt],[Officerid],[OfficerLang],[OfficerRank],[OfficerStartDt],[OfficerStatus],[PerID],[Prefix],[PrefName],[Sex],[SubmitDt],[SubmitType],[Suffix],InsertDateTime)
+SELECT [Age],[Code],[DirEndDt],[DirStartDt],[FirstName],[LastName],[LicFlag],[Midinitial],[OfficerEndDt],[Officerid],[OfficerLang],[OfficerRank],[OfficerStartDt],[OfficerStatus],[PerID],[Prefix],[PrefName],[Sex],[SubmitDt],[SubmitType],[Suffix],@insertDateTime FROM @RKDFndCmpOfficer;
+
+
+@RKDFndCmpOffTitleChg = 
+	EXTRACT
+		[Code] int,
+		[DesgEndDt] DateTime?,
+		[DesgStartDt] DateTime,
+		[LicFlag] int,
+		[OfficerID] int,
+		[Title] string
+	FROM @filePath + "RKDFndCmpOffTitleChg.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCmpOffTitleChg;
+
+INSERT INTO dbo.RKDFndCmpOffTitleChg([Code],[DesgEndDt],[DesgStartDt],[LicFlag],[OfficerID],[Title],InsertDateTime)
+SELECT [Code],[DesgEndDt],[DesgStartDt],[LicFlag],[OfficerID],[Title],@insertDateTime FROM @RKDFndCmpOffTitleChg;
+
+
+@RKDFndCmpPhone = 
+	EXTRACT
+		[City] string,
+		[Code] int,
+		[CtryPh] string,
+		[LicFlag] int,
+		[PhoneNo] string,
+		[PhTypeCode] int
+	FROM @filePath + "RKDFndCmpPhone.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCmpPhone;
+
+INSERT INTO dbo.RKDFndCmpPhone([City],[Code],[CtryPh],[LicFlag],[PhoneNo],[PhTypeCode],InsertDateTime)
+SELECT [City],[Code],[CtryPh],[LicFlag],[PhoneNo],[PhTypeCode],@insertDateTime FROM @RKDFndCmpPhone;
+
+
+@RKDFndCmpRef = 
+	EXTRACT
+		[BALCode] string,
+		[CASCode] string,
+		[CIKNo] string,
+		[COATypeCode] string,
+		[Code] int,
+		[CurrEstStatus] int?,
+		[DFlag] int?,
+		[EstCurrCode] int?,
+		[FilCurrStatus] string,
+		[FilRsnCode] int?,
+		[FinStmtCurrCode] int?,
+		[FProXref] string,
+		[IRSNo] string,
+		[IssuerTypeCode] string,
+		[LastModFinDt] DateTime?,
+		[LastModOtherDt] DateTime?,
+		[LatestFinAnnDt] DateTime?,
+		[LatestFinIntmDt] DateTime?,
+		[LicFlag] int?,
+		[OrgId] string,
+		[PriIssPrcCurrCode] int?,
+		[PrimaryName] string,
+		[ProductionDt] DateTime?,
+		[RelToCode] int?,
+		[RelTypeCode] int?
+	FROM @filePath + "RKDFndCmpRef.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCmpRef;
+
+INSERT INTO dbo.RKDFndCmpRef([BALCode],[CASCode],[CIKNo],[COATypeCode],[Code],[CurrEstStatus],[DFlag],[EstCurrCode],[FilCurrStatus],[FilRsnCode],[FinStmtCurrCode],[FProXref],[IRSNo],[IssuerTypeCode],[LastModFinDt],[LastModOtherDt],[LatestFinAnnDt],[LatestFinIntmDt],[LicFlag],[OrgId],[PriIssPrcCurrCode],[PrimaryName],[ProductionDt],[RelToCode],[RelTypeCode],InsertDateTime)
+SELECT [BALCode],[CASCode],[CIKNo],[COATypeCode],[Code],[CurrEstStatus],[DFlag],[EstCurrCode],[FilCurrStatus],[FilRsnCode],[FinStmtCurrCode],[FProXref],[IRSNo],[IssuerTypeCode],[LastModFinDt],[LastModOtherDt],[LatestFinAnnDt],[LatestFinIntmDt],[LicFlag],[OrgId],[PriIssPrcCurrCode],[PrimaryName],[ProductionDt],[RelToCode],[RelTypeCode],@insertDateTime FROM @RKDFndCmpRef;
+
+
+@RKDFndCmpRefIssue = 
+	EXTRACT
+		[Code] int,
+		[Cusip] string,
+		[DFlag] int?,
+		[DisplayRIC] string,
+		[ExchCode] string,
+		[ExchCtryCode] string,
+		[InstrPI] int?,
+		[ISIN] string,
+		[IssueCode] int?,
+		[IssueID] int,
+		[IssueName] string,
+		[IssueOrder] int?,
+		[IssueStatus] int?,
+		[IssueTypeCode] string,
+		[LicFlag] int?,
+		[ListingTypeCode] string,
+		[MostRecentSplit] float?,
+		[MostRecentSplitDt] DateTime?,
+		[QuotePI] int?,
+		[RegionCode] string,
+		[RIC] string,
+		[Sedol] string,
+		[ShPerListing] float?,
+		[Ticker] string
+	FROM @filePath + "RKDFndCmpRefIssue.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCmpRefIssue;
+
+INSERT INTO dbo.RKDFndCmpRefIssue([Code],[Cusip],[DFlag],[DisplayRIC],[ExchCode],[ExchCtryCode],[InstrPI],[ISIN],[IssueCode],[IssueID],[IssueName],[IssueOrder],[IssueStatus],[IssueTypeCode],[LicFlag],[ListingTypeCode],[MostRecentSplit],[MostRecentSplitDt],[QuotePI],[RegionCode],[RIC],[Sedol],[ShPerListing],[Ticker],InsertDateTime)
+SELECT [Code],[Cusip],[DFlag],[DisplayRIC],[ExchCode],[ExchCtryCode],[InstrPI],[ISIN],[IssueCode],[IssueID],[IssueName],[IssueOrder],[IssueStatus],[IssueTypeCode],[LicFlag],[ListingTypeCode],[MostRecentSplit],[MostRecentSplitDt],[QuotePI],[RegionCode],[RIC],[Sedol],[ShPerListing],[Ticker],@insertDateTime FROM @RKDFndCmpRefIssue;
+
+
+@RKDFndCmpWebLink = 
+	EXTRACT
+		[Code] int,
+		[LastUpdDt] DateTime?,
+		[LicFlag] int,
+		[URL] string,
+		[URLTypeCode] int
+	FROM @filePath + "RKDFndCmpWebLink.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCmpWebLink;
+
+INSERT INTO dbo.RKDFndCmpWebLink([Code],[LastUpdDt],[LicFlag],[URL],[URLTypeCode],InsertDateTime)
+SELECT [Code],[LastUpdDt],[LicFlag],[URL],[URLTypeCode],@insertDateTime FROM @RKDFndCmpWebLink;
+
+
+@RKDFndCode = 
+	EXTRACT
+		[Code] int,
+		[Desc_] string,
+		[Type_] int
+	FROM @filePath + "RKDFndCode.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCode;
+
+INSERT INTO dbo.RKDFndCode([Code], [Desc_], [Type_], InsertDateTime)
+SELECT [Code], [Desc_], [Type_], @insertDateTime FROM @RKDFndCode;
+
+
+@RKDFndCRASCSpec = 
+	EXTRACT
+		[Code] int,
+		[GroupCode] int?,
+		[LicFlag] int,
+		[RasFldNameCode] int,
+		[RasFldTypeCode] int?,
+		[Value_] float?
+	FROM @filePath + "RKDFndCRASCSpec.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCRASCSpec;
+
+INSERT INTO dbo.RKDFndCRASCSpec([Code],[GroupCode],[LicFlag],[RasFldNameCode],[RasFldTypeCode],[Value_],InsertDateTime)
+SELECT [Code],[GroupCode],[LicFlag],[RasFldNameCode],[RasFldTypeCode],[Value_],@insertDateTime FROM @RKDFndCRASCSpec;
+
+
+@RKDFndCRASISpec = 
+	EXTRACT
+		[Code] int,
+		[GroupCode] int?,
+		[IssueOrder] int,
+		[LicFlag] int,
+		[RASFldNameCode] int,
+		[RasFldTypeCode] int?,
+		[Value_] float?
+	FROM @filePath + "RKDFndCRASISpec.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCRASISpec;
+
+INSERT INTO dbo.RKDFndCRASISpec([Code],[GroupCode],[IssueOrder],[LicFlag],[RASFldNameCode],[RasFldTypeCode],[Value_],InsertDateTime)
+SELECT [Code],[GroupCode],[IssueOrder],[LicFlag],[RASFldNameCode],[RasFldTypeCode],[Value_],@insertDateTime FROM @RKDFndCRASISpec;
+
+
+@RKDFndCRASPrCurr = 
+	EXTRACT
+		[Code] int,
+		[ExRateDt] DateTime?,
+		[ISOCurCode] int,
+		[LicFlag] int,
+		[RepToPrcExRate] float?
+	FROM @filePath + "RKDFndCRASPrCurr.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCRASPrCurr;
+
+INSERT INTO dbo.RKDFndCRASPrCurr([Code],[ExRateDt],[ISOCurCode],[LicFlag],[RepToPrcExRate],InsertDateTime)
+SELECT [Code],[ExRateDt],[ISOCurCode],[LicFlag],[RepToPrcExRate],@insertDateTime FROM @RKDFndCRASPrCurr;
+
+
+@RKDFndCSFFinVal = 
+	EXTRACT
+		[CalPerEndDt] DateTime?,
+		[CalStmtDt] DateTime?,
+		[Code] int,
+		[LicFlag] int,
+		[LineID] int,
+		[PerEndDt] DateTime,
+		[PerTypeCode] int,
+		[StmtDt] DateTime,
+		[StmtTypeCode] int,
+		[Value_] float?
+	FROM @filePath + "RKDFndCSFFinVal.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@RKDFndCSFFinVal = 
+	SELECT *, PerEndDt.Year AS PerEndYear FROM @RKDFndCSFFinVal;
+	
+TRUNCATE TABLE dbo.RKDFndCSFFinVal
+	PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),
+	PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),
+	PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+INSERT INTO dbo.RKDFndCSFFinVal([CalPerEndDt],[CalStmtDt],[Code],[LicFlag],[LineID],[PerEndDt],[PerTypeCode],[StmtDt],[StmtTypeCode],[Value_],[PerEndYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1981)
+SELECT [CalPerEndDt],[CalStmtDt],[Code],[LicFlag],[LineID],[PerEndDt],[PerTypeCode],[StmtDt],[StmtTypeCode],[Value_],[PerEndYear],@insertDateTime FROM @RKDFndCSFFinVal;
+
+
+@RKDFndCSFItem = 
+	EXTRACT
+		[Agg] int?,
+		[COA] string,
+		[DataType] string,
+		[Desc_] string,
+		[Display] string,
+		[IsCurrency] int?,
+		[Item] int,
+		[ItemPrecision] int?,
+		[Level_] string,
+		[StmtTypeCode] int?,
+		[Table_] string
+	FROM @filePath + "RKDFndCSFItem.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCSFItem;
+
+INSERT INTO dbo.RKDFndCSFItem([Agg],[COA],[DataType],[Desc_],[Display],[IsCurrency],[Item],[ItemPrecision],[Level_],[StmtTypeCode],[Table_],InsertDateTime)
+SELECT [Agg],[COA],[DataType],[Desc_],[Display],[IsCurrency],[Item],[ItemPrecision],[Level_],[StmtTypeCode],[Table_],@insertDateTime FROM @RKDFndCSFItem;
+
+
+@RKDFndCSFItemSub = 
+	EXTRACT
+		[Code] int,
+		[Desc_] string,
+		[Item] int,
+		[LicFlag] int,
+		[LineID] int,
+		[PerTypeCode] int,
+		[StdCOA] string,
+		[StmtTypeCode] int
+	FROM @filePath + "RKDFndCSFItemSub.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCSFItemSub;
+
+INSERT INTO dbo.RKDFndCSFItemSub([Code],[Desc_],[Item],[LicFlag],[LineID],[PerTypeCode],[StdCOA],[StmtTypeCode],InsertDateTime)
+SELECT [Code],[Desc_],[Item],[LicFlag],[LineID],[PerTypeCode],[StdCOA],[StmtTypeCode],@insertDateTime FROM @RKDFndCSFItemSub;
+
+
+@RKDFndCSFPerFiling = 
+	EXTRACT
+		[AuditorCode] string,
+		[AudOpnCode] string,
+		[CalPerEndDt] DateTime?,
+		[CalStmtDt] DateTime?,
+		[Code] int,
+		[CurrConvToCode] int?,
+		[CurrRepCode] int?,
+		[CurrRepToConvExRate] float?,
+		[FinalFiling] int?,
+		[InterimNo] int?,
+		[LicFlag] int,
+		[OrigAnncDt] DateTime?,
+		[PerEndDt] DateTime,
+		[PerTypeCode] int,
+		[StmtDt] DateTime,
+		[UnitsConvToCode] string,
+		[UnitsRepCode] string
+	FROM @filePath + "RKDFndCSFPerFiling.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCSFPerFiling;
+
+INSERT INTO dbo.RKDFndCSFPerFiling([AuditorCode],[AudOpnCode],[CalPerEndDt],[CalStmtDt],[Code],[CurrConvToCode],[CurrRepCode],[CurrRepToConvExRate],[FinalFiling],[InterimNo],[LicFlag],[OrigAnncDt],[PerEndDt],[PerTypeCode],[StmtDt],[UnitsConvToCode],[UnitsRepCode],InsertDateTime)
+SELECT [AuditorCode],[AudOpnCode],[CalPerEndDt],[CalStmtDt],[Code],[CurrConvToCode],[CurrRepCode],[CurrRepToConvExRate],[FinalFiling],[InterimNo],[LicFlag],[OrigAnncDt],[PerEndDt],[PerTypeCode],[StmtDt],[UnitsConvToCode],[UnitsRepCode],@insertDateTime FROM @RKDFndCSFPerFiling;
+
+
+@RKDFndCSFPeriod = 
+	EXTRACT
+		[CalPerEndDt] DateTime?,
+		[Code] int,
+		[FiscalMth] int?,
+		[Fyr] int?,
+		[InterimNo] int?,
+		[IsHybrid] int?,
+		[LicFlag] int,
+		[PerEndDt] DateTime,
+		[PerTypeCode] int,
+		[PrcToRepExRate] float?,
+		[StkCurrCode] int?,
+		[StkPrcDt] DateTime?,
+		[StkPrice] float?
+	FROM @filePath + "RKDFndCSFPeriod.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndCSFPeriod;
+
+INSERT INTO dbo.RKDFndCSFPeriod([CalPerEndDt],[Code],[FiscalMth],[Fyr],[InterimNo],[IsHybrid],[LicFlag],[PerEndDt],[PerTypeCode],[PrcToRepExRate],[StkCurrCode],[StkPrcDt],[StkPrice],InsertDateTime)
+SELECT [CalPerEndDt],[Code],[FiscalMth],[Fyr],[InterimNo],[IsHybrid],[LicFlag],[PerEndDt],[PerTypeCode],[PrcToRepExRate],[StkCurrCode],[StkPrcDt],[StkPrice],@insertDateTime FROM @RKDFndCSFPeriod;
+
+
+@RKDFndCSFStmt = 
+	EXTRACT
+		[CalPerEndDt] DateTime?,
+		[CalStmtDt] DateTime?,
+		[Code] int,
+		[CompStmtCode] int?,
+		[Consolidated] int?,
+		[DocID] int?,
+		[DocIsInternal] int?,
+		[Flash] int?,
+		[LicFlag] int,
+		[PerEndDt] DateTime,
+		[PerLen] int?,
+		[PerLenCode] string,
+		[PerTypeCode] int,
+		[RepAcctStdCode] string,
+		[Source] string,
+		[SourceDt] DateTime?,
+		[StmtDt] DateTime,
+		[StmtLastUpdDt] DateTime?,
+		[StmtTypeCode] int,
+		[SysDt] DateTime?,
+		[UpdTypeCode] string
+	FROM @filePath + "RKDFndCSFStmt.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@RKDFndCSFStmt = 
+	SELECT *, PerEndDt.Year AS PerEndYear FROM @RKDFndCSFStmt;
+	
+TRUNCATE TABLE dbo.RKDFndCSFStmt
+	PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),
+	PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),
+	PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+INSERT INTO dbo.RKDFndCSFStmt([CalPerEndDt],[CalStmtDt],[Code],[CompStmtCode],[Consolidated],[DocID],[DocIsInternal],[Flash],[LicFlag],[PerEndDt],[PerLen],[PerLenCode],[PerTypeCode],[RepAcctStdCode],[Source],[SourceDt],[StmtDt],[StmtLastUpdDt],[StmtTypeCode],[SysDt],[UpdTypeCode],[PerEndYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1981)
+SELECT [CalPerEndDt],[CalStmtDt],[Code],[CompStmtCode],[Consolidated],[DocID],[DocIsInternal],[Flash],[LicFlag],[PerEndDt],[PerLen],[PerLenCode],[PerTypeCode],[RepAcctStdCode],[Source],[SourceDt],[StmtDt],[StmtLastUpdDt],[StmtTypeCode],[SysDt],[UpdTypeCode],[PerEndYear],@insertDateTime FROM @RKDFndCSFStmt;
+
+
+@RKDFndDesc = 
+	EXTRACT
+		[Code] string,
+		[Desc_] string,
+		[Type_] int
+	FROM @filePath + "RKDFndDesc.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndDesc;
+
+INSERT INTO dbo.RKDFndDesc([Code], [Desc_], [Type_], InsertDateTime)
+SELECT [Code], [Desc_], [Type_], @insertDateTime FROM @RKDFndDesc;
+
+
+@RKDFndInfo = 
+	EXTRACT
+		[CntryCode] string,
+		[Code] int,
+		[Cusip] string,
+		[ExchCode] string,
+		[ISIN] string,
+		[Name_] string,
+		[RegionCode] string,
+		[RepNo] string,
+		[RIC] string,
+		[Sedol] string,
+		[Ticker] string
+	FROM @filePath + "RKDFndInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndInfo;
+
+INSERT INTO dbo.RKDFndInfo([CntryCode],[Code],[Cusip],[ExchCode],[ISIN],[Name_],[RegionCode],[RepNo],[RIC],[Sedol],[Ticker],InsertDateTime)
+SELECT [CntryCode],[Code],[Cusip],[ExchCode],[ISIN],[Name_],[RegionCode],[RepNo],[RIC],[Sedol],[Ticker],@insertDateTime FROM @RKDFndInfo;
+
+
+@RKDFndSplitHist = 
+	EXTRACT
+		[CumAdjFactor] float?,
+		[EndDate] DateTime?,
+		[Factor] float?,
+		[IssueCode] int,
+		[LicFlag] int?,
+		[StartDate] DateTime
+	FROM @filePath + "RKDFndSplitHist.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndSplitHist;
+
+INSERT INTO dbo.RKDFndSplitHist([CumAdjFactor],[EndDate],[Factor],[IssueCode],[LicFlag],[StartDate],InsertDateTime)
+SELECT [CumAdjFactor],[EndDate],[Factor],[IssueCode],[LicFlag],[StartDate],@insertDateTime FROM @RKDFndSplitHist;
+
+
+@RKDFndStdFinVal = 
+	EXTRACT
+		[CalPerEndDt] DateTime?,
+		[CalStmtDt] DateTime?,
+		[Code] int,
+		[Item] int,
+		[LicFlag] int,
+		[PerEndDt] DateTime,
+		[PerTypeCode] int,
+		[StmtDt] DateTime,
+		[StmtTypeCode] int,
+		[Value_] float?
+	FROM @filePath + "RKDFndStdFinVal.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@RKDFndStdFinVal = 
+	SELECT *, PerEndDt.Year AS PerEndYear FROM @RKDFndStdFinVal;
+	
+TRUNCATE TABLE dbo.RKDFndStdFinVal
+	PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),PARTITION(1988),
+	PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),PARTITION(1995),PARTITION(1996),
+	PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),PARTITION(2002),PARTITION(2003),PARTITION(2004),
+	PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),
+	PARTITION(2013),PARTITION(2014),PARTITION(2015),PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),
+	PARTITION(2021),PARTITION(2022),PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),
+	PARTITION(2029),PARTITION(2030);
+
+INSERT INTO dbo.RKDFndStdFinVal([CalPerEndDt],[CalStmtDt],[Code],[Item],[LicFlag],[PerEndDt],[PerTypeCode],[StmtDt],[StmtTypeCode],[Value_],[PerEndYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1981)
+SELECT [CalPerEndDt],[CalStmtDt],[Code],[Item],[LicFlag],[PerEndDt],[PerTypeCode],[StmtDt],[StmtTypeCode],[Value_],[PerEndYear],@insertDateTime FROM @RKDFndStdFinVal;
+
+
+@RKDFndStdItem = 
+	EXTRACT
+		[Adjust] int?,
+		[Agg] int?,
+		[COA] string,
+		[DataType] string,
+		[Desc_] string,
+		[Display] string,
+		[IsCurrency] int?,
+		[Item] int,
+		[ItemPrecision] int?,
+		[Level_] string,
+		[LineID] int?,
+		[StmtTypeCode] int?,
+		[Table_] string
+	FROM @filePath + "RKDFndStdItem.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndStdItem;
+
+INSERT INTO dbo.RKDFndStdItem([Adjust],[Agg],[COA],[DataType],[Desc_],[Display],[IsCurrency],[Item],[ItemPrecision],[Level_],[LineID],[StmtTypeCode],[Table_],InsertDateTime)
+SELECT [Adjust],[Agg],[COA],[DataType],[Desc_],[Display],[IsCurrency],[Item],[ItemPrecision],[Level_],[LineID],[StmtTypeCode],[Table_],@insertDateTime FROM @RKDFndStdItem;
+
+
+@RKDFndStdPerFiling = 
+	EXTRACT
+		[AuditorCode] string,
+		[AudOpnCode] string,
+		[CalPerEndDt] DateTime?,
+		[CalStmtDt] DateTime?,
+		[Code] int,
+		[CurrConvToCode] int?,
+		[CurrRepCode] int?,
+		[CurrRepToConvExRate] float?,
+		[FinalFiling] int?,
+		[InterimNo] int?,
+		[LicFlag] int,
+		[OrigAnncDt] DateTime?,
+		[PerEndDt] DateTime,
+		[PerTypeCode] int,
+		[StmtDt] DateTime,
+		[UnitsConvToCode] string,
+		[UnitsRepCode] string
+	FROM @filePath + "RKDFndStdPerFiling.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndStdPerFiling;
+
+INSERT INTO dbo.RKDFndStdPerFiling([AuditorCode],[AudOpnCode],[CalPerEndDt],[CalStmtDt],[Code],[CurrConvToCode],[CurrRepCode],[CurrRepToConvExRate],[FinalFiling],[InterimNo],[LicFlag],[OrigAnncDt],[PerEndDt],[PerTypeCode],[StmtDt],[UnitsConvToCode],[UnitsRepCode],InsertDateTime)
+SELECT [AuditorCode],[AudOpnCode],[CalPerEndDt],[CalStmtDt],[Code],[CurrConvToCode],[CurrRepCode],[CurrRepToConvExRate],[FinalFiling],[InterimNo],[LicFlag],[OrigAnncDt],[PerEndDt],[PerTypeCode],[StmtDt],[UnitsConvToCode],[UnitsRepCode],@insertDateTime FROM @RKDFndStdPerFiling;
+
+
+
+@RKDFndStdPeriod = 
+	EXTRACT
+		[CalPerEndDt] DateTime?,
+		[Code] int,
+		[FiscalMth] int?,
+		[Fyr] int?,
+		[InterimNo] int?,
+		[IsHybrid] int?,
+		[LicFlag] int,
+		[PerEndDt] DateTime,
+		[PerTypeCode] int,
+		[PrcToRepExRate] float?,
+		[StkCurrCode] int?,
+		[StkPrcDt] DateTime?,
+		[StkPrice] float?
+	FROM @filePath + "RKDFndStdPeriod.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDFndStdPeriod;
+
+INSERT INTO dbo.RKDFndStdPeriod([CalPerEndDt],[Code],[FiscalMth],[Fyr],[InterimNo],[IsHybrid],[LicFlag],[PerEndDt],[PerTypeCode],[PrcToRepExRate],[StkCurrCode],[StkPrcDt],[StkPrice],InsertDateTime)
+SELECT [CalPerEndDt],[Code],[FiscalMth],[Fyr],[InterimNo],[IsHybrid],[LicFlag],[PerEndDt],[PerTypeCode],[PrcToRepExRate],[StkCurrCode],[StkPrcDt],[StkPrice],@insertDateTime FROM @RKDFndStdPeriod;
+
+@RKDFndStdStmt = 
+	EXTRACT
+		[CalPerEndDt] DateTime?,
+		[CalStmtDt] DateTime?,
+		[Code] int,
+		[CompStmtCode] int?,
+		[Consolidated] int?,
+		[DocID] int?,
+		[DocIsInternal] int?,
+		[Flash] int?,
+		[LicFlag] int,
+		[PerEndDt] DateTime,
+		[PerLen] int?,
+		[PerLenCode] string,
+		[PerTypeCode] int,
+		[RepAcctStdCode] string,
+		[Source] string,
+		[SourceDt] DateTime?,
+		[STECFlag] int?,
+		[StmtDt] DateTime,
+		[StmtLastUpdDt] DateTime?,
+		[StmtTypeCode] int,
+		[SysDt] DateTime?,
+		[UpdTypeCode] string
+	FROM @filePath + "RKDFndStdStmt.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@RKDFndStdStmt = 
+	SELECT *, PerEndDt.Year AS PerEndYear FROM @RKDFndStdStmt;
+	
+TRUNCATE TABLE dbo.RKDFndStdStmt
+	PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),
+	PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),
+	PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+INSERT INTO dbo.RKDFndStdStmt([CalPerEndDt],[CalStmtDt],[Code],[CompStmtCode],[Consolidated],[DocID],[DocIsInternal],[Flash],[LicFlag],[PerEndDt],[PerLen],[PerLenCode],[PerTypeCode],[RepAcctStdCode],[Source],[SourceDt],[STECFlag],[StmtDt],[StmtLastUpdDt],[StmtTypeCode],[SysDt],[UpdTypeCode],[PerEndYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1981)
+SELECT [CalPerEndDt],[CalStmtDt],[Code],[CompStmtCode],[Consolidated],[DocID],[DocIsInternal],[Flash],[LicFlag],[PerEndDt],[PerLen],[PerLenCode],[PerTypeCode],[RepAcctStdCode],[Source],[SourceDt],[STECFlag],[StmtDt],[StmtLastUpdDt],[StmtTypeCode],[SysDt],[UpdTypeCode],[PerEndYear],@insertDateTime FROM @RKDFndStdStmt;
+
+@RKDPIT2FndCmpData = 
+	EXTRACT
+		[Code] int,
+		[Item] int,
+		[LicFlag] int,
+		[PointEndDt] DateTime?,
+		[PointStartDt] DateTime,
+		[Value_] string
+	FROM @filePath + "RKDPIT2FndCmpData.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@RKDPIT2FndCmpData = 
+	SELECT *, PointStartDt.Year AS PointStartYear FROM @RKDPIT2FndCmpData;
+	
+TRUNCATE TABLE dbo.RKDPIT2FndCmpData
+	PARTITION(1960),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+INSERT INTO dbo.RKDPIT2FndCmpData([Code],[Item],[LicFlag],[PointEndDt],[PointStartDt],[Value_],[PointStartYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1960)
+SELECT [Code],[Item],[LicFlag],[PointEndDt],[PointStartDt],[Value_],[PointStartYear],@insertDateTime FROM @RKDPIT2FndCmpData;
+
+@RKDPIT2FndCmpIssData = 
+	EXTRACT
+		[Code] int,
+		[IssueID] int,
+		[Item] int,
+		[LicFlag] int,
+		[PointEndDt] DateTime?,
+		[PointStartDt] DateTime,
+		[Value_] string
+	FROM @filePath + "RKDPIT2FndCmpIssData.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@RKDPIT2FndCmpIssData = 
+	SELECT *, PointStartDt.Year AS PointStartYear FROM @RKDPIT2FndCmpIssData;
+	
+TRUNCATE TABLE dbo.RKDPIT2FndCmpIssData
+	PARTITION(1960),PARTITION(1980),PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),
+	PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),
+	PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+INSERT INTO dbo.RKDPIT2FndCmpIssData([Code],[IssueID],[Item],[LicFlag],[PointEndDt],[PointStartDt],[Value_],[PointStartYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1960)
+SELECT [Code],[IssueID],[Item],[LicFlag],[PointEndDt],[PointStartDt],[Value_],[PointStartYear],@insertDateTime FROM @RKDPIT2FndCmpIssData;
+
+@RKDPIT2FndCmpRef = 
+	EXTRACT
+		[AuditorCode] string,
+		[BSDCode] string,
+		[CFMCode] string,
+		[CIKNo] string,
+		[CmpName] string,
+		[CmpStatus] int?,
+		[CmpTypeCode] string,
+		[COATypeCode] string,
+		[Code] int,
+		[Dflag] int?,
+		[FilingStatusCode] int?,
+		[Fproxref] string,
+		[IRSNo] string,
+		[LicFlag] int,
+		[Orgid] string,
+		[RelCode] int?
+	FROM @filePath + "RKDPIT2FndCmpRef.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDPIT2FndCmpRef;
+
+INSERT INTO dbo.RKDPIT2FndCmpRef([AuditorCode],[BSDCode],[CFMCode],[CIKNo],[CmpName],[CmpStatus],[CmpTypeCode],[COATypeCode],[Code],[Dflag],[FilingStatusCode],[Fproxref],[IRSNo],[LicFlag],[Orgid],[RelCode],InsertDateTime)
+SELECT [AuditorCode],[BSDCode],[CFMCode],[CIKNo],[CmpName],[CmpStatus],[CmpTypeCode],[COATypeCode],[Code],[Dflag],[FilingStatusCode],[Fproxref],[IRSNo],[LicFlag],[Orgid],[RelCode],@insertDateTime FROM @RKDPIT2FndCmpRef;
+
+@RKDPIT2FndCmpRefIss = 
+	EXTRACT
+		[Code] int,
+		[ConvFactor] float?,
+		[Cusip] string,
+		[DisplayRic] string,
+		[ExchCode] string,
+		[ExchCtryCode] string,
+		[ExpectedIPO] int?,
+		[IPODt] DateTime?,
+		[ISIN] string,
+		[ISOCurrCode] string,
+		[IssueCode] int,
+		[IssueFloat] float?,
+		[IssueID] int,
+		[IssueName] string,
+		[IssueOrder] int?,
+		[IssueStatus] int?,
+		[IssueTypeCode] string,
+		[LicFlag] int,
+		[ListingTypeCode] string,
+		[ParVal] float?,
+		[Preferred] int?,
+		[Public_] int?,
+		[RegionCode] string,
+		[RIC] string,
+		[Sedol] string,
+		[ShAuth] float?,
+		[ShOut] float?,
+		[ShPerList] float?,
+		[Split] float?,
+		[SplitFactor] float?,
+		[Ticker] string,
+		[Votes] float?
+	FROM @filePath + "RKDPIT2FndCmpRefIss.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDPIT2FndCmpRefIss;
+
+INSERT INTO dbo.RKDPIT2FndCmpRefIss([Code],[ConvFactor],[Cusip],[DisplayRic],[ExchCode],[ExchCtryCode],[ExpectedIPO],[IPODt],[ISIN],[ISOCurrCode],[IssueCode],[IssueFloat],[IssueID],[IssueName],[IssueOrder],[IssueStatus],[IssueTypeCode],[LicFlag],[ListingTypeCode],[ParVal],[Preferred],[Public_],[RegionCode],[RIC],[Sedol],[ShAuth],[ShOut],[ShPerList],[Split],[SplitFactor],[Ticker],[Votes],InsertDateTime)
+SELECT [Code],[ConvFactor],[Cusip],[DisplayRic],[ExchCode],[ExchCtryCode],[ExpectedIPO],[IPODt],[ISIN],[ISOCurrCode],[IssueCode],[IssueFloat],[IssueID],[IssueName],[IssueOrder],[IssueStatus],[IssueTypeCode],[LicFlag],[ListingTypeCode],[ParVal],[Preferred],[Public_],[RegionCode],[RIC],[Sedol],[ShAuth],[ShOut],[ShPerList],[Split],[SplitFactor],[Ticker],[Votes],@insertDateTime FROM @RKDPIT2FndCmpRefIss;
+
+@RKDPIT2FndExchRate = 
+	EXTRACT
+		[Date_] DateTime,
+		[ISOCurrFromCode] int,
+		[ISOCurrToCode] int,
+		[Rate] float?
+	FROM @filePath + "RKDPIT2FndExchRate.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDPIT2FndExchRate;
+
+INSERT INTO dbo.RKDPIT2FndExchRate([Date_],[ISOCurrFromCode],[ISOCurrToCode],[Rate],InsertDateTime)
+SELECT [Date_],[ISOCurrFromCode],[ISOCurrToCode],[Rate],@insertDateTime FROM @RKDPIT2FndExchRate;
+
+@RKDPIT2FndPrc = 
+	EXTRACT
+		[CDate] DateTime?,
+		[Code] int,
+		[CPrice] float?,
+		[CurrMultiplier] int?,
+		[HDate] DateTime?,
+		[HPrice] float?,
+		[ISOCurrCode] string,
+		[IssueID] int,
+		[LDate] DateTime?,
+		[LicFlag] int,
+		[LPrice] float?,
+		[ODate] DateTime?,
+		[OPrice] float?,
+		[PrcEndDt] DateTime,
+		[Volume] float?
+	FROM @filePath + "RKDPIT2FndPrc.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@RKDPIT2FndPrc = 
+	SELECT *, PrcEndDt.Year AS PrcEndYear FROM @RKDPIT2FndPrc;
+	
+TRUNCATE TABLE dbo.RKDPIT2FndPrc
+	PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),
+	PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+INSERT INTO dbo.RKDPIT2FndPrc([CDate],[Code],[CPrice],[CurrMultiplier],[HDate],[HPrice],[ISOCurrCode],[IssueID],[LDate],[LicFlag],[LPrice],[ODate],[OPrice],[PrcEndDt],[Volume],[PrcEndYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1994)
+SELECT [CDate],[Code],[CPrice],[CurrMultiplier],[HDate],[HPrice],[ISOCurrCode],[IssueID],[LDate],[LicFlag],[LPrice],[ODate],[OPrice],[PrcEndDt],[Volume],[PrcEndYear],@insertDateTime FROM @RKDPIT2FndPrc;
+
+@RKDPIT2FndStdFinVal = 
+	EXTRACT
+		[Code] int,
+		[Item] int,
+		[ItemFlgCode] int?,
+		[LicFlag] int,
+		[PerEndDt] DateTime,
+		[PerTypeCode] int,
+		[PointDt] DateTime,
+		[StmtTypeCode] int?,
+		[Value_] float?
+	FROM @filePath + "RKDPIT2FndStdFinVal.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@RKDPIT2FndStdFinVal = 
+	SELECT *, PerEndDt.Year AS PerEndYear FROM @RKDPIT2FndStdFinVal;
+	
+TRUNCATE TABLE dbo.RKDPIT2FndStdFinVal
+	PARTITION(1981), PARTITION(1982), PARTITION(1983), PARTITION(1984), PARTITION(1985), PARTITION(1986), PARTITION(1987), PARTITION(1988), 
+	PARTITION(1989), PARTITION(1990), PARTITION(1991), PARTITION(1992), PARTITION(1993), PARTITION(1994), PARTITION(1995), PARTITION(1996), 
+	PARTITION(1997), PARTITION(1998), PARTITION(1999), PARTITION(2000), PARTITION(2001), PARTITION(2002), PARTITION(2003), PARTITION(2004), 
+	PARTITION(2005), PARTITION(2006), PARTITION(2007), PARTITION(2008), PARTITION(2009), PARTITION(2010), PARTITION(2011), PARTITION(2012),
+	PARTITION(2013), PARTITION(2014), PARTITION(2015), PARTITION(2016), PARTITION(2017), PARTITION(2018), PARTITION(2019), PARTITION(2020)
+;
+
+INSERT INTO dbo.RKDPIT2FndStdFinVal([Code],[Item],[ItemFlgCode],[LicFlag],[PerEndDt],[PerTypeCode],[PointDt],[StmtTypeCode],[Value_],[PerEndYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1981)
+SELECT [Code],[Item],[ItemFlgCode],[LicFlag],[PerEndDt],[PerTypeCode],[PointDt],[StmtTypeCode],[Value_],[PerEndYear],@insertDateTime FROM @RKDPIT2FndStdFinVal;
+
+@RKDPIT2FndStdPeriod = 
+	EXTRACT
+		[AudOpnCode] string,
+		[CalStmtDt] DateTime?,
+		[Code] int,
+		[FiscalMth] int?,
+		[Fyr] int?,
+		[InterimNo] int?,
+		[ISOCurrCode] string,
+		[LicFlag] int,
+		[PerEndDt] DateTime,
+		[PerTypeCode] int,
+		[PointDt] DateTime,
+		[StmtDt] DateTime?,
+		[StmtFlgCode] int?
+	FROM @filePath + "RKDPIT2FndStdPeriod.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDPIT2FndStdPeriod;
+
+INSERT INTO dbo.RKDPIT2FndStdPeriod([AudOpnCode],[CalStmtDt],[Code],[FiscalMth],[Fyr],[InterimNo],[ISOCurrCode],[LicFlag],[PerEndDt],[PerTypeCode],[PointDt],[StmtDt],[StmtFlgCode],InsertDateTime)
+SELECT [AudOpnCode],[CalStmtDt],[Code],[FiscalMth],[Fyr],[InterimNo],[ISOCurrCode],[LicFlag],[PerEndDt],[PerTypeCode],[PointDt],[StmtDt],[StmtFlgCode],@insertDateTime FROM @RKDPIT2FndStdPeriod;
+
+@RKDPIT2FndStdPrdDt = 
+	EXTRACT
+		[ActPerEndDt] DateTime?,
+		[CalPeriod] int,
+		[Code] int,
+		[FinalDt] DateTime?,
+		[LicFlag] int,
+		[PerEndDt] DateTime,
+		[PerTypeCode] int,
+		[PrelimDt] DateTime?
+	FROM @filePath + "RKDPIT2FndStdPrdDt.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.RKDPIT2FndStdPrdDt;
+
+INSERT INTO dbo.RKDPIT2FndStdPrdDt([ActPerEndDt],[CalPeriod],[Code],[FinalDt],[LicFlag],[PerEndDt],[PerTypeCode],[PrelimDt],InsertDateTime)
+SELECT [ActPerEndDt],[CalPeriod],[Code],[FinalDt],[LicFlag],[PerEndDt],[PerTypeCode],[PrelimDt],@insertDateTime FROM @RKDPIT2FndStdPrdDt;
+
+@RKDPIT2FndStdStmt = 
+	EXTRACT
+		[Code] int,
+		[LicFlag] int,
+		[NoPd] int?,
+		[OrigAnncDt] DateTime?,
+		[PerEndDt] DateTime,
+		[PerLen] int?,
+		[PerLenCode] int?,
+		[PerTypeCode] int,
+		[PointDt] DateTime,
+		[RepAcctStdCode] string,
+		[Source] string,
+		[SourceDt] DateTime?,
+		[StmtTypeCode] int,
+		[SysDt] DateTime?,
+		[UpdTypeCode] string
+	FROM @filePath + "RKDPIT2FndStdStmt.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@RKDPIT2FndStdStmt = 
+	SELECT *, PerEndDt.Year AS PerEndYear FROM @RKDPIT2FndStdStmt;
+	
+TRUNCATE TABLE dbo.RKDPIT2FndStdStmt
+PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),
+	PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),
+	PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+INSERT INTO dbo.RKDPIT2FndStdStmt([Code],[LicFlag],[NoPd],[OrigAnncDt],[PerEndDt],[PerLen],[PerLenCode],[PerTypeCode],[PointDt],[RepAcctStdCode],[Source],[SourceDt],[StmtTypeCode],[SysDt],[UpdTypeCode],[PerEndYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1981)
+SELECT [Code],[LicFlag],[NoPd],[OrigAnncDt],[PerEndDt],[PerLen],[PerLenCode],[PerTypeCode],[PointDt],[RepAcctStdCode],[Source],[SourceDt],[StmtTypeCode],[SysDt],[UpdTypeCode],[PerEndYear],@insertDateTime FROM @RKDPIT2FndStdStmt;
+
+@SDDates_v = 
+	EXTRACT
+		[Code] int,
+		[Date_] DateTime,
+		[ExchCode] int
+	FROM @filePath + "SDDates_v.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.SDDates_v;
+
+INSERT INTO dbo.SDDates_v([Code], [Date_], [ExchCode], InsertDateTime)
+SELECT [Code], [Date_], [ExchCode], @insertDateTime FROM @SDDates_v;
+
+@SDDates = 
+	EXTRACT
+		[Code] int,
+		[Date_] DateTime
+	FROM @filePath + "SDDates.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.SDDates;
+
+INSERT INTO dbo.SDDates([Code], [Date_], InsertDateTime)
+SELECT [Code], [Date_], @insertDateTime FROM @SDDates;
+
+@SDExchInfo_v = 
+	EXTRACT
+		[CntryName] string,
+		[Define1] string,
+		[Define2] string,
+		[ExchAbbr] string,
+		[ExchCode] int,
+		[ExchName] string,
+		[HolType] string,
+		[IsoCcy] string,
+		[IsoCtry] string
+	FROM @filePath + "SDExchInfo_v.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.SDExchInfo_v;
+
+INSERT INTO dbo.SDExchInfo_v([CntryName],[Define1],[Define2],[ExchAbbr],[ExchCode],[ExchName],[HolType],[IsoCcy],[IsoCtry],InsertDateTime)
+SELECT [CntryName],[Define1],[Define2],[ExchAbbr],[ExchCode],[ExchName],[HolType],[IsoCcy],[IsoCtry],@insertDateTime FROM @SDExchInfo_v;
+
+@SDInfo_v = 
+	EXTRACT
+		[Code] int,
+		[Name] string
+	FROM @filePath + "SDInfo_v.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.SDInfo_v;
+
+INSERT INTO dbo.SDInfo_v([Code], [Name], InsertDateTime)
+SELECT [Code], [Name], @insertDateTime FROM @SDInfo_v;
+
+@SDInfo = 
+	EXTRACT
+		[Code] int,
+		[Name] string
+	FROM @filePath + "SDInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.SDInfo;
+
+INSERT INTO dbo.SDInfo([Code], [Name], InsertDateTime)
+SELECT [Code], [Name], @insertDateTime FROM @SDInfo;
+
+@SecMap = 
+	EXTRACT
+		[Exchange] int?,
+		[Rank] int,
+		[SecCode] int,
+		[VenCode] int?,
+		[VenType] int
+	FROM @filePath + "SecMap.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.SecMap;
+
+INSERT INTO dbo.SecMap([Exchange],[Rank],[SecCode],[VenCode],[VenType],InsertDateTime)
+SELECT [Exchange],[Rank],[SecCode],[VenCode],[VenType],@insertDateTime FROM @SecMap;
+
+@SecMapX = 
+	EXTRACT
+		[EndDate] DateTime?,
+		[Exchange] int?,
+		[Rank] int,
+		[SecCode] int,
+		[StartDate] DateTime?,
+		[VenCode] int?,
+		[VenType] int
+	FROM @filePath + "SecMapX.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.SecMapX;
+
+INSERT INTO dbo.SecMapX([EndDate],[Exchange],[Rank],[SecCode],[StartDate],[VenCode],[VenType],InsertDateTime)
+SELECT [EndDate],[Exchange],[Rank],[SecCode],[StartDate],[VenCode],[VenType],@insertDateTime FROM @SecMapX;
+
+@SecMstr = 
+	EXTRACT
+		[Country] string,
+		[Id] string,
+		[IdBase] string,
+		[IdSeq] int?,
+		[Name] string,
+		[SecCode] int,
+		[Type_] int,
+		[Vendors] string
+	FROM @filePath + "SecMstr.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.SecMstr;
+
+INSERT INTO dbo.SecMstr([Country],[Id],[IdBase],[IdSeq],[Name],[SecCode],[Type_],[Vendors],InsertDateTime)
+SELECT [Country],[Id],[IdBase],[IdSeq],[Name],[SecCode],[Type_],[Vendors],@insertDateTime FROM @SecMstr;
+
+
+
+@SecMstrX = 
+	EXTRACT
+		[Country] string,
+		[Id] string,
+		[IdBase] string,
+		[IdSeq] int?,
+		[Name] string,
+		[SecCode] int,
+		[Type_] int,
+		[Vendors1] long?,
+		[Vendors2] long?,
+		[Vendors3] long?,
+		[Vendors4] long?
+	FROM @filePath + "SecMstrX.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.SecMstrX;
+
+INSERT INTO dbo.SecMstrX([Country],[Id],[IdBase],[IdSeq],[Name],[SecCode],[Type_],[Vendors1],[Vendors2],[Vendors3],[Vendors4],InsertDateTime)
+SELECT [Country],[Id],[IdBase],[IdSeq],[Name],[SecCode],[Type_],[Vendors1],[Vendors2],[Vendors3],[Vendors4],@insertDateTime FROM @SecMstrX;
+
+
+@SecVenType = 
+	EXTRACT
+		[MaskNum] int?,
+		[MaskValue] long?,
+		[VenId] string,
+		[VenName] string,
+		[VenType] int
+	FROM @filePath + "SecVenType.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.SecVenType;
+
+INSERT INTO dbo.SecVenType([MaskNum],[MaskValue],[VenId],[VenName],[VenType],InsertDateTime)
+SELECT [MaskNum],[MaskValue],[VenId],[VenName],[VenType],@insertDateTime FROM @SecVenType;
+
+
+@SPGCode = 
+	EXTRACT
+		[Code] string,
+		[Desc_] string,
+		[Type_] int
+	FROM @filePath + "SPGCode.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.SPGCode;
+
+INSERT INTO dbo.SPGCode([Code], [Desc_], [Type_], InsertDateTime)
+SELECT [Code], [Desc_], [Type_], @insertDateTime FROM @SPGCode;
+
+
+@TMCCode = 
+	EXTRACT
+		[Code] int,
+		[Desc_] string,
+		[Type_] int
+	FROM @filePath + "TMCCode.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TMCCode;
+
+INSERT INTO dbo.TMCCode([Code], [Desc_], [Type_], InsertDateTime)
+SELECT [Code], [Desc_], [Type_], @insertDateTime FROM @TMCCode;
+
+
+@TMCRegnCntryMap = 
+	EXTRACT
+		[Lvl1PermId] int?,
+		[Lvl2PermId] int?,
+		[Lvl3PermId] int?,
+		[Lvl4PermId] int?,
+		[Lvl5ISOCntry] string,
+		[Lvl5PermId] int
+	FROM @filePath + "TMCRegnCntryMap.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TMCRegnCntryMap;
+
+INSERT INTO dbo.TMCRegnCntryMap([Lvl1PermId],[Lvl2PermId],[Lvl3PermId],[Lvl4PermId],[Lvl5ISOCntry],[Lvl5PermId],InsertDateTime)
+SELECT [Lvl1PermId],[Lvl2PermId],[Lvl3PermId],[Lvl4PermId],[Lvl5ISOCntry],[Lvl5PermId],@insertDateTime FROM @TMCRegnCntryMap;
+
+
+@TQAExch = 
+	EXTRACT
+		[CompExchCode] int?,
+		[Desc_] string,
+		[ExchCode] int,
+		[TQAExch] string
+	FROM @filePath + "TQAExch.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TQAExch;
+
+INSERT INTO dbo.TQAExch([CompExchCode],[Desc_],[ExchCode],[TQAExch],InsertDateTime)
+SELECT [CompExchCode],[Desc_],[ExchCode],[TQAExch],@insertDateTime FROM @TQAExch;
+
+
+@TREActChg = 
+	EXTRACT
+		[ActChgPct] float?,
+		[ActGrowth] float?,
+		[ActivationDate] DateTime?,
+		[ActStability] float?,
+		[DefActChg] float?,
+		[DefCurrPermID] int?,
+		[DefScale] float?,
+		[EstPermID] long,
+		[FYEMonth] int,
+		[IsParent] bool,
+		[Measure] int,
+		[NormActChg] float?,
+		[NormCurrAdj] float?,
+		[NormCurrPermID] int?,
+		[NormScale] float?,
+		[NormSplitFactor] float?,
+		[PerEndDate] DateTime,
+		[PerType] int,
+		[RegionPermID] int?,
+		[UnitType] string,
+		[WinEndDate] DateTime?,
+		[WinEndOffset] int?,
+		[WinLength] int,
+		[WinType] int
+	FROM @filePath + "TREActChg.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TREActChg;
+
+INSERT INTO dbo.TREActChg([ActChgPct],[ActGrowth],[ActivationDate],[ActStability],[DefActChg],[DefCurrPermID],[DefScale],[EstPermID],[FYEMonth],[IsParent],[Measure],[NormActChg],[NormCurrAdj],[NormCurrPermID],[NormScale],[NormSplitFactor],[PerEndDate],[PerType],[RegionPermID],[UnitType],[WinEndDate],[WinEndOffset],[WinLength],[WinType],InsertDateTime)
+SELECT [ActChgPct],[ActGrowth],[ActivationDate],[ActStability],[DefActChg],[DefCurrPermID],[DefScale],[EstPermID],[FYEMonth],[IsParent],[Measure],[NormActChg],[NormCurrAdj],[NormCurrPermID],[NormScale],[NormSplitFactor],[PerEndDate],[PerType],[RegionPermID],[UnitType],[WinEndDate],[WinEndOffset],[WinLength],[WinType],@insertDateTime FROM @TREActChg;
+
+
+@TREActGoFwd = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[AnnounceDate] DateTime?,
+		[AnnounceOffset] int?,
+		[AsContribActValue] float?,
+		[AsContribCurrPermID] int?,
+		[AsContribScale] float?,
+		[DefActValue] float?,
+		[DefCurrAdj] float?,
+		[DefCurrPermID] int?,
+		[DefScale] float?,
+		[EffectiveDate] DateTime,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[FYEMonth] int,
+		[IsParent] bool,
+		[Measure] int,
+		[NormActValue] float?,
+		[NormCurrAdj] float?,
+		[NormCurrPermID] int?,
+		[NormScale] float?,
+		[NormSplitFactor] float?,
+		[PerEndDate] DateTime,
+		[PerType] int,
+		[RegionPermID] int?,
+		[UnitType] string
+	FROM @filePath + "TREActGoFwd.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TREActGoFwd;
+
+INSERT INTO dbo.TREActGoFwd([ActivationDate],[AnnounceDate],[AnnounceOffset],[AsContribActValue],[AsContribCurrPermID],[AsContribScale],[DefActValue],[DefCurrAdj],[DefCurrPermID],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[Measure],[NormActValue],[NormCurrAdj],[NormCurrPermID],[NormScale],[NormSplitFactor],[PerEndDate],[PerType],[RegionPermID],[UnitType],InsertDateTime)
+SELECT [ActivationDate],[AnnounceDate],[AnnounceOffset],[AsContribActValue],[AsContribCurrPermID],[AsContribScale],[DefActValue],[DefCurrAdj],[DefCurrPermID],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[Measure],[NormActValue],[NormCurrAdj],[NormCurrPermID],[NormScale],[NormSplitFactor],[PerEndDate],[PerType],[RegionPermID],[UnitType],@insertDateTime FROM @TREActGoFwd;
+
+
+@TREActRpt = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[AnnounceDate] DateTime?,
+		[AnnounceOffset] int?,
+		[AsContribActValue] float?,
+		[AsContribCurrPermID] int?,
+		[AsContribScale] float?,
+		[DefActValue] float?,
+		[DefCurrAdj] float?,
+		[DefCurrPermID] int?,
+		[DefScale] float?,
+		[EffectiveDate] DateTime,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[FYEMonth] int,
+		[IsParent] bool,
+		[Measure] int,
+		[NormActValue] float?,
+		[NormCurrAdj] float?,
+		[NormCurrPermID] int?,
+		[NormScale] float?,
+		[NormSplitFactor] float?,
+		[PerEndDate] DateTime,
+		[PerType] int,
+		[RegionPermID] int?,
+		[UnitType] string
+	FROM @filePath + "TREActRpt.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TREActRpt;
+
+INSERT INTO dbo.TREActRpt([ActivationDate],[AnnounceDate],[AnnounceOffset],[AsContribActValue],[AsContribCurrPermID],[AsContribScale],[DefActValue],[DefCurrAdj],[DefCurrPermID],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[Measure],[NormActValue],[NormCurrAdj],[NormCurrPermID],[NormScale],[NormSplitFactor],[PerEndDate],[PerType],[RegionPermID],[UnitType],InsertDateTime)
+SELECT [ActivationDate],[AnnounceDate],[AnnounceOffset],[AsContribActValue],[AsContribCurrPermID],[AsContribScale],[DefActValue],[DefCurrAdj],[DefCurrPermID],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[Measure],[NormActValue],[NormCurrAdj],[NormCurrPermID],[NormScale],[NormSplitFactor],[PerEndDate],[PerType],[RegionPermID],[UnitType],@insertDateTime FROM @TREActRpt;
+
+
+@TREActRst = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[AnnounceDate] DateTime?,
+		[AnnounceOffset] int?,
+		[AsContribActValue] float?,
+		[AsContribCurrPermID] int?,
+		[AsContribScale] float?,
+		[DefActValue] float?,
+		[DefCurrAdj] float?,
+		[DefCurrPermID] int?,
+		[DefScale] float?,
+		[EffectiveDate] DateTime,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[FYEMonth] int,
+		[IsParent] bool,
+		[Measure] int,
+		[NormActValue] float?,
+		[NormCurrAdj] float?,
+		[NormCurrPermID] int?,
+		[NormScale] float?,
+		[NormSplitFactor] float?,
+		[PerEndDate] DateTime,
+		[PerType] int,
+		[RegionPermID] int?,
+		[UnitType] string
+	FROM @filePath + "TREActRst.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TREActRst;
+
+INSERT INTO dbo.TREActRst([ActivationDate],[AnnounceDate],[AnnounceOffset],[AsContribActValue],[AsContribCurrPermID],[AsContribScale],[DefActValue],[DefCurrAdj],[DefCurrPermID],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[Measure],[NormActValue],[NormCurrAdj],[NormCurrPermID],[NormScale],[NormSplitFactor],[PerEndDate],[PerType],[RegionPermID],[UnitType],InsertDateTime)
+SELECT [ActivationDate],[AnnounceDate],[AnnounceOffset],[AsContribActValue],[AsContribCurrPermID],[AsContribScale],[DefActValue],[DefCurrAdj],[DefCurrPermID],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[Measure],[NormActValue],[NormCurrAdj],[NormCurrPermID],[NormScale],[NormSplitFactor],[PerEndDate],[PerType],[RegionPermID],[UnitType],@insertDateTime FROM @TREActRst;
+
+
+@TREActSurpWin = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[DefActSUEScore] float?,
+		[DefActSurprise] float?,
+		[EstPermID] long,
+		[FYEMonth] int,
+		[IsParent] bool,
+		[Measure] int,
+		[PerEndDate] DateTime,
+		[PerType] int,
+		[RegionPermID] int?,
+		[WinEndDate] DateTime?,
+		[WinEndOffset] int?,
+		[WinLength] int,
+		[WinType] int
+	FROM @filePath + "TREActSurpWin.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TREActSurpWin;
+
+INSERT INTO dbo.TREActSurpWin([ActivationDate],[DefActSUEScore],[DefActSurprise],[EstPermID],[FYEMonth],[IsParent],[Measure],[PerEndDate],[PerType],[RegionPermID],[WinEndDate],[WinEndOffset],[WinLength],[WinType],InsertDateTime)
+SELECT [ActivationDate],[DefActSUEScore],[DefActSurprise],[EstPermID],[FYEMonth],[IsParent],[Measure],[PerEndDate],[PerType],[RegionPermID],[WinEndDate],[WinEndOffset],[WinLength],[WinType],@insertDateTime FROM @TREActSurpWin;
+
+
+@TRECode = 
+	EXTRACT
+		[Code] string,
+		[CodeType] int,
+		[Description] string
+	FROM @filePath + "TRECode.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TRECode;
+
+INSERT INTO dbo.TRECode([Code], [CodeType], [Description], InsertDateTime)
+SELECT [Code], [CodeType], [Description], @insertDateTime FROM @TRECode;
+
+
+@TREInfo = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[CtryPermID] int?,
+		[DefCurrPermID] int?,
+		[DefPerCurrPermID] int?,
+		[DefTPCurrPermID] int?,
+		[EffectiveDate] DateTime?,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpCurrPermID] int?,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[FilingPermID] long?,
+		[IBESTicker] string,
+		[InstrPermID] long?,
+		[OrgPermID] long?,
+		[PrefMeasure] int?,
+		[PrefMeasureIsParent] bool?,
+		[QuotePermID] long?,
+		[RegionPermID] int?,
+		[RepNo] string
+	FROM @filePath + "TREInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TREInfo;
+
+INSERT INTO dbo.TREInfo([ActivationDate],[CtryPermID],[DefCurrPermID],[DefPerCurrPermID],[DefTPCurrPermID],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpCurrPermID],[ExpireDate],[ExpireOffset],[FilingPermID],[IBESTicker],[InstrPermID],[OrgPermID],[PrefMeasure],[PrefMeasureIsParent],[QuotePermID],[RegionPermID],[RepNo],InsertDateTime)
+SELECT [ActivationDate],[CtryPermID],[DefCurrPermID],[DefPerCurrPermID],[DefTPCurrPermID],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpCurrPermID],[ExpireDate],[ExpireOffset],[FilingPermID],[IBESTicker],[InstrPermID],[OrgPermID],[PrefMeasure],[PrefMeasureIsParent],[QuotePermID],[RegionPermID],[RepNo],@insertDateTime FROM @TREInfo;
+
+
+@TREOrgNotesAper = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[AsContribCurrPermID] int?,
+		[AsContribNoteValue] float?,
+		[AsContribScale] float?,
+		[DefCurrAdj] float?,
+		[DefCurrPermID] int?,
+		[DefNoteValue] float?,
+		[DefScale] float?,
+		[EffectiveDate] DateTime,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[IsParent] bool,
+		[Measure] int,
+		[NormCurrAdj] float?,
+		[NormCurrPermID] int?,
+		[NormNoteValue] float?,
+		[NormScale] float?,
+		[NormSplitFactor] float?,
+		[OrgNoteCategory] string,
+		[OrgNoteEndDate] DateTime?,
+		[OrgNoteEndOffset] int?,
+		[OrgNoteText] string,
+		[OrgNoteType] int,
+		[PerType] int,
+		[RegionPermID] int?,
+		[UnitType] string
+	FROM @filePath + "TREOrgNotesAper.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TREOrgNotesAper;
+
+INSERT INTO dbo.TREOrgNotesAper([ActivationDate],[AsContribCurrPermID],[AsContribNoteValue],[AsContribScale],[DefCurrAdj],[DefCurrPermID],[DefNoteValue],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[IsParent],[Measure],[NormCurrAdj],[NormCurrPermID],[NormNoteValue],[NormScale],[NormSplitFactor],[OrgNoteCategory],[OrgNoteEndDate],[OrgNoteEndOffset],[OrgNoteText],[OrgNoteType],[PerType],[RegionPermID],[UnitType],InsertDateTime)
+SELECT [ActivationDate],[AsContribCurrPermID],[AsContribNoteValue],[AsContribScale],[DefCurrAdj],[DefCurrPermID],[DefNoteValue],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[IsParent],[Measure],[NormCurrAdj],[NormCurrPermID],[NormNoteValue],[NormScale],[NormSplitFactor],[OrgNoteCategory],[OrgNoteEndDate],[OrgNoteEndOffset],[OrgNoteText],[OrgNoteType],[PerType],[RegionPermID],[UnitType],@insertDateTime FROM @TREOrgNotesAper;
+
+
+@TREOrgNotesHzn = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[AsContribCurrPermID] int?,
+		[AsContribNoteValue] float?,
+		[AsContribScale] float?,
+		[DefCurrAdj] float?,
+		[DefCurrPermID] int?,
+		[DefNoteValue] float?,
+		[DefScale] float?,
+		[EffectiveDate] DateTime,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[IsParent] bool,
+		[Measure] int,
+		[NormCurrAdj] float?,
+		[NormCurrPermID] int?,
+		[NormNoteValue] float?,
+		[NormScale] float?,
+		[NormSplitFactor] float?,
+		[OrgNoteCategory] string,
+		[OrgNoteEndDate] DateTime?,
+		[OrgNoteEndOffset] int?,
+		[OrgNoteText] string,
+		[OrgNoteType] int,
+		[PerLength] int,
+		[PerType] int,
+		[RegionPermID] int?,
+		[UnitType] string
+	FROM @filePath + "TREOrgNotesHzn.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TREOrgNotesHzn;
+
+INSERT INTO dbo.TREOrgNotesHzn([ActivationDate],[AsContribCurrPermID],[AsContribNoteValue],[AsContribScale],[DefCurrAdj],[DefCurrPermID],[DefNoteValue],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[IsParent],[Measure],[NormCurrAdj],[NormCurrPermID],[NormNoteValue],[NormScale],[NormSplitFactor],[OrgNoteCategory],[OrgNoteEndDate],[OrgNoteEndOffset],[OrgNoteText],[OrgNoteType],[PerLength],[PerType],[RegionPermID],[UnitType],InsertDateTime)
+SELECT [ActivationDate],[AsContribCurrPermID],[AsContribNoteValue],[AsContribScale],[DefCurrAdj],[DefCurrPermID],[DefNoteValue],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[IsParent],[Measure],[NormCurrAdj],[NormCurrPermID],[NormNoteValue],[NormScale],[NormSplitFactor],[OrgNoteCategory],[OrgNoteEndDate],[OrgNoteEndOffset],[OrgNoteText],[OrgNoteType],[PerLength],[PerType],[RegionPermID],[UnitType],@insertDateTime FROM @TREOrgNotesHzn;
+
+
+@TREOrgNotesPer = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[AsContribCurrPermID] int?,
+		[AsContribNoteValue] float?,
+		[AsContribScale] float?,
+		[DefCurrAdj] float?,
+		[DefCurrPermID] int?,
+		[DefNoteValue] float?,
+		[DefScale] float?,
+		[EffectiveDate] DateTime,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[FYEMonth] int,
+		[IsParent] bool,
+		[Measure] int,
+		[NormCurrAdj] float?,
+		[NormCurrPermID] int?,
+		[NormNoteValue] float?,
+		[NormScale] float?,
+		[NormSplitFactor] float?,
+		[OrgNoteCategory] string,
+		[OrgNoteEndDate] DateTime?,
+		[OrgNoteEndOffset] int?,
+		[OrgNoteText] string,
+		[OrgNoteType] int,
+		[PerEndDate] DateTime,
+		[PerType] int,
+		[RegionPermID] int?,
+		[UnitType] string
+	FROM @filePath + "TREOrgNotesPer.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TREOrgNotesPer;
+
+INSERT INTO dbo.TREOrgNotesPer([ActivationDate],[AsContribCurrPermID],[AsContribNoteValue],[AsContribScale],[DefCurrAdj],[DefCurrPermID],[DefNoteValue],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[Measure],[NormCurrAdj],[NormCurrPermID],[NormNoteValue],[NormScale],[NormSplitFactor],[OrgNoteCategory],[OrgNoteEndDate],[OrgNoteEndOffset],[OrgNoteText],[OrgNoteType],[PerEndDate],[PerType],[RegionPermID],[UnitType],InsertDateTime)
+SELECT [ActivationDate],[AsContribCurrPermID],[AsContribNoteValue],[AsContribScale],[DefCurrAdj],[DefCurrPermID],[DefNoteValue],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[Measure],[NormCurrAdj],[NormCurrPermID],[NormNoteValue],[NormScale],[NormSplitFactor],[OrgNoteCategory],[OrgNoteEndDate],[OrgNoteEndOffset],[OrgNoteText],[OrgNoteType],[PerEndDate],[PerType],[RegionPermID],[UnitType],@insertDateTime FROM @TREOrgNotesPer;
+
+
+@TREPerAdvance = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[EffectiveDate] DateTime?,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[FYEMonth] int,
+		[PerEndDate] DateTime,
+		[Periodicity] int,
+		[PerLength] int,
+		[PerType] int,
+		[RegionPermID] int?
+	FROM @filePath + "TREPerAdvance.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TREPerAdvance;
+
+INSERT INTO dbo.TREPerAdvance([ActivationDate],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[PerEndDate],[Periodicity],[PerLength],[PerType],[RegionPermID],InsertDateTime)
+SELECT [ActivationDate],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[PerEndDate],[Periodicity],[PerLength],[PerType],[RegionPermID],@insertDateTime FROM @TREPerAdvance;
+
+
+@TREPerIndex = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[EffectiveDate] DateTime?,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[FiscalIndex] int?,
+		[FiscalYear] int?,
+		[FYEMonth] int,
+		[PerEndDate] DateTime,
+		[PerIndex] int?,
+		[Periodicity] int,
+		[PerLength] int,
+		[PerType] int,
+		[RegionPermID] int?
+	FROM @filePath + "TREPerIndex.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TREPerIndex;
+
+INSERT INTO dbo.TREPerIndex([ActivationDate],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FiscalIndex],[FiscalYear],[FYEMonth],[PerEndDate],[PerIndex],[Periodicity],[PerLength],[PerType],[RegionPermID],InsertDateTime)
+SELECT [ActivationDate],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FiscalIndex],[FiscalYear],[FYEMonth],[PerEndDate],[PerIndex],[Periodicity],[PerLength],[PerType],[RegionPermID],@insertDateTime FROM @TREPerIndex;
+
+
+@TRERecSum = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[EffectiveDate] DateTime,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[HighRec] int?,
+		[IsRealtime] bool?,
+		[LowRec] int?,
+		[MeanRec] float?,
+		[MedianRec] float?,
+		[NumNoRec] int?,
+		[NumRecs] int?,
+		[NumRecs1] int?,
+		[NumRecs2] int?,
+		[NumRecs3] int?,
+		[NumRecs4] int?,
+		[NumRecs5] int?,
+		[RegionPermID] int?
+	FROM @filePath + "TRERecSum.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TRERecSum;
+
+INSERT INTO dbo.TRERecSum([ActivationDate],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[HighRec],[IsRealtime],[LowRec],[MeanRec],[MedianRec],[NumNoRec],[NumRecs],[NumRecs1],[NumRecs2],[NumRecs3],[NumRecs4],[NumRecs5],[RegionPermID],InsertDateTime)
+SELECT [ActivationDate],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[HighRec],[IsRealtime],[LowRec],[MeanRec],[MedianRec],[NumNoRec],[NumRecs],[NumRecs1],[NumRecs2],[NumRecs3],[NumRecs4],[NumRecs5],[RegionPermID],@insertDateTime FROM @TRERecSum;
+
+
+@TRESmartClusterPer = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[AvgRevisionPct] float?,
+		[ClusterDetectDate] DateTime?,
+		[ClusterDetectOffset] int?,
+		[ClusterEstsDown] int?,
+		[ClusterEstsUp] int?,
+		[DefAvgRevisionEst] float?,
+		[DefClusterMeanEst] float?,
+		[DefCurrPermID] int?,
+		[DefScale] float?,
+		[EffectiveDate] DateTime,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[FYEMonth] int,
+		[IsParent] bool,
+		[IsRealTime] bool?,
+		[Measure] int,
+		[NormAvgRevisionEst] float?,
+		[NormClusterMeanEst] float?,
+		[NormCurrAdj] float?,
+		[NormCurrPermID] int?,
+		[NormScale] float?,
+		[NormSplitFactor] float?,
+		[NumClusterEsts] int?,
+		[PctChgMean] float?,
+		[PerEndDate] DateTime,
+		[PerType] int,
+		[RegionPermID] int?,
+		[UnitType] string
+	FROM @filePath + "TRESmartClusterPer.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TRESmartClusterPer;
+
+INSERT INTO dbo.TRESmartClusterPer([ActivationDate],[AvgRevisionPct],[ClusterDetectDate],[ClusterDetectOffset],[ClusterEstsDown],[ClusterEstsUp],[DefAvgRevisionEst],[DefClusterMeanEst],[DefCurrPermID],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[IsRealTime],[Measure],[NormAvgRevisionEst],[NormClusterMeanEst],[NormCurrAdj],[NormCurrPermID],[NormScale],[NormSplitFactor],[NumClusterEsts],[PctChgMean],[PerEndDate],[PerType],[RegionPermID],[UnitType],InsertDateTime)
+SELECT [ActivationDate],[AvgRevisionPct],[ClusterDetectDate],[ClusterDetectOffset],[ClusterEstsDown],[ClusterEstsUp],[DefAvgRevisionEst],[DefClusterMeanEst],[DefCurrPermID],[DefScale],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[IsRealTime],[Measure],[NormAvgRevisionEst],[NormClusterMeanEst],[NormCurrAdj],[NormCurrPermID],[NormScale],[NormSplitFactor],[NumClusterEsts],[PctChgMean],[PerEndDate],[PerType],[RegionPermID],[UnitType],@insertDateTime FROM @TRESmartClusterPer;
+
+
+@TRESmartSumPer = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[DefCurrPermID] int?,
+		[DefPreSurprise] float?,
+		[DefScale] float?,
+		[DefSmartEst] float?,
+		[EffectiveDate] DateTime,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[FYEMonth] int,
+		[IsParent] bool,
+		[IsRealtime] bool?,
+		[Measure] int,
+		[NormCurrAdj] float?,
+		[NormCurrPermID] int?,
+		[NormPreSurprise] float?,
+		[NormScale] float?,
+		[NormSmartEst] float?,
+		[NormSplitFactor] float?,
+		[NumIncEsts] int?,
+		[PerEndDate] DateTime,
+		[PerType] int,
+		[PreSurpriseFlag] int?,
+		[PreSurprisePct] float?,
+		[RegionPermID] int?,
+		[UnitType] string
+	FROM @filePath + "TRESmartSumPer.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@TRESmartSumPer = 
+	SELECT *, EffectiveDate.Year AS EffectiveYear FROM @TRESmartSumPer;
+	
+TRUNCATE TABLE dbo.TRESmartSumPer
+	PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+INSERT INTO dbo.TRESmartSumPer([ActivationDate],[DefCurrPermID],[DefPreSurprise],[DefScale],[DefSmartEst],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[IsRealtime],[Measure],[NormCurrAdj],[NormCurrPermID],[NormPreSurprise],[NormScale],[NormSmartEst],[NormSplitFactor],[NumIncEsts],[PerEndDate],[PerType],[PreSurpriseFlag],[PreSurprisePct],[RegionPermID],[UnitType],[EffectiveYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (2012)
+SELECT [ActivationDate],[DefCurrPermID],[DefPreSurprise],[DefScale],[DefSmartEst],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[IsRealtime],[Measure],[NormCurrAdj],[NormCurrPermID],[NormPreSurprise],[NormScale],[NormSmartEst],[NormSplitFactor],[NumIncEsts],[PerEndDate],[PerType],[PreSurpriseFlag],[PreSurprisePct],[RegionPermID],[UnitType],[EffectiveYear],@insertDateTime FROM @TRESmartSumPer;
+
+@TRESumAper = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[DefCurrPermID] int?,
+		[DefHighEst] float?,
+		[DefLowEst] float?,
+		[DefMeanEst] float?,
+		[DefMedianEst] float?,
+		[DefScale] float?,
+		[DefStdDev] float?,
+		[EffectiveDate] DateTime,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[IsParent] bool,
+		[IsRealtime] bool?,
+		[MarginPct] float?,
+		[Measure] int,
+		[NormCurrAdj] float?,
+		[NormCurrPermID] int?,
+		[NormHighEst] float?,
+		[NormLowEst] float?,
+		[NormMeanEst] float?,
+		[NormMedianEst] float?,
+		[NormScale] float?,
+		[NormSplitFactor] float?,
+		[NormStdDev] float?,
+		[NumEsts] int?,
+		[NumIncEsts] int?,
+		[PerType] int,
+		[RegionPermID] int?,
+		[UnitType] string
+	FROM @filePath + "TRESumAper.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TRESumAper;
+
+INSERT INTO dbo.TRESumAper([ActivationDate],[DefCurrPermID],[DefHighEst],[DefLowEst],[DefMeanEst],[DefMedianEst],[DefScale],[DefStdDev],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[IsParent],[IsRealtime],[MarginPct],[Measure],[NormCurrAdj],[NormCurrPermID],[NormHighEst],[NormLowEst],[NormMeanEst],[NormMedianEst],[NormScale],[NormSplitFactor],[NormStdDev],[NumEsts],[NumIncEsts],[PerType],[RegionPermID],[UnitType],InsertDateTime)
+SELECT [ActivationDate],[DefCurrPermID],[DefHighEst],[DefLowEst],[DefMeanEst],[DefMedianEst],[DefScale],[DefStdDev],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[IsParent],[IsRealtime],[MarginPct],[Measure],[NormCurrAdj],[NormCurrPermID],[NormHighEst],[NormLowEst],[NormMeanEst],[NormMedianEst],[NormScale],[NormSplitFactor],[NormStdDev],[NumEsts],[NumIncEsts],[PerType],[RegionPermID],[UnitType],@insertDateTime FROM @TRESumAper;
+
+
+@TRESumHzn = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[DefCurrPermID] int?,
+		[DefHighEst] float?,
+		[DefLowEst] float?,
+		[DefMeanEst] float?,
+		[DefMedianEst] float?,
+		[DefScale] float?,
+		[DefStdDev] float?,
+		[EffectiveDate] DateTime,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[IsParent] bool,
+		[IsRealtime] bool?,
+		[MarginPct] float?,
+		[Measure] int,
+		[NormCurrAdj] float?,
+		[NormCurrPermID] int?,
+		[NormHighEst] float?,
+		[NormLowEst] float?,
+		[NormMeanEst] float?,
+		[NormMedianEst] float?,
+		[NormScale] float?,
+		[NormSplitFactor] float?,
+		[NormStdDev] float?,
+		[NumEsts] int?,
+		[NumIncEsts] int?,
+		[PerLength] int,
+		[PerType] int,
+		[RegionPermID] int?,
+		[UnitType] string
+	FROM @filePath + "TRESumHzn.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.TRESumHzn;
+
+INSERT INTO dbo.TRESumHzn([ActivationDate],[DefCurrPermID],[DefHighEst],[DefLowEst],[DefMeanEst],[DefMedianEst],[DefScale],[DefStdDev],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[IsParent],[IsRealtime],[MarginPct],[Measure],[NormCurrAdj],[NormCurrPermID],[NormHighEst],[NormLowEst],[NormMeanEst],[NormMedianEst],[NormScale],[NormSplitFactor],[NormStdDev],[NumEsts],[NumIncEsts],[PerLength],[PerType],[RegionPermID],[UnitType],InsertDateTime)
+SELECT [ActivationDate],[DefCurrPermID],[DefHighEst],[DefLowEst],[DefMeanEst],[DefMedianEst],[DefScale],[DefStdDev],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[IsParent],[IsRealtime],[MarginPct],[Measure],[NormCurrAdj],[NormCurrPermID],[NormHighEst],[NormLowEst],[NormMeanEst],[NormMedianEst],[NormScale],[NormSplitFactor],[NormStdDev],[NumEsts],[NumIncEsts],[PerLength],[PerType],[RegionPermID],[UnitType],@insertDateTime FROM @TRESumHzn;
+
+
+@TRESumPer = 
+	EXTRACT
+		[ActivationDate] DateTime?,
+		[DefCurrPermID] int?,
+		[DefHighEst] float?,
+		[DefLowEst] float?,
+		[DefMeanEst] float?,
+		[DefMedianEst] float?,
+		[DefScale] float?,
+		[DefStdDev] float?,
+		[EffectiveDate] DateTime,
+		[EffectiveOffset] int?,
+		[EstPermID] long,
+		[ExpireDate] DateTime?,
+		[ExpireOffset] int?,
+		[FYEMonth] int,
+		[IsParent] bool,
+		[IsRealtime] bool?,
+		[MarginPct] float?,
+		[Measure] int,
+		[NormCurrAdj] float?,
+		[NormCurrPermID] int?,
+		[NormHighEst] float?,
+		[NormLowEst] float?,
+		[NormMeanEst] float?,
+		[NormMedianEst] float?,
+		[NormScale] float?,
+		[NormSplitFactor] float?,
+		[NormStdDev] float?,
+		[NumEsts] int?,
+		[NumIncEsts] int?,
+		[PerEndDate] DateTime,
+		[PerType] int,
+		[RegionPermID] int?,
+		[UnitType] string
+	FROM @filePath + "TRESumPer.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@TRESumPer = 
+	SELECT *, EffectiveDate.Year AS EffectiveDateYear FROM @TRESumPer;
+	
+TRUNCATE TABLE dbo.TRESumPer
+	PARTITION(1970),PARTITION(1971),PARTITION(1972),PARTITION(1973),PARTITION(1974),PARTITION(1975),
+	PARTITION(1976),PARTITION(1977),PARTITION(1978),PARTITION(1979),PARTITION(1980),PARTITION(1981),
+	PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),
+	PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),
+	PARTITION(1994),PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),
+	PARTITION(2000),PARTITION(2001),PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),
+	PARTITION(2006),PARTITION(2007),PARTITION(2008),PARTITION(2009),PARTITION(2010),PARTITION(2011),
+	PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),PARTITION(2016),PARTITION(2017),
+	PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),PARTITION(2023),
+	PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),PARTITION(2030)
+;
+
+INSERT INTO dbo.TRESumPer([ActivationDate],[DefCurrPermID],[DefHighEst],[DefLowEst],[DefMeanEst],[DefMedianEst],[DefScale],[DefStdDev],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[IsRealtime],[MarginPct],[Measure],[NormCurrAdj],[NormCurrPermID],[NormHighEst],[NormLowEst],[NormMeanEst],[NormMedianEst],[NormScale],[NormSplitFactor],[NormStdDev],[NumEsts],[NumIncEsts],[PerEndDate],[PerType],[RegionPermID],[UnitType],[EffectiveDateYear],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (1970)
+SELECT [ActivationDate],[DefCurrPermID],[DefHighEst],[DefLowEst],[DefMeanEst],[DefMedianEst],[DefScale],[DefStdDev],[EffectiveDate],[EffectiveOffset],[EstPermID],[ExpireDate],[ExpireOffset],[FYEMonth],[IsParent],[IsRealtime],[MarginPct],[Measure],[NormCurrAdj],[NormCurrPermID],[NormHighEst],[NormLowEst],[NormMeanEst],[NormMedianEst],[NormScale],[NormSplitFactor],[NormStdDev],[NumEsts],[NumIncEsts],[PerEndDate],[PerType],[RegionPermID],[UnitType],[EffectiveDateYear],@insertDateTime FROM @TRESumPer;
+
+
+@UPDPrimCode = 
+	EXTRACT
+		[Exchange] string,
+		[Frequency] string,
+		[Region] string,
+		[UpdateID] int,
+		[UpdateName] string
+	FROM @filePath + "UPDPrimCode.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.UPDPrimCode;
+
+INSERT INTO dbo.UPDPrimCode([Exchange],[Frequency],[Region],[UpdateID],[UpdateName],InsertDateTime)
+SELECT [Exchange],[Frequency],[Region],[UpdateID],[UpdateName],@insertDateTime FROM @UPDPrimCode;
+
+
+@UPDPrimStatus = 
+	EXTRACT
+		[IsComplete] int?,
+		[MarketDate] DateTime,
+		[UpdateID] int
+	FROM @filePath + "UPDPrimStatus.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE dbo.UPDPrimStatus;
+
+INSERT INTO dbo.UPDPrimStatus([IsComplete], [MarketDate], [UpdateID], InsertDateTime)
+SELECT [IsComplete], [MarketDate], [UpdateID], @insertDateTime FROM @UPDPrimStatus;

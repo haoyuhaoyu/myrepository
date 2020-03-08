@@ -1,0 +1,4 @@
+	[Id] [nvarchar],
+	[Version] [nvarchar],
+	[Name] [nvarchar],
+	[Value] [nvarchar],

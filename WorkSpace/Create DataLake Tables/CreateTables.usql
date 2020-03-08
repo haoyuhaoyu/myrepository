@@ -1,0 +1,2348 @@
+CREATE DATABASE IF NOT EXISTS TnR;
+USE DATABASE TnR;
+CREATE SCHEMA IF NOT EXISTS [prc];
+
+CREATE TABLE IF NOT EXISTS [dbo].[AdjFctr](
+	Database_ int,
+	VendorCode int,
+	Factor float?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_adjfctr CLUSTERED(Database_ ASC, VendorCode ASC)
+)
+DISTRIBUTED BY HASH (Database_, VendorCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[canary_table](
+	[FixedId] int,
+	[Currenttime] DateTime,
+	[InsertDateTime] DateTime?,
+	INDEX PK_sPublisherTime CLUSTERED(FixedId ASC)
+)
+DISTRIBUTED BY HASH (FixedId);
+
+CREATE TABLE IF NOT EXISTS [dbo].[CSGSec](
+	[GVKEY] int,
+	[IID] string,
+	[DLDTEI] DateTime?,
+	[DLRSNI] string,
+	[DSCI] string,
+	[EPF] string,
+	[EXCHG] int?,
+	[EXCNTRY] string,
+	[IBTIC] string,
+	[ISIN] string,
+	[SECSTAT] string,
+	[TIC] string,
+	[TPCI] string,
+	[SECID] int?,
+	[NAME] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_CsgSec CLUSTERED([GVKEY] ASC,[IID] ASC)
+)
+DISTRIBUTED BY HASH ([GVKEY],[IID]);
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2Company](
+	[DsCmpyCode] int,
+	[DsCompCode] string,
+	[DsCmpyName] string,
+	[CmpyCtryCode] string,
+	[CmpyCtryType] int?,
+	[IndusIsDef] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_DS2Company CLUSTERED(DsCmpyCode ASC)
+)
+DISTRIBUTED BY HASH (DsCmpyCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2CtryQtInfo](
+	[InfoCode] int,
+	[DsCode] string,
+	[DsSecCode] int?,
+	[Region] string,
+	[RegCodeTypeId] int?,
+	[IsPrimQt] int?,
+	[DsQtName] string,
+	[DsLocalCode] string,
+	[DsMnem] string,
+	[CovergCode] string,
+	[StatusCode] string,
+	[PermID] string,
+	[TypeCode] string,
+	[PrimISOCurrCode] string,
+	[DelistDate] DateTime?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_DS2CtryQtInfo CLUSTERED(InfoCode ASC)
+)
+DISTRIBUTED BY HASH (InfoCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2DataType](
+	[DataTypeMnem] string,
+	[EntityTypeId] string,
+	[TableName] string,
+	[ColnName] string,
+	[Descn] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_Ds2DataType CLUSTERED(DataTypeMnem ASC, EntityTypeId ASC)
+)
+DISTRIBUTED BY HASH (DataTypeMnem,EntityTypeId);
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2EquityIndex](
+	[DSIndexCode] int,
+	[DSIndexMnem] string,
+	[Region] string,
+	[RegCodeTypeID] int?,
+	[IndexDesc] string,
+	[LDB] string,
+	[SourceCode] string,
+	[IndexListCode] int?,
+	[BaseDate] DateTime?,
+	[ISOCurrCode] string,
+	[IsLocalCurrency] string,
+	[IndexStatusCode] string,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_DS2EquityIndex CLUSTERED(DSIndexCode ASC)
+)
+DISTRIBUTED BY HASH (DSIndexCode);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2Exchange](
+	[ExchIntCode] int,
+	[DsExchCode] string,
+	[ExchType] string,
+	[ExchName] string,
+	[ExchMnem] string,
+	[ExchCtryCode] string,
+	[CtryCodeType] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_DS2Exchange CLUSTERED(ExchIntCode ASC)
+)
+DISTRIBUTED BY HASH (ExchIntCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2FXCode](
+	[ExRateIntCode] int,
+	[ExRateCode] string,
+	[FromCurrCode] string,
+	[ToCurrCode] string,
+	[SourceCode] string,
+	[RateTypeCode] string,
+	[ExRateDesc] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_DS2Exchange CLUSTERED(ExRateIntCode ASC)
+)
+DISTRIBUTED BY HASH (ExRateIntCode);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2FXRate](
+	[ExRateIntCode] int,
+	[ExRateDate] DateTime,
+	[MidRate] float?,
+	[BidRate] float?,
+	[OfferRate] float?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_Ds2FxRate CLUSTERED(ExRateIntCode ASC, ExRateDate ASC)
+)
+DISTRIBUTED BY HASH (ExRateIntCode, ExRateDate);
+
+// Add Partitions
+CREATE TABLE IF NOT EXISTS [dbo].[DS2IndexAddlData](
+	[DataTypeMnem] string,
+	[DSIndexCode] int,
+	[ValueYear] int,
+	[ValueDate] DateTime,
+	[DataTypeValue] float?,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_DS2IndexAddlData CLUSTERED(DataTypeMnem ASC, DSIndexCode ASC, ValueDate ASC)
+)
+PARTITIONED BY (ValueYear)
+DISTRIBUTED BY HASH (DataTypeMnem, DSIndexCode, ValueDate);
+
+ALTER TABLE [dbo].[DS2IndexAddlData] ADD IF NOT EXISTS 
+	PARTITION(1951), PARTITION(1952), PARTITION(1953), PARTITION(1954), PARTITION(1955), PARTITION(1956), PARTITION(1957), PARTITION(1958), 
+	PARTITION(1959), PARTITION(1960), PARTITION(1961), PARTITION(1962), PARTITION(1963), PARTITION(1964), PARTITION(1965), PARTITION(1966), 
+	PARTITION(1967), PARTITION(1968), PARTITION(1969), PARTITION(1970), PARTITION(1971), PARTITION(1972), PARTITION(1973), PARTITION(1974), 
+	PARTITION(1975), PARTITION(1976), PARTITION(1977), PARTITION(1978), PARTITION(1979), PARTITION(1980), PARTITION(1981), PARTITION(1982), 
+	PARTITION(1983), PARTITION(1984), PARTITION(1985), PARTITION(1986), PARTITION(1987), PARTITION(1988), PARTITION(1989), PARTITION(1990), 
+	PARTITION(1991), PARTITION(1992), PARTITION(1993), PARTITION(1994), PARTITION(1995), PARTITION(1996), PARTITION(1997), PARTITION(1998), 
+	PARTITION(1999), PARTITION(2000), PARTITION(2001), PARTITION(2002), PARTITION(2003), PARTITION(2004), PARTITION(2005), PARTITION(2006), 
+	PARTITION(2007), PARTITION(2008), PARTITION(2009), PARTITION(2010), PARTITION(2011), PARTITION(2012), PARTITION(2013), PARTITION(2014), 
+	PARTITION(2015), PARTITION(2016), PARTITION(2017), PARTITION(2018), PARTITION(2019), PARTITION(2020), PARTITION(2021), PARTITION(2022),
+	PARTITION(2023), PARTITION(2024), PARTITION(2025), PARTITION(2026), PARTITION(2027), PARTITION(2028), PARTITION(2029), PARTITION(2030) ;
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2IndexData](
+	[DSIndexCode] int,
+	[ValueDate] DateTime,
+	[ValueYear] int,
+	[PI_] float?,
+	[RI] float?,
+	[MV] float?,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_DS2IndexData CLUSTERED(DSIndexCode ASC, ValueDate ASC)
+)
+PARTITIONED BY (ValueYear)
+DISTRIBUTED BY HASH (DSIndexCode, ValueDate);
+
+ALTER TABLE [dbo].[DS2IndexData] ADD IF NOT EXISTS 
+	PARTITION(1951),PARTITION(1952),PARTITION(1953),PARTITION(1954),PARTITION(1955),PARTITION(1956),
+	PARTITION(1957),PARTITION(1958),PARTITION(1959),PARTITION(1960),PARTITION(1961),PARTITION(1962),
+	PARTITION(1963),PARTITION(1964),PARTITION(1965),PARTITION(1966),PARTITION(1967),PARTITION(1968),
+	PARTITION(1969),PARTITION(1970),PARTITION(1971),PARTITION(1972),PARTITION(1973),PARTITION(1974),
+	PARTITION(1975),PARTITION(1976),PARTITION(1977),PARTITION(1978),PARTITION(1979),PARTITION(1980),
+	PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),
+	PARTITION(1987),PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),
+	PARTITION(1993),PARTITION(1994),PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),
+	PARTITION(1999),PARTITION(2000),PARTITION(2001),PARTITION(2002),PARTITION(2003),PARTITION(2004),
+	PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),PARTITION(2009),PARTITION(2010),
+	PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),PARTITION(2016),
+	PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),
+	PARTITION(2029),PARTITION(2030);
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2IndexDataType](
+	[DataTypeMnem] string,
+	[DSIndexCode] int,
+	[EntityTypeId] int?,
+	[ISOCurrCode] string,
+	[Frequency] string,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_DS2IndexDataType CLUSTERED(DataTypeMnem ASC, DSIndexCode ASC)
+)
+DISTRIBUTED BY HASH (DataTypeMnem, DSIndexCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2ISINChg](
+	[DsSecCode] int,
+	[StartDate] DateTime,
+	[EndDate] DateTime?,
+	[ISIN] string,
+	[ISIN2] string,
+	[LicFlagC] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_DS2IsinChg CLUSTERED(DsSecCode ASC, StartDate ASC)
+)
+DISTRIBUTED BY HASH (DsSecCode, StartDate);
+
+CREATE TABLE IF NOT EXISTS [dbo].[Ds2LocalCodeChg](
+	[InfoCode] int,
+	[StartDate] DateTime,
+	[EndDate] DateTime?,
+	[DSLocalCode] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_Ds2LocalCodeChg CLUSTERED(InfoCode ASC, StartDate ASC)
+)
+DISTRIBUTED BY HASH (InfoCode, StartDate);
+
+CREATE TABLE IF NOT EXISTS [dbo].[Ds2MnemChg](
+	[InfoCode] int,
+	[StartDate] DateTime,
+	[EndDate] DateTime?,
+	[DsMnem] string,
+	[Ticker] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_Ds2MnemChg CLUSTERED(InfoCode ASC, StartDate ASC)
+)
+DISTRIBUTED BY HASH (InfoCode, StartDate);
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2QtNameChg](
+	[InfoCode] int,
+	[StartDate] DateTime,
+	[EndDate] DateTime?,
+	[DSQtName] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_DS2QtNameChg CLUSTERED(InfoCode ASC, StartDate ASC)
+)
+DISTRIBUTED BY HASH (InfoCode, StartDate);
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2Region](
+	[Region] string,
+	[RegCodeTypeID] int,
+	[Name_] string,
+	[DsGeoCode] string,
+	[ISOCurrCode] string,
+	[PermRegion] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_DS2Region CLUSTERED(Region ASC, RegCodeTypeID ASC)
+)
+DISTRIBUTED BY HASH (Region, RegCodeTypeID);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2Security](
+	[DsSecCode] int,
+	[DsSctyCode] string,
+	[DsCmpyCode] int?,
+	[IsMajorSec] string,
+	[DsSecName] string,
+	[ISOCurrCode] string,
+	[DivUnit] string,
+	[PrimQtSedol] string,
+	[PrimExchMnem] string,
+	[PrimQtInfoCode] int?,
+	[WSSctyPPI] string,
+	[IBESTicker] string,
+	[WSSctyPPI2] string,
+	[IBESTicker2] string,
+	[DelistDate] DateTime?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_DS2Security CLUSTERED(DsSecCode ASC)
+)
+DISTRIBUTED BY HASH (DsSecCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[DS2XRef](
+	[Type_] int,
+	[Code] string,
+	[Desc_] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_Ds2XRef CLUSTERED(Type_ ASC, Code ASC)
+)
+DISTRIBUTED BY HASH (Type_,Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[GSecMap](
+	[SecCode] int,
+	[VenType] int,
+	[VenCode] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_GSecMap CLUSTERED(SecCode ASC, VenType ASC)
+)
+DISTRIBUTED BY HASH (SecCode, VenType);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[GSecMapX](
+	[SecCode] int,
+	[VenType] int,
+	[VenCode] int?,
+	[Rank] int,
+	[Exchange] int?,
+	[StartDate] DateTime?,
+	[EndDate] DateTime?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_GSecMapX CLUSTERED(SecCode ASC, VenType ASC, Rank ASC)
+)
+DISTRIBUTED BY HASH (SecCode, VenType, Rank);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[GSecMstr](
+	[SecCode] int,
+	[GsId] string,
+	[IdBase] string,
+	[IdSeq] int?,
+	[Isin] string,
+	[Name] string,
+	[Country] string,
+	[Vendors] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_GSecMstr CLUSTERED(SecCode ASC)
+)
+DISTRIBUTED BY HASH (SecCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[GSecMstrX](
+	[SecCode] int,
+	[Id] string,
+	[Type_] int,
+	[IdBase] string,
+	[IdSeq] int?,
+	[Isin] string,
+	[Name] string,
+	[Country] string,
+	[Vendors1] long?,
+	[Vendors2] long?,
+	[Vendors3] long?,
+	[Vendors4] long?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_GSecMstrX CLUSTERED(SecCode ASC, Type_ ASC)
+)
+DISTRIBUTED BY HASH (SecCode, Type_);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[IBDAnl](
+	[Code] int,
+	[Name] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_IbdAnl CLUSTERED(Code ASC)
+)
+DISTRIBUTED BY HASH (Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[IdxInfo](
+	[Ticker] string,
+	[Cusip] string,
+	[Name] string,
+	[Code] int,
+	[Type_] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_idxinfo CLUSTERED(Code ASC)
+)
+DISTRIBUTED BY HASH (Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[IdxRlClsCode](
+	[Code] int,
+	[StartDate] DateTime,
+	[CodeDesc] string,
+	[EndDate] DateTime?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_IdxRlClsCode CLUSTERED(Code ASC, StartDate ASC)
+)
+DISTRIBUTED BY HASH (Code,StartDate);
+
+CREATE TABLE IF NOT EXISTS [prc].[IdxSec](
+	[Vendor] int,
+	[Cusip] string,
+	[Ticker] string,
+	[Name] string,
+	[FirstDate] DateTime?,
+	[LastDate] DateTime?,
+	[Code] int,
+	[PrcCode] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_IdxSec CLUSTERED(Vendor ASC, Code ASC)
+)
+DISTRIBUTED BY HASH (Vendor,Code);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[PermCode](
+	[CodeType] int,
+	[Code] string,
+	[Description] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PermCode CLUSTERED(CodeType ASC, Code ASC)
+)
+DISTRIBUTED BY HASH (CodeType, Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[PermInstrInfo](
+	[InstrPermID] long,
+	[RCSAssetCla] string,
+	[Category] string,
+	[ShortName] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PermInstrInfo CLUSTERED(InstrPermID ASC)
+)
+DISTRIBUTED BY DIRECT HASH (InstrPermID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[PermInstrRef](
+	[InstrPermID] long,
+	[IsPrimary] bool?,
+	[Status] string,
+	[TypeCode] string,
+	[ComName] string,
+	[CurrPermID] long?,
+	[OrgPermID] long?,
+	[PriTrdQuotePermID] long?,
+	[ValQuotePermID] long?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PermInstrRef CLUSTERED(InstrPermID ASC)
+)
+DISTRIBUTED BY DIRECT HASH (InstrPermID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[PermOrgInfo](
+	[OrgPermID] long,
+	[AddrTypeCode] int,
+	[IsPublic] bool?,
+	[IPODate] DateTime?,
+	[ISO2CntryCode] string,
+	[LegalName] string,
+	[AddrLine1] string,
+	[AddrLine2] string,
+	[City] string,
+	[StateProv] string,
+	[PostalCode] string,
+	[PriTRBCIndPermID] long?,
+	[CntryGeoID] long?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PermOrgInfo CLUSTERED(OrgPermID ASC,AddrTypeCode ASC)
+)
+DISTRIBUTED BY DIRECT HASH (OrgPermID);
+// AddrTypeCode only have two value : 1 and 2. That not make sense for distribution
+
+CREATE TABLE IF NOT EXISTS [dbo].[PermOrgRef](
+	[OrgPermID] long,
+	[Status] string,
+	[TypeCode] string,
+	[DomCntryPermID] long?,
+	[IncCntryPermID] long?,
+	[PriInstrPermID] long?,
+	[ValQuotePermID] long?,
+	[ComName] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PermOrgRef CLUSTERED(OrgPermID ASC)
+)
+DISTRIBUTED BY HASH (OrgPermID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[PermQuoteInfo](
+	[QuotePermID] long,
+	[Category] string,
+	[ShortName] string,
+	[RSCAssetCla] string,
+	[Opol] string,
+	[TrdWhenIssued] bool?,
+	[Is144aReg] bool?,
+	[RetireDate] DateTime?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PermQuoteInfo CLUSTERED(QuotePermID ASC)
+)
+DISTRIBUTED BY DIRECT HASH (QuotePermID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[PermQuoteRef](
+	[QuotePermID] long,
+	[Status] string,
+	[TypeCode] string,
+	[IsPrimary] bool?,
+	[Mic] string,
+	[Ticker] string,
+	[ComName] string,
+	[ExchCode] string,
+	[CurrPermID] long?,
+	[InstrPermID] long?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PermQuoteRef CLUSTERED(QuotePermID ASC)
+)
+DISTRIBUTED BY DIRECT HASH (QuotePermID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[PermRICData](
+	[QuotePermID] long,
+	[StartDate] DateTime,
+	[StartYear] int,
+	[EndDate] DateTime?,
+	[RIC] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PermRICData CLUSTERED(QuotePermID ASC, StartDate ASC)
+)
+PARTITIONED BY (StartYear)
+DISTRIBUTED BY HASH (QuotePermID,StartDate);
+
+ALTER TABLE [dbo].[PermRICData] ADD IF NOT EXISTS 
+	PARTITION(1900), PARTITION(1968), PARTITION(1974), PARTITION(1977), PARTITION(1981), PARTITION(1984),
+	PARTITION(1986), PARTITION(1987), PARTITION(1989), PARTITION(1990), PARTITION(1991), PARTITION(1992),
+	PARTITION(1993), PARTITION(1994), PARTITION(1995), PARTITION(1996), PARTITION(1997), PARTITION(1998), 
+	PARTITION(1999), PARTITION(2000), PARTITION(2001), PARTITION(2002), PARTITION(2003), PARTITION(2004), 
+	PARTITION(2005), PARTITION(2006), PARTITION(2007), PARTITION(2008), PARTITION(2009), PARTITION(2010), 
+	PARTITION(2011), PARTITION(2012), PARTITION(2013), PARTITION(2014), PARTITION(2015), PARTITION(2016), 
+	PARTITION(2017), PARTITION(2018), PARTITION(2019), PARTITION(2020), PARTITION(2021), PARTITION(2022), 
+	PARTITION(2023), PARTITION(2024), PARTITION(2025), PARTITION(2026), PARTITION(2027), PARTITION(2028), 
+	PARTITION(2029), PARTITION(2030);
+
+CREATE TABLE IF NOT EXISTS [dbo].[PermSecMapX](
+	[RegCode] int,
+	[SecCode] int,
+	[EntType] int,
+	[Rank] int,
+	[EntPermID] long?,
+	[StartDate] DateTime?,
+	[EndDate] DateTime?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PermSecMapX CLUSTERED(RegCode ASC, SecCode ASC, EntType ASC, Rank ASC)
+)
+DISTRIBUTED BY HASH (RegCode,SecCode,EntType,Rank);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[PrcCode2](
+	[Type_] int,
+	[Code] int,
+	[Desc_] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PrcCode2 CLUSTERED(Type_ ASC, Code ASC)
+)
+DISTRIBUTED BY HASH (Type_,Code);
+
+
+CREATE TABLE IF NOT EXISTS [prc].[PrcIsr](
+	[IsrCode] int,
+	[ParIsrCode] int?,
+	[IsrName] string,
+	[StartDate] DateTime?,
+	[EndDate] DateTime,
+	[IsoCtry] string,
+	[FyeMonth] int?,
+	[SIC] int?,
+	[NAICS] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PrcIsr CLUSTERED(IsrCode ASC, EndDate ASC)
+)
+DISTRIBUTED BY HASH (IsrCode,EndDate);
+
+CREATE TABLE IF NOT EXISTS [prc].[PrcIss](
+	[IsrCode] int,
+	[Type_] int,
+	[Code] int,
+	[Rank] int?,
+	[StartDate] DateTime?,
+	[EndDate] DateTime,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PrcIss CLUSTERED(Type_ ASC, Code ASC, EndDate ASC)
+)
+DISTRIBUTED BY HASH (Type_,Code,EndDate);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[PrcTxtCode](
+	[Type_] string,
+	[Code] string,
+	[Desc_] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_PrcTxtCode CLUSTERED(Type_ ASC, Code ASC)
+)
+DISTRIBUTED BY HASH (Type_,Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RDCCode](
+	[Type_] int,
+	[Code] int,
+	[Desc_] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RDCCode CLUSTERED(Type_ ASC, Code ASC)
+)
+DISTRIBUTED BY HASH (Type_,Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RDCDesc](
+	[Type_] int,
+	[Code] string,
+	[Desc_] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RDCDesc CLUSTERED(Type_ ASC, Code ASC)
+)
+DISTRIBUTED BY HASH (Type_,Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RDCGSecMapX](
+	[SecCode] int,
+	[VenType] int,
+	[VenCode] int?,
+	[Rank] int,
+	[Exchange] int?,
+	[StartDate] DateTime?,
+	[EndDate] DateTime?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RDCGSecMapX CLUSTERED(SecCode ASC, VenType ASC, Rank ASC)
+)
+DISTRIBUTED BY HASH (SecCode,VenType,Rank);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RDCInstrInfo](
+	[InstrID] int,
+	[InstrStatusCode] string,
+	[ComName] string,
+	[InstrCatCode] string,
+	[InstrType] string,
+	[IssueISOCurrCode] string,
+	[IsCDSConv] int?,
+	[MifidStatusCode] string,
+	[MostReleMrkt] string,
+	[RCSAssetCla] string,
+	[ShortName] string,
+	[OrgID] int?,
+	[PrimTrdQuotePI] int?,
+	[TMTPermId] string,
+	[GemPermId] long?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RDCInstrInfo CLUSTERED(InstrID ASC)
+)
+DISTRIBUTED BY DIRECT HASH (InstrID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RDCOrgAddr](
+	[OrgId] int,
+	[AddrTypeCode] string,
+	[EmailId] string,
+	[FaxNo] string,
+	[IndiEmailId] string,
+	[IndiFaxNo] string,
+	[IndiName] string,
+	[IndiTelNo] string,
+	[PostalCode] string,
+	[StateCntry] string,
+	[StrAddr] string,
+	[CityTown] string,
+	[TelNo] string,
+	[TollFreeNo] string,
+	[WebAddr] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RDCOrgAddr CLUSTERED(OrgId ASC)
+)
+DISTRIBUTED BY HASH (OrgId);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RDCOrgInfo](
+	[OrgId] int,
+	[ComName] string,
+	[LegalName] string,
+	[ShortName] string,
+	[OrgStatus] string,
+	[ContriCode] string,
+	[ContriTypeCode] string,
+	[ClSiteLocCode] string,
+	[CntryHQISOCode] string,
+	[CntryOfIncCode] string,
+	[ISOCurrCode] string,
+	[OrgTypeCode] string,
+	[DFlag] int?,
+	[NDAOrgID] long?,
+	[TMTPermID] string,
+	[GEMPermID] long?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RDCOrgInfo CLUSTERED(OrgId ASC)
+)
+DISTRIBUTED BY HASH (OrgId);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RDCQuoteInfo](
+	[QuoteID] int,
+	[QuoteStatusCode] string,
+	[QuoteType] string,
+	[QuoteCatCode] string,
+	[ComName] string,
+	[IsSuspended] string,
+	[QuoteISOCurrCode] string,
+	[QuoteGrpByPsExch] string,
+	[QuoteCla] string,
+	[RateTypeCode] string,
+	[RSCAssetCla] string,
+	[ShortName] string,
+	[TagCla] string,
+	[InstrID] int?,
+	[Mic] string,
+	[Opol] string,
+	[Ticker] string,
+	[TMTPermId] string,
+	[GemPermId] long?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RDCQuoteInfo CLUSTERED(QuoteID ASC)
+)
+DISTRIBUTED BY DIRECT HASH (QuoteID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RDCRICData](
+	[QuoteID] int,
+	[SeqNo] int,
+	[StartDate] DateTime,
+	[StartYear] int,
+	[StartTime] int,
+	[EndDate] DateTime?,
+	[EndTime] int?,
+	[RIC] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RDCRICData CLUSTERED(QuoteID ASC, SeqNo ASC, StartTime ASC)
+)
+PARTITIONED BY (StartYear)
+DISTRIBUTED BY HASH (QuoteID,SeqNo, StartTime);
+
+ALTER TABLE [dbo].[RDCRICData] ADD IF NOT EXISTS 
+	PARTITION(1900), PARTITION(1968), PARTITION(1974), PARTITION(1977), PARTITION(1981), PARTITION(1984),
+	PARTITION(1986), PARTITION(1987), PARTITION(1989), PARTITION(1990), PARTITION(1991), PARTITION(1992),
+	PARTITION(1993), PARTITION(1994), PARTITION(1995), PARTITION(1996), PARTITION(1997), PARTITION(1998), 
+	PARTITION(1999), PARTITION(2000), PARTITION(2001), PARTITION(2002), PARTITION(2003), PARTITION(2004), 
+	PARTITION(2005), PARTITION(2006), PARTITION(2007), PARTITION(2008), PARTITION(2009), PARTITION(2010), 
+	PARTITION(2011), PARTITION(2012), PARTITION(2013), PARTITION(2014), PARTITION(2015), PARTITION(2016), 
+	PARTITION(2017), PARTITION(2018), PARTITION(2019), PARTITION(2020), PARTITION(2021), PARTITION(2022), 
+	PARTITION(2023), PARTITION(2024), PARTITION(2025), PARTITION(2026), PARTITION(2027), PARTITION(2028), 
+	PARTITION(2029), PARTITION(2030);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RDCSecMapX](
+	[SecCode] int,
+	[VenType] int,
+	[VenCode] int?,
+	[Rank] int,
+	[Exchange] int?,
+	[StartDate] DateTime?,
+	[EndDate] DateTime?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RDCSecMapX CLUSTERED(SecCode ASC, VenType ASC, Rank ASC)
+)
+DISTRIBUTED BY HASH (SecCode,VenType,Rank);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndBGSeg](
+	[Code] int,
+	[SegID] int,
+	[SegDesc] string,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndBGSeg CLUSTERED(Code ASC, SegID ASC)
+)
+DISTRIBUTED BY HASH (Code,SegID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndBGSegData](
+	[Code] int,
+	[PerEndDt] DateTime,
+	[PerTypeCode] int,
+	[StmtDt] DateTime,
+	[SegTypeCode] int,
+	[SegOrder] int,
+	[SegCode] int,
+	[CalPerEndDt] DateTime?,
+	[CalStmtDt] DateTime?,
+	[SegID] int?,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndBGSegData CLUSTERED(Code ASC, PerEndDt ASC, PerTypeCode ASC, StmtDt ASC, SegTypeCode ASC, SegOrder ASC, SegCode ASC)
+)
+DISTRIBUTED BY HASH (Code,PerEndDt,PerTypeCode,StmtDt,SegTypeCode,SegOrder,SegCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndBGSegItem](
+	[Item] int,
+	[LineID] int,
+	[COA] string,
+	[Desc_] string,
+	[Table_] string,
+	[DataType] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndBGSegItem CLUSTERED(Item ASC)
+)
+DISTRIBUTED BY HASH (Item);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndBGSegVal](
+	[Code] int,
+	[PerEndDt] DateTime,
+	[PerEndYear] int,
+	[PerTypeCode] int,
+	[StmtDt] DateTime,
+	[SegTypeCode] int,
+	[SegOrder] int,
+	[Item] int,
+	[CalPerEndDt] DateTime?,
+	[CalStmtDt] DateTime?,
+	[Value_] float?,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndBGSegVal CLUSTERED(Code ASC, PerEndDt ASC, PerTypeCode ASC, StmtDt ASC, SegTypeCode ASC, SegOrder ASC, Item ASC)
+)
+PARTITIONED BY (PerEndYear)
+DISTRIBUTED BY HASH (Code,PerEndDt,PerTypeCode,StmtDt,SegTypeCode,SegOrder,Item);
+
+ALTER TABLE [dbo].[RKDFndBGSegVal] ADD IF NOT EXISTS 
+	PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),PARTITION(1988),
+	PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),
+	PARTITION(2001),PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),
+	PARTITION(2007),PARTITION(2008),PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),
+	PARTITION(2013),PARTITION(2014),PARTITION(2015),PARTITION(2016),PARTITION(2017),PARTITION(2018),
+	PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),PARTITION(2023),PARTITION(2024),
+	PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),PARTITION(2030);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCmpDet](
+	[Code] int,
+	[PrimaryName] string,
+	[ConstOfGSPC] string,
+	[ConstOfNDX] string,
+	[ProductionDt] DateTime?,
+	[Employees] int?,
+	[EmpLastUpdDt] DateTime?,
+	[TotShOut] float?,
+	[TotShOutDt] DateTime?,
+	[TotFloat] float?,
+	[ComShHldr] int?,
+	[ComShHldrDt] DateTime?,
+	[IncIn] string,
+	[IncInDt] DateTime?,
+	[IncInCtryCode] string,
+	[AuditorCode] string,
+	[StAdd1] string,
+	[StAdd2] string,
+	[StAdd3] string,
+	[City] string,
+	[StateOrReg] string,
+	[Post] string,
+	[ISOCntryCode] string,
+	[CntPerName] string,
+	[CntPerTitle] string,
+	[Email] string,
+	[PublicSince] DateTime?,
+	[TxAgentCode] int?,
+	[TxAgentPh] string,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndCmpDet CLUSTERED(Code ASC)
+)
+DISTRIBUTED BY HASH (Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCmpFiling](
+	[Code] int,
+	[TxtInfoTypeCode] int,
+	[LastUpdDt] DateTime?,
+	[Language_] string,
+	[SrcFilingDt] DateTime?,
+	[SrcFilingType] string,
+	[TxtInfo] string,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDCMPFILING CLUSTERED(Code ASC, TxtInfoTypeCode ASC)
+)
+DISTRIBUTED BY HASH (Code,TxtInfoTypeCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCmpInd](
+	[Code] int,
+	[TxoTypeCode] int,
+	[TxoOrder] int,
+	[TxoCode] long?,
+	[Desc_] string,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndCmpInd CLUSTERED(Code ASC, TxoTypeCode ASC, TxoOrder ASC)
+)
+DISTRIBUTED BY HASH (Code,TxoTypeCode,TxoOrder);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCmpIssDet](
+	[Code] int,
+	[IssueID] int,
+	[IssueTypeCode] int?,
+	[IssueOrder] int?,
+	[ISOParCurrCode] string,
+	[ParValue] float?,
+	[ShAuth] float?,
+	[ShOut] float?,
+	[ShOutDt] DateTime?,
+	[IssueFloat] float?,
+	[Votes] float?,
+	[ConvFactor] float?,
+	[ShAuthDt] DateTime?,
+	[FloatDt] DateTime?,
+	[ShIssued] float?,
+	[ShIssuedDt] DateTime?,
+	[TreasurySh] float?,
+	[TreasuryShDt] DateTime?,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndCmpIssDet CLUSTERED(Code ASC, IssueID ASC)
+)
+DISTRIBUTED BY HASH (Code,IssueID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCmpOfficer](
+	[Code] int,
+	[Officerid] int,
+	[OfficerRank] int?,
+	[PerID] int?,
+	[OfficerStatus] string,
+	[OfficerLang] string,
+	[SubmitType] string,
+	[SubmitDt] DateTime?,
+	[LastName] string,
+	[FirstName] string,
+	[Suffix] string,
+	[Prefix] string,
+	[PrefName] string,
+	[Midinitial] string,
+	[Age] int?,
+	[Sex] string,
+	[OfficerStartDt] DateTime?,
+	[OfficerEndDt] DateTime?,
+	[DirStartDt] DateTime?,
+	[DirEndDt] DateTime?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDCMPOFFICER CLUSTERED(Code ASC, Officerid ASC)
+)
+DISTRIBUTED BY HASH (Code,Officerid);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCmpOffTitleChg](
+	[Code] int,
+	[OfficerID] int,
+	[DesgStartDt] DateTime,
+	[DesgEndDt] DateTime?,
+	[Title] string,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDCMPOFFTITLECHG CLUSTERED(Code ASC, OfficerID ASC, DesgStartDt ASC)
+)
+DISTRIBUTED BY HASH (Code,OfficerID,DesgStartDt);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCmpPhone](
+	[Code] int,
+	[PhTypeCode] int,
+	[CtryPh] string,
+	[City] string,
+	[PhoneNo] string,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDCMPPHONE CLUSTERED(Code ASC, PhTypeCode ASC)
+)
+DISTRIBUTED BY HASH (Code, PhTypeCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCmpRef](
+	[Code] int,
+	[ProductionDt] DateTime?,
+	[PrimaryName] string,
+	[IssuerTypeCode] string,
+	[RelToCode] int?,
+	[RelTypeCode] int?,
+	[IRSNo] string,
+	[CIKNo] string,
+	[FProXref] string,
+	[OrgId] string,
+	[CurrEstStatus] int?,
+	[LastModFinDt] DateTime?,
+	[LastModOtherDt] DateTime?,
+	[LatestFinAnnDt] DateTime?,
+	[LatestFinIntmDt] DateTime?,
+	[FilCurrStatus] string,
+	[FinStmtCurrCode] int?,
+	[EstCurrCode] int?,
+	[PriIssPrcCurrCode] int?,
+	[COATypeCode] string,
+	[BALCode] string,
+	[CASCode] string,
+	[DFlag] int?,
+	[FilRsnCode] int?,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndCmpRef CLUSTERED(Code ASC)
+)
+DISTRIBUTED BY HASH (Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCmpRefIssue](
+	[Code] int,
+	[IssueID] int,
+	[IssueCode] int?,
+	[IssueTypeCode] string,
+	[IssueStatus] int?,
+	[IssueOrder] int?,
+	[IssueName] string,
+	[ListingTypeCode] string,
+	[Ticker] string,
+	[Cusip] string,
+	[ISIN] string,
+	[RIC] string,
+	[DisplayRIC] string,
+	[Sedol] string,
+	[ExchCode] string,
+	[ExchCtryCode] string,
+	[RegionCode] string,
+	[DFlag] int?,
+	[InstrPI] int?,
+	[QuotePI] int?,
+	[MostRecentSplit] float?,
+	[MostRecentSplitDt] DateTime?,
+	[ShPerListing] float?,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndCmpRefIssue CLUSTERED(Code ASC, IssueID ASC)
+)
+DISTRIBUTED BY HASH (Code, IssueID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCmpWebLink](
+	[Code] int,
+	[URLTypeCode] int,
+	[LastUpdDt] DateTime?,
+	[URL] string,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDCMPWEBLINK CLUSTERED(Code ASC, URLTypeCode ASC)
+)
+DISTRIBUTED BY HASH (Code, URLTypeCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCode](
+	[Type_] int,
+	[Code] int,
+	[Desc_] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDCODE CLUSTERED(Type_ ASC, Code ASC)
+)
+DISTRIBUTED BY HASH (Type_, Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCRASCSpec](
+	[Code] int,
+	[RasFldNameCode] int,
+	[GroupCode] int?,
+	[RasFldTypeCode] int?,
+	[Value_] float?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndCRASCSpec CLUSTERED(Code ASC, RasFldNameCode ASC)
+)
+DISTRIBUTED BY RANGE (Code, RasFldNameCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCRASISpec](
+	[Code] int,
+	[IssueOrder] int,
+	[RASFldNameCode] int,
+	[GroupCode] int?,
+	[RasFldTypeCode] int?,
+	[Value_] float?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndCRASISpec CLUSTERED(Code ASC, IssueOrder ASC, RASFldNameCode ASC)
+)
+DISTRIBUTED BY HASH (Code, IssueOrder, RASFldNameCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCRASPrCurr](
+	[Code] int,
+	[ISOCurCode] int,
+	[RepToPrcExRate] float?,
+	[ExRateDt] DateTime?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndCRASPrCurr CLUSTERED(Code ASC, ISOCurCode ASC)
+)
+DISTRIBUTED BY HASH (Code, ISOCurCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCSFFinVal](
+	[Code] int,
+	[PerEndDt] DateTime,
+	[PerEndYear] int,
+	[PerTypeCode] int,
+	[StmtDt] DateTime,
+	[StmtTypeCode] int,
+	[LineID] int,
+	[CalPerEndDt] DateTime?,
+	[CalStmtDt] DateTime?,
+	[Value_] float?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDCSFFINVAL CLUSTERED(Code ASC, PerEndDt ASC, PerTypeCode ASC, StmtDt ASC, StmtTypeCode ASC, LineID ASC)
+)
+PARTITIONED BY (PerEndYear)
+DISTRIBUTED BY HASH (Code, PerEndDt, PerTypeCode, StmtDt, StmtTypeCode, LineID);
+
+ALTER TABLE [dbo].[RKDFndCSFFinVal] ADD IF NOT EXISTS 
+	PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),
+	PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),
+	PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030)
+;
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCSFItem](
+	[Item] int,
+	[COA] string,
+	[StmtTypeCode] int?,
+	[Display] string,
+	[ItemPrecision] int?,
+	[Level_] string,
+	[Agg] int?,
+	[Desc_] string,
+	[Table_] string,
+	[DataType] string,
+	[IsCurrency] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDCSFITEM CLUSTERED(Item ASC)
+)
+DISTRIBUTED BY HASH (Item);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCSFItemSub](
+	[Code] int,
+	[PerTypeCode] int,
+	[StmtTypeCode] int,
+	[LineID] int,
+	[Item] int,
+	[StdCOA] string,
+	[Desc_] string,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDCSFITEMSUB CLUSTERED(Code ASC, PerTypeCode ASC, StmtTypeCode ASC, LineID ASC)
+)
+DISTRIBUTED BY RANGE (Code, PerTypeCode, StmtTypeCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCSFPerFiling](
+	[Code] int,
+	[PerEndDt] DateTime,
+	[PerTypeCode] int,
+	[StmtDt] DateTime,
+	[CalPerEndDt] DateTime?,
+	[CalStmtDt] DateTime?,
+	[FinalFiling] int?,
+	[OrigAnncDt] DateTime?,
+	[CurrRepCode] int?,
+	[CurrConvToCode] int?,
+	[CurrRepToConvExRate] float?,
+	[UnitsRepCode] string,
+	[UnitsConvToCode] string,
+	[AuditorCode] string,
+	[AudOpnCode] string,
+	[InterimNo] int?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDCSFPERFILING CLUSTERED(Code ASC, PerEndDt ASC, PerTypeCode ASC, StmtDt ASC)
+)
+DISTRIBUTED BY HASH (Code, PerEndDt, PerTypeCode, StmtDt);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCSFPeriod](
+	[Code] int,
+	[PerEndDt] DateTime,
+	[PerTypeCode] int,
+	[CalPerEndDt] DateTime?,
+	[Fyr] int?,
+	[FiscalMth] int?,
+	[InterimNo] int?,
+	[IsHybrid] int?,
+	[StkPrice] float?,
+	[StkCurrCode] int?,
+	[StkPrcDt] DateTime?,
+	[PrcToRepExRate] float?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDCSFPERIOD CLUSTERED(Code ASC, PerEndDt ASC, PerTypeCode ASC)
+)
+DISTRIBUTED BY HASH (Code, PerEndDt, PerTypeCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndCSFStmt](
+	[Code] int,
+	[PerEndDt] DateTime,
+	[PerEndYear] int,
+	[PerTypeCode] int,
+	[StmtDt] DateTime,
+	[StmtTypeCode] int,
+	[CalPerEndDt] DateTime?,
+	[CalStmtDt] DateTime?,
+	[CompStmtCode] int?,
+	[Flash] int?,
+	[PerLen] int?,
+	[PerLenCode] string,
+	[UpdTypeCode] string,
+	[Source] string,
+	[SourceDt] DateTime?,
+	[DocID] int?,
+	[DocIsInternal] int?,
+	[SysDt] DateTime?,
+	[StmtLastUpdDt] DateTime?,
+	[RepAcctStdCode] string,
+	[Consolidated] int?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDCSFSTMT CLUSTERED(Code ASC, PerEndDt ASC, PerTypeCode ASC, StmtDt ASC, StmtTypeCode ASC)
+)
+PARTITIONED BY (PerEndYear)
+DISTRIBUTED BY HASH (Code, PerEndDt, PerTypeCode, StmtDt, StmtTypeCode);
+
+ALTER TABLE [dbo].[RKDFndCSFStmt] ADD IF NOT EXISTS 
+	PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),
+	PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),
+	PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndDesc](
+	[Type_] int,
+	[Code] string,
+	[Desc_] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDDESC CLUSTERED(Type_ ASC, Code ASC)
+)
+DISTRIBUTED BY HASH (Type_, Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndInfo](
+	[Code] int,
+	[RepNo] string,
+	[Name_] string,
+	[Ticker] string,
+	[Cusip] string,
+	[ISIN] string,
+	[RIC] string,
+	[Sedol] string,
+	[ExchCode] string,
+	[RegionCode] string,
+	[CntryCode] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDINFO CLUSTERED(Code ASC)
+)
+DISTRIBUTED BY HASH (Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndSplitHist](
+	[IssueCode] int,
+	[StartDate] DateTime,
+	[EndDate] DateTime?,
+	[Factor] float?,
+	[CumAdjFactor] float?,
+	[LicFlag] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndSplitHist CLUSTERED(IssueCode ASC, StartDate ASC)
+)
+DISTRIBUTED BY HASH (IssueCode, StartDate);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndStdFinVal](
+	[Code] int,
+	[PerEndDt] DateTime,
+	[PerEndYear] int,
+	[PerTypeCode] int,
+	[StmtDt] DateTime,
+	[StmtTypeCode] int,
+	[Item] int,
+	[CalPerEndDt] DateTime?,
+	[CalStmtDt] DateTime?,
+	[Value_] float?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDSTDFINVAL CLUSTERED(Code ASC, PerEndDt ASC, PerTypeCode ASC, StmtDt ASC, StmtTypeCode ASC, Item ASC)
+)
+PARTITIONED BY (PerEndYear)
+DISTRIBUTED BY HASH (Code, PerEndDt, PerTypeCode, StmtDt, StmtTypeCode, Item);
+
+ALTER TABLE [dbo].[RKDFndStdFinVal] ADD IF NOT EXISTS 
+	PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),PARTITION(1988),
+	PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),PARTITION(1995),PARTITION(1996),
+	PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),PARTITION(2002),PARTITION(2003),PARTITION(2004),
+	PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),
+	PARTITION(2013),PARTITION(2014),PARTITION(2015),PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),
+	PARTITION(2021),PARTITION(2022),PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),
+	PARTITION(2029),PARTITION(2030)
+;
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndStdItem](
+	[Item] int,
+	[COA] string,
+	[StmtTypeCode] int?,
+	[LineID] int?,
+	[Level_] string,
+	[Agg] int?,
+	[ItemPrecision] int?,
+	[Display] string,
+	[Desc_] string,
+	[Table_] string,
+	[DataType] string,
+	[IsCurrency] int?,
+	[Adjust] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFndStdItem CLUSTERED(Item ASC)
+)
+DISTRIBUTED BY HASH (Item);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndStdPerFiling](
+	[Code] int,
+	[PerEndDt] DateTime,
+	[PerTypeCode] int,
+	[StmtDt] DateTime,
+	[CalPerEndDt] DateTime?,
+	[CalStmtDt] DateTime?,
+	[FinalFiling] int?,
+	[OrigAnncDt] DateTime?,
+	[CurrRepCode] int?,
+	[CurrConvToCode] int?,
+	[CurrRepToConvExRate] float?,
+	[UnitsRepCode] string,
+	[UnitsConvToCode] string,
+	[AuditorCode] string,
+	[AudOpnCode] string,
+	[InterimNo] int?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDSTDPERFILING CLUSTERED(Code ASC, PerEndDt ASC, PerTypeCode ASC, StmtDt ASC)
+)
+DISTRIBUTED BY HASH (Code, PerEndDt, PerTypeCode, StmtDt);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndStdPeriod](
+	[Code] int,
+	[PerEndDt] DateTime,
+	[PerTypeCode] int,
+	[CalPerEndDt] DateTime?,
+	[Fyr] int?,
+	[FiscalMth] int?,
+	[InterimNo] int?,
+	[IsHybrid] int?,
+	[StkPrice] float?,
+	[StkCurrCode] int?,
+	[StkPrcDt] DateTime?,
+	[PrcToRepExRate] float?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDSTDPERIOD CLUSTERED(Code ASC, PerEndDt ASC, PerTypeCode ASC)
+)
+DISTRIBUTED BY HASH (Code, PerEndDt, PerTypeCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDFndStdStmt](
+	[Code] int,
+	[PerEndDt] DateTime,
+	[PerEndYear] int,
+	[PerTypeCode] int,
+	[StmtDt] DateTime,
+	[StmtTypeCode] int,
+	[CalPerEndDt] DateTime?,
+	[CalStmtDt] DateTime?,
+	[CompStmtCode] int?,
+	[Flash] int?,
+	[PerLen] int?,
+	[PerLenCode] string,
+	[UpdTypeCode] string,
+	[Source] string,
+	[SourceDt] DateTime?,
+	[DocID] int?,
+	[DocIsInternal] int?,
+	[SysDt] DateTime?,
+	[StmtLastUpdDt] DateTime?,
+	[RepAcctStdCode] string,
+	[Consolidated] int?,
+	[STECFlag] int?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDFNDSTDSTMT CLUSTERED(Code ASC, PerEndDt ASC, PerTypeCode ASC, StmtDt ASC, StmtTypeCode ASC)
+)
+PARTITIONED BY (PerEndYear)
+DISTRIBUTED BY HASH (Code, PerEndDt, PerTypeCode, StmtDt, StmtTypeCode);
+
+ALTER TABLE [dbo].[RKDFndStdStmt] ADD IF NOT EXISTS 
+	PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),
+	PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),
+	PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDPIT2FndCmpData](
+	[Code] int,
+	[PointStartDt] DateTime,
+	[PointStartYear] int,
+	[Item] int,
+	[PointEndDt] DateTime?,
+	[Value_] string,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDPIT2FndCmpData CLUSTERED(Code ASC, PointStartDt ASC, Item ASC)
+)
+PARTITIONED BY (PointStartYear)
+DISTRIBUTED BY HASH (Code, PointStartDt, Item);
+
+ALTER TABLE [dbo].[RKDPIT2FndCmpData] ADD IF NOT EXISTS 
+	PARTITION(1960),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDPIT2FndCmpIssData](
+	[Code] int,
+	[IssueID] int,
+	[PointStartDt] DateTime,
+	[PointStartYear] int,
+	[Item] int,
+	[PointEndDt] DateTime?,
+	[Value_] string,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDPIT2FndCmpIssData CLUSTERED(Code ASC, IssueID ASC, PointStartDt ASC, Item ASC)
+)
+PARTITIONED BY (PointStartYear)
+DISTRIBUTED BY HASH (Code, IssueID, PointStartDt, Item);
+
+ALTER TABLE [dbo].[RKDPIT2FndCmpIssData] ADD IF NOT EXISTS 
+	PARTITION(1960),PARTITION(1980),PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),
+	PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),
+	PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDPIT2FndCmpRef](
+	[Code] int,
+	[Orgid] string,
+	[Fproxref] string,
+	[IRSNo] string,
+	[CIKNo] string,
+	[CmpName] string,
+	[CmpStatus] int?,
+	[CmpTypeCode] string,
+	[COATypeCode] string,
+	[BSDCode] string,
+	[CFMCode] string,
+	[FilingStatusCode] int?,
+	[RelCode] int?,
+	[AuditorCode] string,
+	[Dflag] int?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDPIT2FndCmpRef CLUSTERED(Code ASC)
+)
+DISTRIBUTED BY HASH (Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDPIT2FndCmpRefIss](
+	[Code] int,
+	[IssueID] int,
+	[IssueCode] int,
+	[IssueTypeCode] string,
+	[IssueOrder] int?,
+	[IssueStatus] int?,
+	[IssueName] string,
+	[ListingTypeCode] string,
+	[ExchCode] string,
+	[ExchCtryCode] string,
+	[RegionCode] string,
+	[Cusip] string,
+	[DisplayRic] string,
+	[ISIN] string,
+	[RIC] string,
+	[Sedol] string,
+	[Ticker] string,
+	[ISOCurrCode] string,
+	[ParVal] float?,
+	[ShAuth] float?,
+	[ShOut] float?,
+	[ShPerList] float?,
+	[IssueFloat] float?,
+	[Votes] float?,
+	[ConvFactor] float?,
+	[Public_] int?,
+	[Preferred] int?,
+	[ExpectedIPO] int?,
+	[IPODt] DateTime?,
+	[Split] float?,
+	[SplitFactor] float?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDPIT2FndCmpRefIss CLUSTERED(Code ASC, IssueID ASC)
+)
+DISTRIBUTED BY HASH (Code, IssueID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDPIT2FndExchRate](
+	[ISOCurrFromCode] int,
+	[ISOCurrToCode] int,
+	[Date_] DateTime,
+	[Rate] float?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDPIT2FndExchRate CLUSTERED(ISOCurrFromCode ASC, ISOCurrToCode ASC, Date_ ASC)
+)
+DISTRIBUTED BY HASH (ISOCurrFromCode, ISOCurrToCode, Date_);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDPIT2FndPrc](
+	[Code] int,
+	[IssueID] int,
+	[PrcEndDt] DateTime,
+	[PrcEndYear] int,
+	[ISOCurrCode] string,
+	[CurrMultiplier] int?,
+	[CDate] DateTime?,
+	[CPrice] float?,
+	[HDate] DateTime?,
+	[HPrice] float?,
+	[LDate] DateTime?,
+	[LPrice] float?,
+	[ODate] DateTime?,
+	[OPrice] float?,
+	[Volume] float?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDPIT2FndPrc CLUSTERED(Code ASC, IssueID ASC, PrcEndDt ASC)
+)
+PARTITIONED BY (PrcEndYear)
+DISTRIBUTED BY HASH (Code, IssueID, PrcEndDt);
+
+ALTER TABLE [dbo].[RKDPIT2FndPrc] ADD IF NOT EXISTS 
+	PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),
+	PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDPIT2FndStdFinVal](
+	[Code] int,
+	[PerTypeCode] int,
+	[PointDt] DateTime,
+	[PerEndDt] DateTime,
+	[PerEndYear] int,
+	[Item] int,
+	[ItemFlgCode] int?,
+	[StmtTypeCode] int?,
+	[Value_] float?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDPIT2FndStdFinVal CLUSTERED(Code ASC, PerTypeCode ASC, PointDt ASC, PerEndDt ASC, Item ASC)
+)
+PARTITIONED BY (PerEndYear)
+DISTRIBUTED BY HASH (Code, PerTypeCode, PointDt, PerEndDt, Item);
+
+ALTER TABLE [dbo].[RKDPIT2FndStdFinVal] ADD IF NOT EXISTS 
+	PARTITION(1981), PARTITION(1982), PARTITION(1983), PARTITION(1984), PARTITION(1985), PARTITION(1986), PARTITION(1987), PARTITION(1988), 
+	PARTITION(1989), PARTITION(1990), PARTITION(1991), PARTITION(1992), PARTITION(1993), PARTITION(1994), PARTITION(1995), PARTITION(1996), 
+	PARTITION(1997), PARTITION(1998), PARTITION(1999), PARTITION(2000), PARTITION(2001), PARTITION(2002), PARTITION(2003), PARTITION(2004), 
+	PARTITION(2005), PARTITION(2006), PARTITION(2007), PARTITION(2008), PARTITION(2009), PARTITION(2010), PARTITION(2011), PARTITION(2012),
+	PARTITION(2013), PARTITION(2014), PARTITION(2015), PARTITION(2016), PARTITION(2017), PARTITION(2018), PARTITION(2019), PARTITION(2020)
+;
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDPIT2FndStdPeriod](
+	[Code] int,
+	[PerTypeCode] int,
+	[PointDt] DateTime,
+	[PerEndDt] DateTime,
+	[StmtDt] DateTime?,
+	[CalStmtDt] DateTime?,
+	[Fyr] int?,
+	[FiscalMth] int?,
+	[InterimNo] int?,
+	[StmtFlgCode] int?,
+	[AudOpnCode] string,
+	[ISOCurrCode] string,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDPIT2FndStdPeriod CLUSTERED(Code ASC, PerTypeCode ASC, PointDt ASC, PerEndDt ASC)
+)
+DISTRIBUTED BY HASH (Code, PerTypeCode, PointDt, PerEndDt);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDPIT2FndStdPrdDt](
+	[Code] int,
+	[PerTypeCode] int,
+	[PerEndDt] DateTime,
+	[CalPeriod] int,
+	[ActPerEndDt] DateTime?,
+	[PrelimDt] DateTime?,
+	[FinalDt] DateTime?,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDPIT2FndStdPrdDt CLUSTERED(Code ASC, PerTypeCode ASC, PerEndDt ASC, CalPeriod ASC)
+)
+DISTRIBUTED BY HASH (Code, PerTypeCode, PerEndDt, CalPeriod);
+
+CREATE TABLE IF NOT EXISTS [dbo].[RKDPIT2FndStdStmt](
+	[Code] int,
+	[PerTypeCode] int,
+	[StmtTypeCode] int,
+	[PointDt] DateTime,
+	[PerEndDt] DateTime,
+	[PerEndYear] int,
+	[NoPd] int?,
+	[PerLen] int?,
+	[PerLenCode] int?,
+	[UpdTypeCode] string,
+	[OrigAnncDt] DateTime?,
+	[Source] string,
+	[SourceDt] DateTime?,
+	[SysDt] DateTime?,
+	[RepAcctStdCode] string,
+	[LicFlag] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_RKDPIT2FndStdStmt CLUSTERED(Code ASC, PerTypeCode ASC, StmtTypeCode ASC, PointDt ASC, PerEndDt ASC)
+)
+PARTITIONED BY (PerEndYear)
+DISTRIBUTED BY HASH (Code, PerTypeCode, StmtTypeCode, PointDt, PerEndDt);
+
+ALTER TABLE [dbo].[RKDPIT2FndStdStmt] ADD IF NOT EXISTS 
+PARTITION(1981),PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),
+	PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),PARTITION(1994),
+	PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),PARTITION(2000),PARTITION(2001),
+	PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),PARTITION(2006),PARTITION(2007),PARTITION(2008),
+	PARTITION(2009),PARTITION(2010),PARTITION(2011),PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+CREATE TABLE IF NOT EXISTS [dbo].[SDDates](
+	[Code] int,
+	[Date_] DateTime,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_sddates CLUSTERED(Code ASC, Date_ ASC)
+)
+DISTRIBUTED BY HASH (Code, Date_);
+
+CREATE TABLE IF NOT EXISTS [dbo].[SDDates_v](
+	[Code] int,
+	[Date_] DateTime,
+	[ExchCode] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_SdDates_v CLUSTERED(Code ASC, Date_ ASC, ExchCode ASC)
+)
+DISTRIBUTED BY HASH (Code, Date_, ExchCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[SDExchInfo_v](
+	[ExchCode] int,
+	[ExchAbbr] string,
+	[ExchName] string,
+	[CntryName] string,
+	[IsoCcy] string,
+	[IsoCtry] string,
+	[HolType] string,
+	[Define1] string,
+	[Define2] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_SdExchInfo_v CLUSTERED(ExchCode ASC)
+)
+DISTRIBUTED BY HASH (ExchCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[SDInfo](
+	[Name] string,
+	[Code] int,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_sdinfo CLUSTERED(Code ASC)
+)
+DISTRIBUTED BY HASH (Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[SDInfo_v](
+	[Code] int,
+	[Name] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_SdInfo_v CLUSTERED(Code ASC)
+)
+DISTRIBUTED BY HASH (Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[SecMap](
+	[SecCode] int,
+	[VenType] int,
+	[VenCode] int?,
+	[Rank] int,
+	[Exchange] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_SecMap CLUSTERED(SecCode ASC, VenType ASC, Rank ASC)
+)
+DISTRIBUTED BY HASH (SecCode, VenType, Rank);
+
+CREATE TABLE IF NOT EXISTS [dbo].[SecMapX](
+	[SecCode] int,
+	[VenType] int,
+	[VenCode] int?,
+	[Rank] int,
+	[Exchange] int?,
+	[StartDate] DateTime?,
+	[EndDate] DateTime?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_SecMapX CLUSTERED(SecCode ASC, VenType ASC, Rank ASC)
+)
+DISTRIBUTED BY HASH (SecCode, VenType, Rank);
+
+CREATE TABLE IF NOT EXISTS [dbo].[SecMstr](
+	[SecCode] int,
+	[Id] string,
+	[Type_] int,
+	[IdBase] string,
+	[IdSeq] int?,
+	[Name] string,
+	[Country] string,
+	[Vendors] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_SecMstr CLUSTERED(SecCode ASC, Type_ ASC)
+)
+DISTRIBUTED BY HASH (SecCode, Type_);
+
+
+CREATE TABLE IF NOT EXISTS [dbo].[SecMstrX](
+	[SecCode] int,
+	[Id] string,
+	[Type_] int,
+	[IdBase] string,
+	[IdSeq] int?,
+	[Name] string,
+	[Country] string,
+	[Vendors1] long?,
+	[Vendors2] long?,
+	[Vendors3] long?,
+	[Vendors4] long?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_SecMstrX CLUSTERED(SecCode ASC, Type_ ASC)
+)
+DISTRIBUTED BY HASH (SecCode, Type_);
+
+CREATE TABLE IF NOT EXISTS [dbo].[SecVenType](
+	[VenType] int,
+	[VenId] string,
+	[VenName] string,
+	[MaskNum] int?,
+	[MaskValue] long?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_SECVENTYPE CLUSTERED(VenType ASC)
+)
+DISTRIBUTED BY HASH (VenType);
+
+CREATE TABLE IF NOT EXISTS [dbo].[SPGCode](
+	[Type_] int,
+	[Code] string,
+	[Desc_] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_Spgcode CLUSTERED(Type_ ASC, Code ASC)
+)
+DISTRIBUTED BY HASH (Type_, Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TMCCode](
+	[Type_] int,
+	[Code] int,
+	[Desc_] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TMCCode CLUSTERED(Type_ ASC, Code ASC)
+)
+DISTRIBUTED BY HASH (Type_, Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TMCRegnCntryMap](
+	[Lvl5PermId] int,
+	[Lvl5ISOCntry] string,
+	[Lvl4PermId] int?,
+	[Lvl3PermId] int?,
+	[Lvl2PermId] int?,
+	[Lvl1PermId] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TMCRegnCntryMap CLUSTERED(Lvl5PermId ASC)
+)
+DISTRIBUTED BY HASH (Lvl5PermId);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TQAExch](
+	[ExchCode] int,
+	[CompExchCode] int?,
+	[TQAExch] string,
+	[Desc_] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TqaExch CLUSTERED(ExchCode ASC)
+)
+DISTRIBUTED BY HASH (ExchCode);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TREActChg](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[PerEndDate] DateTime,
+	[FYEMonth] int,
+	[WinType] int,
+	[WinLength] int,
+	[WinEndDate] DateTime?,
+	[WinEndOffset] int?,
+	[ActivationDate] DateTime?,
+	[ActGrowth] float?,
+	[ActStability] float?,
+	[UnitType] string,
+	[DefActChg] float?,
+	[DefCurrPermID] int?,
+	[DefScale] float?,
+	[NormActChg] float?,
+	[NormCurrPermID] int?,
+	[NormScale] float?,
+	[NormSplitFactor] float?,
+	[NormCurrAdj] float?,
+	[ActChgPct] float?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TREActChg CLUSTERED(PerEndDate ASC, EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC, FYEMonth ASC, WinType ASC, WinLength ASC)
+)
+DISTRIBUTED BY HASH (PerEndDate, EstPermID, Measure, IsParent, PerType, FYEMonth, WinType, WinLength);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TREActGoFwd](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[PerEndDate] DateTime,
+	[FYEMonth] int,
+	[EffectiveDate] DateTime,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[AnnounceDate] DateTime?,
+	[AnnounceOffset] int?,
+	[UnitType] string,
+	[DefActValue] float?,
+	[DefCurrPermID] int?,
+	[DefScale] float?,
+	[DefCurrAdj] float?,
+	[NormActValue] float?,
+	[NormCurrPermID] int?,
+	[NormScale] float?,
+	[NormSplitFactor] float?,
+	[NormCurrAdj] float?,
+	[AsContribActValue] float?,
+	[AsContribCurrPermID] int?,
+	[AsContribScale] float?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TREActGoFwd CLUSTERED(EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC, PerEndDate ASC, FYEMonth ASC)
+)
+DISTRIBUTED BY HASH (EstPermID, Measure, IsParent, PerType, PerEndDate, FYEMonth);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TREActRpt](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[PerEndDate] DateTime,
+	[FYEMonth] int,
+	[EffectiveDate] DateTime,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[AnnounceDate] DateTime?,
+	[AnnounceOffset] int?,
+	[UnitType] string,
+	[DefActValue] float?,
+	[DefCurrPermID] int?,
+	[DefScale] float?,
+	[DefCurrAdj] float?,
+	[NormActValue] float?,
+	[NormCurrPermID] int?,
+	[NormScale] float?,
+	[NormSplitFactor] float?,
+	[NormCurrAdj] float?,
+	[AsContribActValue] float?,
+	[AsContribCurrPermID] int?,
+	[AsContribScale] float?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TREActRpt CLUSTERED(EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC, PerEndDate ASC, FYEMonth ASC)
+)
+DISTRIBUTED BY HASH (EstPermID, Measure, IsParent, PerType, PerEndDate, FYEMonth);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TREActRst](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[PerEndDate] DateTime,
+	[FYEMonth] int,
+	[EffectiveDate] DateTime,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[AnnounceDate] DateTime?,
+	[AnnounceOffset] int?,
+	[UnitType] string,
+	[DefActValue] float?,
+	[DefCurrPermID] int?,
+	[DefScale] float?,
+	[DefCurrAdj] float?,
+	[NormActValue] float?,
+	[NormCurrPermID] int?,
+	[NormScale] float?,
+	[NormSplitFactor] float?,
+	[NormCurrAdj] float?,
+	[AsContribActValue] float?,
+	[AsContribCurrPermID] int?,
+	[AsContribScale] float?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TREActRst CLUSTERED(EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC, PerEndDate ASC, FYEMonth ASC)
+)
+DISTRIBUTED BY HASH (EstPermID, Measure, IsParent, PerType, PerEndDate, FYEMonth);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TREActSurpWin](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[PerEndDate] DateTime,
+	[FYEMonth] int,
+	[WinType] int,
+	[WinLength] int,
+	[WinEndDate] DateTime?,
+	[WinEndOffset] int?,
+	[ActivationDate] DateTime?,
+	[DefActSurprise] float?,
+	[DefActSUEScore] float?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TREActSurpWin CLUSTERED(PerEndDate ASC, EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC, FYEMonth ASC, WinType ASC, WinLength ASC)
+)
+DISTRIBUTED BY HASH (PerEndDate, EstPermID, Measure, IsParent, PerType, FYEMonth, WinType, WinLength);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TRECode](
+	[CodeType] int,
+	[Code] string,
+	[Description] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TRECode CLUSTERED(CodeType ASC, Code ASC)
+)
+DISTRIBUTED BY HASH (CodeType, Code);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TREInfo](
+	[EstPermID] long,
+	[EffectiveDate] DateTime?,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[IBESTicker] string,
+	[OrgPermID] long?,
+	[FilingPermID] long?,
+	[RepNo] string,
+	[InstrPermID] long?,
+	[QuotePermID] long?,
+	[DefCurrPermID] int?,
+	[DefPerCurrPermID] int?,
+	[DefTPCurrPermID] int?,
+	[ExpCurrPermID] int?,
+	[PrefMeasure] int?,
+	[PrefMeasureIsParent] bool?,
+	[CtryPermID] int?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TREInfo CLUSTERED(EstPermID ASC)
+)
+DISTRIBUTED BY HASH (EstPermID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TREOrgNotesAper](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[OrgNoteCategory] string,
+	[OrgNoteType] int,
+	[EffectiveDate] DateTime,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[OrgNoteEndDate] DateTime?,
+	[OrgNoteEndOffset] int?,
+	[UnitType] string,
+	[DefCurrPermID] int?,
+	[DefScale] float?,
+	[DefCurrAdj] float?,
+	[DefNoteValue] float?,
+	[NormCurrPermID] int?,
+	[NormScale] float?,
+	[NormSplitFactor] float?,
+	[NormCurrAdj] float?,
+	[NormNoteValue] float?,
+	[AsContribCurrPermID] int?,
+	[AsContribScale] float?,
+	[AsContribNoteValue] float?,
+	[OrgNoteText] string,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TREOrgNotesAper CLUSTERED(EffectiveDate ASC, EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC, OrgNoteCategory ASC, OrgNoteType ASC)
+)
+DISTRIBUTED BY HASH (EffectiveDate, EstPermID, Measure, IsParent, PerType, OrgNoteCategory, OrgNoteType);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TREOrgNotesHzn](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[PerLength] int,
+	[OrgNoteCategory] string,
+	[OrgNoteType] int,
+	[EffectiveDate] DateTime,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[OrgNoteEndDate] DateTime?,
+	[OrgNoteEndOffset] int?,
+	[UnitType] string,
+	[DefCurrPermID] int?,
+	[DefScale] float?,
+	[DefCurrAdj] float?,
+	[DefNoteValue] float?,
+	[NormCurrPermID] int?,
+	[NormScale] float?,
+	[NormSplitFactor] float?,
+	[NormCurrAdj] float?,
+	[NormNoteValue] float?,
+	[AsContribCurrPermID] int?,
+	[AsContribScale] float?,
+	[AsContribNoteValue] float?,
+	[OrgNoteText] string,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TREOrgNotesHzn CLUSTERED(EffectiveDate ASC, EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC, PerLength ASC, OrgNoteCategory ASC, OrgNoteType ASC)
+)
+DISTRIBUTED BY HASH (EffectiveDate, EstPermID, Measure, IsParent, PerType, PerLength, OrgNoteCategory, OrgNoteType);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TREOrgNotesPer](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[PerEndDate] DateTime,
+	[FYEMonth] int,
+	[OrgNoteCategory] string,
+	[OrgNoteType] int,
+	[EffectiveDate] DateTime,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[OrgNoteEndDate] DateTime?,
+	[OrgNoteEndOffset] int?,
+	[UnitType] string,
+	[DefCurrPermID] int?,
+	[DefScale] float?,
+	[DefCurrAdj] float?,
+	[DefNoteValue] float?,
+	[NormCurrPermID] int?,
+	[NormScale] float?,
+	[NormSplitFactor] float?,
+	[NormCurrAdj] float?,
+	[NormNoteValue] float?,
+	[AsContribCurrPermID] int?,
+	[AsContribScale] float?,
+	[AsContribNoteValue] float?,
+	[OrgNoteText] string,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TREOrgNotesPer CLUSTERED(EffectiveDate ASC, EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC, PerEndDate ASC, FYEMonth ASC, OrgNoteCategory ASC, OrgNoteType ASC)
+)
+DISTRIBUTED BY HASH (EffectiveDate, EstPermID, Measure, IsParent, PerType, PerEndDate, FYEMonth, OrgNoteCategory, OrgNoteType);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TREPerAdvance](
+	[EstPermID] long,
+	[Periodicity] int,
+	[PerType] int,
+	[PerEndDate] DateTime,
+	[PerLength] int,
+	[FYEMonth] int,
+	[EffectiveDate] DateTime?,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TREPerAdvance CLUSTERED(PerEndDate ASC, EstPermID ASC, Periodicity ASC, PerType ASC, PerLength ASC, FYEMonth ASC)
+)
+DISTRIBUTED BY HASH (PerEndDate, EstPermID, Periodicity, PerType, PerLength, FYEMonth);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TREPerIndex](
+	[EstPermID] long,
+	[Periodicity] int,
+	[PerType] int,
+	[PerEndDate] DateTime,
+	[PerLength] int,
+	[FYEMonth] int,
+	[EffectiveDate] DateTime?,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[FiscalYear] int?,
+	[FiscalIndex] int?,
+	[PerIndex] int?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TREPerIndex CLUSTERED(PerEndDate ASC, EstPermID ASC, Periodicity ASC, PerType ASC, PerLength ASC, FYEMonth ASC)
+)
+DISTRIBUTED BY HASH (PerEndDate, EstPermID, Periodicity, PerType, PerLength, FYEMonth);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TRERecSum](
+	[EstPermID] long,
+	[EffectiveDate] DateTime,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[IsRealtime] bool?,
+	[HighRec] int?,
+	[LowRec] int?,
+	[MeanRec] float?,
+	[MedianRec] float?,
+	[NumRecs] int?,
+	[NumNoRec] int?,
+	[NumRecs1] int?,
+	[NumRecs2] int?,
+	[NumRecs3] int?,
+	[NumRecs4] int?,
+	[NumRecs5] int?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TRERecSum CLUSTERED(EffectiveDate ASC, EstPermID ASC)
+)
+DISTRIBUTED BY HASH (EffectiveDate, EstPermID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TRESmartClusterPer](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[PerEndDate] DateTime,
+	[FYEMonth] int,
+	[EffectiveDate] DateTime,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[IsRealTime] bool?,
+	[ClusterDetectDate] DateTime?,
+	[ClusterDetectOffset] int?,
+	[ClusterEstsDown] int?,
+	[ClusterEstsUp] int?,
+	[PctChgMean] float?,
+	[NumClusterEsts] int?,
+	[DefClusterMeanEst] float?,
+	[DefAvgRevisionEst] float?,
+	[DefCurrPermID] int?,
+	[DefScale] float?,
+	[UnitType] string,
+	[NormClusterMeanEst] float?,
+	[NormAvgRevisionEst] float?,
+	[NormCurrPermID] int?,
+	[NormScale] float?,
+	[NormSplitFactor] float?,
+	[NormCurrAdj] float?,
+	[AvgRevisionPct] float?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TRESmartClusterPer CLUSTERED(EffectiveDate ASC, EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC, PerEndDate ASC, FYEMonth ASC)
+)
+DISTRIBUTED BY HASH (EffectiveDate, EstPermID, Measure, IsParent, PerType, PerEndDate, FYEMonth);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TRESmartSumPer](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[PerEndDate] DateTime,
+	[FYEMonth] int,
+	[EffectiveDate] DateTime,
+	[EffectiveYear] int,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[IsRealtime] bool?,
+	[DefSmartEst] float?,
+	[DefPreSurprise] float?,
+	[DefCurrPermID] int?,
+	[DefScale] float?,
+	[UnitType] string,
+	[NormSmartEst] float?,
+	[NormPreSurprise] float?,
+	[NormCurrPermID] int?,
+	[NormScale] float?,
+	[NormSplitFactor] float?,
+	[NormCurrAdj] float?,
+	[PreSurpriseFlag] int?,
+	[PreSurprisePct] float?,
+	[NumIncEsts] int?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TRESmartSumPer CLUSTERED(EffectiveDate ASC, EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC, PerEndDate ASC, FYEMonth ASC)
+)
+PARTITIONED BY (EffectiveYear)
+DISTRIBUTED BY HASH (EffectiveDate, EstPermID, Measure, IsParent, PerType, PerEndDate, FYEMonth);
+
+ALTER TABLE [dbo].[TRESmartSumPer] ADD IF NOT EXISTS 
+	PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),
+	PARTITION(2016),PARTITION(2017),PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),
+	PARTITION(2023),PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),
+	PARTITION(2030);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TRESumAper](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[EffectiveDate] DateTime,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[IsRealtime] bool?,
+	[DefStdDev] float?,
+	[DefHighEst] float?,
+	[DefLowEst] float?,
+	[DefMeanEst] float?,
+	[DefMedianEst] float?,
+	[DefCurrPermID] int?,
+	[DefScale] float?,
+	[UnitType] string,
+	[NormStdDev] float?,
+	[NormHighEst] float?,
+	[NormLowEst] float?,
+	[NormMeanEst] float?,
+	[NormMedianEst] float?,
+	[NormCurrPermID] int?,
+	[NormScale] float?,
+	[NormSplitFactor] float?,
+	[NormCurrAdj] float?,
+	[MarginPct] float?,
+	[NumIncEsts] int?,
+	[NumEsts] int?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TRESumAper CLUSTERED(EffectiveDate ASC, EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC)
+)
+DISTRIBUTED BY HASH (EffectiveDate, EstPermID, Measure, IsParent, PerType);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TRESumHzn](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[PerLength] int,
+	[EffectiveDate] DateTime,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[IsRealtime] bool?,
+	[DefStdDev] float?,
+	[DefHighEst] float?,
+	[DefLowEst] float?,
+	[DefMeanEst] float?,
+	[DefMedianEst] float?,
+	[DefCurrPermID] int?,
+	[DefScale] float?,
+	[UnitType] string,
+	[NormStdDev] float?,
+	[NormHighEst] float?,
+	[NormLowEst] float?,
+	[NormMeanEst] float?,
+	[NormMedianEst] float?,
+	[NormCurrPermID] int?,
+	[NormScale] float?,
+	[NormSplitFactor] float?,
+	[NormCurrAdj] float?,
+	[MarginPct] float?,
+	[NumIncEsts] int?,
+	[NumEsts] int?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TRESumHzn CLUSTERED(EffectiveDate ASC, EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC, PerLength ASC)
+)
+DISTRIBUTED BY HASH (EffectiveDate, EstPermID, Measure, IsParent, PerType, PerLength);
+
+CREATE TABLE IF NOT EXISTS [dbo].[TRESumPer](
+	[EstPermID] long,
+	[Measure] int,
+	[IsParent] bool,
+	[PerType] int,
+	[PerEndDate] DateTime,
+	[FYEMonth] int,
+	[EffectiveDate] DateTime,
+	[EffectiveDateYear] int,
+	[EffectiveOffset] int?,
+	[ExpireDate] DateTime?,
+	[ExpireOffset] int?,
+	[ActivationDate] DateTime?,
+	[IsRealtime] bool?,
+	[DefStdDev] float?,
+	[DefHighEst] float?,
+	[DefLowEst] float?,
+	[DefMeanEst] float?,
+	[DefMedianEst] float?,
+	[DefCurrPermID] int?,
+	[DefScale] float?,
+	[UnitType] string,
+	[NormStdDev] float?,
+	[NormHighEst] float?,
+	[NormLowEst] float?,
+	[NormMeanEst] float?,
+	[NormMedianEst] float?,
+	[NormCurrPermID] int?,
+	[NormScale] float?,
+	[NormSplitFactor] float?,
+	[NormCurrAdj] float?,
+	[MarginPct] float?,
+	[NumIncEsts] int?,
+	[NumEsts] int?,
+	[RegionPermID] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_TRESumPer CLUSTERED(EstPermID ASC, Measure ASC, IsParent ASC, PerType ASC, PerEndDate ASC, FYEMonth ASC)
+)
+PARTITIONED BY (EffectiveDateYear)
+DISTRIBUTED BY HASH (EstPermID, Measure, IsParent, PerType, PerEndDate, FYEMonth);
+
+ALTER TABLE [dbo].[TRESumPer] ADD IF NOT EXISTS 
+	PARTITION(1970),PARTITION(1971),PARTITION(1972),PARTITION(1973),PARTITION(1974),PARTITION(1975),
+	PARTITION(1976),PARTITION(1977),PARTITION(1978),PARTITION(1979),PARTITION(1980),PARTITION(1981),
+	PARTITION(1982),PARTITION(1983),PARTITION(1984),PARTITION(1985),PARTITION(1986),PARTITION(1987),
+	PARTITION(1988),PARTITION(1989),PARTITION(1990),PARTITION(1991),PARTITION(1992),PARTITION(1993),
+	PARTITION(1994),PARTITION(1995),PARTITION(1996),PARTITION(1997),PARTITION(1998),PARTITION(1999),
+	PARTITION(2000),PARTITION(2001),PARTITION(2002),PARTITION(2003),PARTITION(2004),PARTITION(2005),
+	PARTITION(2006),PARTITION(2007),PARTITION(2008),PARTITION(2009),PARTITION(2010),PARTITION(2011),
+	PARTITION(2012),PARTITION(2013),PARTITION(2014),PARTITION(2015),PARTITION(2016),PARTITION(2017),
+	PARTITION(2018),PARTITION(2019),PARTITION(2020),PARTITION(2021),PARTITION(2022),PARTITION(2023),
+	PARTITION(2024),PARTITION(2025),PARTITION(2026),PARTITION(2027),PARTITION(2028),PARTITION(2029),PARTITION(2030)
+;
+
+CREATE TABLE IF NOT EXISTS [dbo].[UPDPrimCode](
+	[UpdateID] int,
+	[UpdateName] string,
+	[Region] string,
+	[Exchange] string,
+	[Frequency] string,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_UPDPrimCode CLUSTERED(UpdateID ASC)
+)
+DISTRIBUTED BY HASH (UpdateID);
+
+CREATE TABLE IF NOT EXISTS [dbo].[UPDPrimStatus](
+	[UpdateID] int,
+	[MarketDate] DateTime,
+	[IsComplete] int?,
+	[InsertDateTime] DateTime?,
+	INDEX pkey_UPDPrimStatus CLUSTERED(UpdateID ASC, MarketDate ASC)
+)
+DISTRIBUTED BY HASH (UpdateID, MarketDate);

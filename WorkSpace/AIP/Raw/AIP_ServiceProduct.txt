@@ -1,0 +1,1 @@
+Id:string,InsertDateTime:datetime,IsDeleted:bool,LastModifiedTimeStamp:datetime,Name:string,ServiceId:string,Title:string,Type:string,Version:string

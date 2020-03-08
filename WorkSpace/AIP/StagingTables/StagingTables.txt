@@ -1,0 +1,7 @@
+.create table CSP_AIP_AzureCustomAttribute_Staging(Id:string,Name:string,Value:string,Version:string) with(folder="\\InternalUse\\Staging")
+.create table CSP_AIP_AzureProductMeter_Staging(Eligibility:string,ExclusionDetail:string,Id:string,IsActive:bool,IsRestricted:bool,Name:string,PartNumber:int,SkuId:string,State:string,Type:string,TypeDescription:string,UnitOfMeasure:string,Version:string) with(folder="\\InternalUse\\Staging")
+.create table CSP_AIP_AzureProductPrice_Staging(ArmRegionName:string,CurrencyCode:string,EffectiveStartDate:datetime,Id:string,IsPrimaryMeterRegion:bool,Location:string,MeterId:string,PartNumber:string,ReservationTerm:string,RetailPrice:real,SkuId:string,TierMinimumUnits:real,Type:string,UnitPrice:real,Version:string) with(folder="\\InternalUse\\Staging")
+.create table CSP_AIP_AzureProductSku_Staging(CaymanSkuId:string,Id:string,Name:string,ProductId:string,Title:string,Version:string) with(folder="\\InternalUse\\Staging")
+.create table CSP_AIP_AzureService_Staging(Id:string,LastModifiedTimeStamp:datetime,Name:string,Platform:string,ServiceFamilyId:int,Version:string) with(folder="\\InternalUse\\Staging")
+.create table CSP_AIP_AzureServiceFamily_Staging(Id:int,Name:string) with(folder="\\InternalUse\\Staging")
+.create table CSP_AIP_AzureServiceProduct_Staging(Id:string,IsDeleted:bool,LastModifiedTimeStamp:datetime,Name:string,ServiceId:string,Title:string,Type:string,Version:string) with(folder="\\InternalUse\\Staging")

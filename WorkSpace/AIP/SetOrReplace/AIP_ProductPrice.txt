@@ -1,0 +1,11 @@
+.set-or-replace AIP_CSP_ProductPrice  <| 
+   AIP_CSP_ProductPrice_Staging
+   | extend InsertDateTime = now()
+   |project ArmRegionName,CurrencyCode,EffectiveStartDate,Id,InsertDateTime,IsPrimaryMeterRegion,Location,MeterId,PartNumber,ReservationTerm,RetailPrice,SkuId,TierMinimumUnits,Type,UnitPrice,Version
+
+   
+.append AIP_CSP_ProductPrice with(tags='["drop-by:@{item().Tag}"]') <|
+	AIP_CSP_ProductPrice_Staging
+	|where strcat(ArmRegionName,"_",Version)==@{item().Tag}
+	|extend InsertDateTime=now()
+   |project ArmRegionName,CurrencyCode,EffectiveStartDate,Id,InsertDateTime,IsPrimaryMeterRegion,Location,MeterId,PartNumber,ReservationTerm,RetailPrice,SkuId,TierMinimumUnits,Type,UnitPrice,Version

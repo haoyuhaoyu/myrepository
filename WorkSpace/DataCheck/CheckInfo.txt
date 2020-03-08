@@ -1,0 +1,79 @@
+CSP:
+	AWS-ProductPriceDetail  改名为  CSP_AWS_ProductPriceDetail  第51列错位  少InsertDateTime列
+	CSP_GCP_VMTypes_dual	少
+	CSP_GCP_VMTypes_single	少
+	CSP_AWS_SpotPriceHistory	少
+	CSP_AWSCHINA_ProductPriceDetail	少
+	
+Meetup:
+	Board  改名为 MeetUpBoard 少UpdatedDate，CreatedDate，InsertDateTime列
+	Events 改名为 MeetUpEvent  TimeZone --> Timezone, 少InsertDateTime列，多IngestedAt，ModifiedAt列
+	Groups 改名为 MeetUpGroup  Created --> created,少InsertDateTime列，多IngestedAt，Sponsors，ModifiedAt列
+	Members改名为 MeetUpMember Membershipcount --> MembershipCount,少InsertDateTime列，多Joined,JoinedDate,Status,Visited,VisitedTime,GroupId,IngestedAt,ModifiedAt列
+	Rsvp   改名为 MeetUpRsvp  Guest --> Guests,ModifiedDate --> UpdatedDate 少Created，InsertDateTime列，多RSVPId，OriginalRsvpId，status列
+	Comments 改名为 MeetupEventComment 少InsertDateTime,MemberId列
+	MeetUpCategory  少
+	MeetUpEventAttendance  少
+	MeetUpEventHostMapping  少
+	MeetUpGroupLeader  少
+	MeetUpGroupMembersMapping  少
+	MeetUpGroupTopicMapping  少
+	MeetUpMemberPhotoMapping  少
+	MeetUpMemberProfilesMapping  少
+	MeetUpMemberTopicMapping  少
+	MeetUpSeries  少
+	MeetUpSimilarGroupMapping  少
+	MeetUpTopic  少
+	MeetUpVenue  少
+	MeetUpWentMember  少
+	
+GitHub:
+	GitHubIssue					少AssigneeId,ClosedById,Id,IsDeleted,UserId列,多AssigneeHash,AssigneeSiteAdmin,AssigneeType,ClosedByHash,ClosedBySiteAdmin,ClosedByType,UserHash,UserSiteAdmin,UserType列
+	GitHubIssueComment			少IsDeleted,IssueId,UserId列,多IssueNumber,RepoId,UserHash,UserSiteAdmin,UserType列
+	GitHubPullRequest			少AssigneeId,BaseRepoId,BaseUserId,HeadRepoId,HeadUserId,Id,IsDeleted,Mergeable,MergeableState,MergedById,UserId,多AssigneeHash,AssigneeSiteAdmin,AssigneeType,MergedByHash,MergedBySiteAdmin,MergedByType,UserHash,UserSiteAdmin,UserType
+	GitHubPullRequestComment	少IsDeleted,PullRequestId,UserId,多PullRequestNumber,RepoId,UserHash,UserSiteAdmin,UserType
+	GitHubRepos					少
+									CreatedDateKey
+									DefaultBranch
+									HasDownloads
+									HasIssues
+									HasPages
+									HasWiki
+									IsDeleted
+									NetworkCount
+									OriginalOwnerID
+									OriginalReposID
+									OriginalSourceReposID
+									Private
+									PushedDate
+									PushedDatekey
+									ReposLanguageID
+									SubscribersCount
+									UpdatedDateKey
+									
+									IsFork --> Fork
+									RepoId --> Id
+									OpenIssuesCount --> OpenIssues
+									Name --> ReposName
+									WatchersCount --> Watchers
+									
+									多
+									IsMicrosoft,OrganizationId,OrganizationLogin,OrganizationType,OwnerHash,OwnerType
+	GitHubUser					少
+									ID
+									IsDeleted
+									IsOrg
+									Login
+									Name
+									
+									Hireable --> IsHireable
+									SiteAdmin --> IsSiteAdmin
+									Type --> UserType
+	
+	Commit  多
+	
+TnR:
+
+
+	
+	

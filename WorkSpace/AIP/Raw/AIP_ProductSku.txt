@@ -1,0 +1,1 @@
+CaymanSkuId:string,Id:string,InsertDateTime:datetime,Name:string,ProductId:string,Title:string,Version:string

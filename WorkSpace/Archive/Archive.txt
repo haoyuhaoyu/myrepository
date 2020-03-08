@@ -1,0 +1,53 @@
+
+CREATE TABLE stage._ArchiveStaging(
+Id bigint not null,
+ActorID bigint,
+ActorLogin nvarchar(256),
+RepoID bigint,
+RepoName nvarchar(256),
+CONSTRAINT [PK_Id] PRIMARY KEY CLUSTERED 
+(
+	Id ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF)
+)
+
+USE DATABASE CGAThirdPartyDW;
+REFERENCE ASSEMBLY CGADataLakeHelper;
+DECLARE @Path string = "adl://sisdevadls.azuredatalakestore.net/CGAThirdParty/Staging/GitHub/2020/03/03/GitHub_Archive_000454ec-6485-4a93-ad8e-b3258a0e7781.tsv";
+@Archive = 
+	EXTRACT
+		[ID] string,
+		Type string,
+		ActorID string,
+		ActorLogin string,
+		Actor string,
+		RepoID string,
+		RepoName string,
+		Repo string,
+		PayloadStr SQL.ARRAY<string>,
+		Payload SQL.ARRAY<string>,
+		Public string,
+		Created_at string
+	FROM @Path
+	USING new CGAThirdPartyUDO.CustomExtractor(new[]{8,9});
+	
+@Archive = 
+	SELECT DISTINCT
+		ActorID,
+		ActorLogin,
+		RepoID,
+		RepoName
+	FROM @Archive;
+	
+@Archive = 
+	SELECT
+		ROW_NUMBER() OVER(ORDER BY ActorID,ActorLogin,RepoID,RepoName) AS Id,
+		ActorID,
+		ActorLogin,
+		RepoID,
+		RepoName
+	FROM @Archive;
+	
+OUTPUT @Archive
+TO "adl://sisdevadls.azuredatalakestore.net/Output/Staging/GitHub/Archive/Archive.tsv"
+USING Outputters.Tsv(outputHeader:true,quoting:false);
