@@ -1,0 +1,1285 @@
+DECLARE @filePath string = "/CGAThirdParty/Technology/CloudServicesPricing/";
+DECLARE @insertDateTime DateTime? = DateTime.Now;
+CREATE DATABASE IF NOT EXISTS Technology;
+USE DATABASE Technology;
+
+@AWS_Offer = 
+	EXTRACT
+		[OfferCode] string,
+		[CurrentVersion] string,
+		[IsActive] bool
+	FROM @filePath + "AWS_Offer.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_AWS_Offer;
+
+INSERT INTO csp.CSP_AWS_Offer([OfferCode],[CurrentVersion],[IsActive],[InsertDateTime])
+SELECT [OfferCode],[CurrentVersion],[IsActive],@insertDateTime FROM @AWS_Offer;
+
+
+@AWS_OfferVersion = 
+	EXTRACT
+		[Id] int,
+		[OfferCode] string,
+		[Version] string,
+		[PublicationDate] DateTime?,
+		[EffectiveBeginDate] DateTime,
+		[EffectiveEndDate] DateTime?,
+		[OfferVersionUrl] string,
+		[SyncDate] DateTime?,
+		[IsDeleted] bool,
+		[IsDenormalized] bool
+	FROM @filePath + "AWS_OfferVersion.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_AWS_OfferVersion;
+
+INSERT INTO csp.CSP_AWS_OfferVersion([Id],[OfferCode],[Version],[PublicationDate],[EffectiveBeginDate],[EffectiveEndDate],[OfferVersionUrl],[SyncDate],[IsDeleted],[IsDenormalized],InsertDateTime)
+SELECT [Id],[OfferCode],[Version],[PublicationDate],[EffectiveBeginDate],[EffectiveEndDate],[OfferVersionUrl],[SyncDate],[IsDeleted],[IsDenormalized],@insertDateTime FROM @AWS_OfferVersion;
+
+
+@AWSCHINA_OfferVersion = 
+	EXTRACT
+		[Id] int,
+		[OfferCode] string,
+		[Version] string,
+		[PublicationDate] DateTime?,
+		[EffectiveBeginDate] DateTime,
+		[EffectiveEndDate] DateTime?,
+		[OfferVersionUrl] string,
+		[SyncDate] DateTime?,
+		[IsDeleted] bool,
+		[IsDenormalized] bool
+	FROM @filePath + "AWSCHINA_OfferVersion.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_AWSCHINA_OfferVersion;
+
+INSERT INTO csp.CSP_AWSCHINA_OfferVersion([Id],[OfferCode],[Version],[PublicationDate],[EffectiveBeginDate],[EffectiveEndDate],[OfferVersionUrl],[SyncDate],[IsDeleted],[IsDenormalized],InsertDateTime)
+SELECT [Id],[OfferCode],[Version],[PublicationDate],[EffectiveBeginDate],[EffectiveEndDate],[OfferVersionUrl],[SyncDate],[IsDeleted],[IsDenormalized],@insertDateTime FROM @AWSCHINA_OfferVersion;
+
+
+@AWSCHINA_Offer = 
+	EXTRACT
+		[OfferCode] string,
+		[CurrentVersion] string,
+		[IsActive] bool
+	FROM @filePath + "AWSCHINA_Offer.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_AWSCHINA_Offer;
+
+INSERT INTO csp.CSP_AWSCHINA_Offer([OfferCode], [CurrentVersion], [IsActive], InsertDateTime)
+SELECT [OfferCode], [CurrentVersion], [IsActive], @insertDateTime FROM @AWSCHINA_Offer;
+
+
+@GCP_TierRate = 
+	EXTRACT
+		[Id] long,
+		[StartUsageAmount] decimal,
+		[MoneyId] long,
+		[HashKey] string
+	FROM @filePath + "GCP_TierRate.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_TierRate;
+
+INSERT INTO csp.CSP_GCP_TierRate([Id], [StartUsageAmount], [MoneyId], [HashKey],InsertDateTime)
+SELECT [Id], [StartUsageAmount], [MoneyId], [HashKey], @insertDateTime FROM @GCP_TierRate;
+
+
+@GCP_SkuRegions = 
+	EXTRACT
+		[SkuId] string,
+		[RegionId] int
+	FROM @filePath + "GCP_SkuRegions.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_SkuRegions;
+
+INSERT INTO csp.CSP_GCP_SkuRegions([SkuId], [RegionId], InsertDateTime)
+SELECT [SkuId], [RegionId], @insertDateTime FROM @GCP_SkuRegions;
+
+
+@GCP_Sku = 
+	EXTRACT
+		[SkuId] string,
+		[ServiceId] string,
+		[Name] string,
+		[Description] string,
+		[ServiceProviderName] string,
+		[CategoryId] int
+	FROM @filePath + "GCP_Sku.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_Sku;
+
+INSERT INTO csp.CSP_GCP_Sku([SkuId], [ServiceId], [Name], [Description],[ServiceProviderName],[CategoryId],InsertDateTime)
+SELECT [SkuId], [ServiceId], [Name], [Description],[ServiceProviderName],[CategoryId],@insertDateTime FROM @GCP_Sku;
+
+
+@GCP_ServiceVersion = 
+	EXTRACT
+		[Id] int,
+		[ServiceId] string,
+		[EffectiveDate] DateTime,
+		[SyncDate] DateTime?
+	FROM @filePath + "GCP_ServiceVersion.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_ServiceVersion;
+
+INSERT INTO csp.CSP_GCP_ServiceVersion([Id], [ServiceId], [EffectiveDate], [SyncDate],InsertDateTime)
+SELECT [Id], [ServiceId], [EffectiveDate], [SyncDate],@insertDateTime FROM @GCP_ServiceVersion;
+
+
+@GCP_Service = 
+	EXTRACT
+		[ServiceId] string,
+		[Name] string,
+		[DisplayName] string,
+		[BusinessEntityName] string,
+		[IsActive] bool,
+		[IsBackfilled] bool
+	FROM @filePath + "GCP_Service.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_Service;
+
+INSERT INTO csp.CSP_GCP_Service([ServiceId], [Name], [DisplayName],[BusinessEntityName],[IsActive],[IsBackfilled], InsertDateTime)
+SELECT [ServiceId], [Name], [DisplayName],[BusinessEntityName],[IsActive],[IsBackfilled], @insertDateTime FROM @GCP_Service;
+
+
+@GCP_Region = 
+	EXTRACT
+		[Id] int,
+		[RegionCode] string,
+		[HashKey] string
+	FROM @filePath + "GCP_Region.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_Region;
+
+INSERT INTO csp.CSP_GCP_Region([Id], [RegionCode], [HashKey], InsertDateTime)
+SELECT [Id], [RegionCode], [HashKey], @insertDateTime FROM @GCP_Region;
+
+
+@GCP_Money = 
+	EXTRACT
+		[Id] long,
+		[CurrencyCode] string,
+		[Units] long,
+		[Nanos] int,
+		[HashKey] string
+	FROM @filePath + "GCP_Money.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_Money;
+
+INSERT INTO csp.CSP_GCP_Money([Id], [CurrencyCode], [Units], [Nanos],[HashKey],InsertDateTime)
+SELECT [Id], [CurrencyCode], [Units], [Nanos],[HashKey], @insertDateTime FROM @GCP_Money;
+
+
+@GCP_Category = 
+	EXTRACT
+		[Id] int,
+		[ServiceDisplayName] string,
+		[ResourceFamily] string,
+		[ResourceGroup] string,
+		[UsageType] string,
+		[HashKey] string
+	FROM @filePath + "GCP_Category.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_Category;
+
+INSERT INTO csp.CSP_GCP_Category([Id], [ServiceDisplayName], [ResourceFamily],[ResourceGroup],[UsageType], [HashKey],InsertDateTime)
+SELECT [Id], [ServiceDisplayName], [ResourceFamily],[ResourceGroup],[UsageType], [HashKey],@insertDateTime FROM @GCP_Category;
+
+
+@GCP_AggregationInfo = 
+	EXTRACT
+		[Id] int,
+		[AggregationLevel] string,
+		[AggregationInterval] string,
+		[AggregationCount] int,
+		[HashKey] string
+	FROM @filePath + "GCP_AggregationInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_AggregationInfo;
+
+INSERT INTO csp.CSP_GCP_AggregationInfo([Id], [AggregationLevel], [AggregationInterval],[AggregationCount],[HashKey], InsertDateTime)
+SELECT [Id], [AggregationLevel], [AggregationInterval],[AggregationCount],[HashKey], @insertDateTime FROM @GCP_AggregationInfo;
+
+
+@AZURE_MeterPriceDetail = 
+	EXTRACT
+		[ResourceGuid] string,
+		[ProductName] string,
+		[ProductTitle] string,
+		[ProductDescription] string,
+		[ProductGroupName] string,
+		[ProductType] string,
+		[ProductCategory] string,
+		[PillarId] int?,
+		[PillarName] string,
+		[WorkloadId] int?,
+		[WorkloadName] string,
+		[ServiceId] int?,
+		[ServiceName] string,
+		[ServiceFamily] string,
+		[InstanceType] string,
+		[IsReservedInstance] string,
+		[VCPU] string,
+		[DiskSize] string,
+		[RAM] string,
+		[ACU] string,
+		[Zone] string,
+		[Cloud] string,
+		[UnitOfMeasure] string,
+		[DurationInMonths] string,
+		[RegionName] string,
+		[ArmRegionName] string,
+		[SkuId] string,
+		[SKUName] string,
+		[SKUTitle] string,
+		[SkuDescription] string,
+		[ArmSkuName] string,
+		[ReservationAutoFitGroup] string,
+		[ReservationAutofFitRatio] string,
+		[IsPremium] string,
+		[IsOpenSource] string,
+		[IsDiscountable] string,
+		[HasPriceGaurantee] string,
+		[CanConsumeMC] string,
+		[HasNoMeterRates] string,
+		[SKUIsPrivateMarketplace] string,
+		[IsByol] string,
+		[ProductTags] string,
+		[ProductState] string,
+		[ProductEffectiveDate] string,
+		[ProductIsPreviewPublish] string,
+		[PriceLockDate] string,
+		[ProductDisclosureDates] string,
+		[PublisherName] string,
+		[ProductOwnershipSellingMotion] string,
+		[PartNumber] string,
+		[MeterName] string,
+		[MeterDescription] string,
+		[MeterType] string,
+		[MeterStartDate] string,
+		[MeterEndDate] string,
+		[OfferGroup] string,
+		[CurrencyCode] string,
+		[ChargeAmount] decimal,
+		[EffectiveStartDate] DateTime,
+		[EffectiveEndDate] DateTime,
+		[DataSourceId] int
+	FROM @filePath + "AZURE_MeterPriceDetail.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_AZURE_MeterPriceDetail;
+
+INSERT INTO csp.CSP_AZURE_MeterPriceDetail([ResourceGuid],[ProductName],[ProductTitle],[ProductDescription],[ProductGroupName],[ProductType],[ProductCategory],[PillarId],[PillarName],[WorkloadId],[WorkloadName],[ServiceId],[ServiceName],[ServiceFamily],[InstanceType],[IsReservedInstance],[VCPU],[DiskSize],[RAM],[ACU],[Zone],[Cloud],[UnitOfMeasure],[DurationInMonths],[RegionName],[ArmRegionName],[SkuId],[SKUName],[SKUTitle],[SkuDescription],[ArmSkuName],[ReservationAutoFitGroup],[ReservationAutofFitRatio],[IsPremium],[IsOpenSource],[IsDiscountable],[HasPriceGaurantee],[CanConsumeMC],[HasNoMeterRates],[SKUIsPrivateMarketplace],[IsByol],[ProductTags],[ProductState],[ProductEffectiveDate],[ProductIsPreviewPublish],[PriceLockDate],[ProductDisclosureDates],[PublisherName],[ProductOwnershipSellingMotion],[PartNumber],[MeterName],[MeterDescription],[MeterType],[MeterStartDate],[MeterEndDate],[OfferGroup],[CurrencyCode],[ChargeAmount],[EffectiveStartDate],[EffectiveEndDate],[DataSourceId],InsertDateTime)
+SELECT [ResourceGuid],[ProductName],[ProductTitle],[ProductDescription],[ProductGroupName],[ProductType],[ProductCategory],[PillarId],[PillarName],[WorkloadId],[WorkloadName],[ServiceId],[ServiceName],[ServiceFamily],[InstanceType],[IsReservedInstance],[VCPU],[DiskSize],[RAM],[ACU],[Zone],[Cloud],[UnitOfMeasure],[DurationInMonths],[RegionName],[ArmRegionName],[SkuId],[SKUName],[SKUTitle],[SkuDescription],[ArmSkuName],[ReservationAutoFitGroup],[ReservationAutofFitRatio],[IsPremium],[IsOpenSource],[IsDiscountable],[HasPriceGaurantee],[CanConsumeMC],[HasNoMeterRates],[SKUIsPrivateMarketplace],[IsByol],[ProductTags],[ProductState],[ProductEffectiveDate],[ProductIsPreviewPublish],[PriceLockDate],[ProductDisclosureDates],[PublisherName],[ProductOwnershipSellingMotion],[PartNumber],[MeterName],[MeterDescription],[MeterType],[MeterStartDate],[MeterEndDate],[OfferGroup],[CurrencyCode],[ChargeAmount],[EffectiveStartDate],[EffectiveEndDate],[DataSourceId], @insertDateTime FROM @AZURE_MeterPriceDetail;
+
+
+@AWSCHINA_Product = 
+	EXTRACT
+		[Id] long,
+		[OfferVersionId] int,
+		[Sku] string,
+		[ProductFamily] string
+	FROM @filePath + "AWSCHINA_Product.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_AWSCHINA_Product;
+
+INSERT INTO csp.CSP_AWSCHINA_Product([Id], [OfferVersionId], [Sku] ,[ProductFamily],InsertDateTime)
+SELECT [Id], [OfferVersionId], [Sku], [ProductFamily],@insertDateTime FROM @AWSCHINA_Product;
+
+
+@GCP_SkuPrices = 
+	EXTRACT
+		[SkuId] string,
+		[PricingInfoId] long
+	FROM @filePath + "GCP_SkuPrices.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_SkuPrices;
+
+INSERT INTO csp.CSP_GCP_SkuPrices([SkuId], [PricingInfoId], InsertDateTime)
+SELECT [SkuId], [PricingInfoId],  @insertDateTime FROM @GCP_SkuPrices;
+
+
+@GCP_PricingInfo = 
+	EXTRACT
+		[Id] long,
+		[ServiceVersionId] int,
+		[EffectiveDate] DateTime,
+		[Summary] string,
+		[PricingExpressionId] long,
+		[AggregationInfoId] int?,
+		[CurrencyConversionRate] decimal,
+		[HashKey] string
+	FROM @filePath + "GCP_PricingInfo.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@GCP_PricingInfo = SELECT *,EffectiveDate.ToString("yyyy-MM") AS EffectiveMonth 
+					FROM @GCP_PricingInfo;
+					
+TRUNCATE TABLE csp.CSP_GCP_PricingInfo
+	PARTITION("2016-01"), PARTITION("2016-02"), PARTITION("2016-03"), PARTITION("2016-04"), PARTITION("2016-05"), PARTITION("2016-06"), PARTITION("2016-07"), PARTITION("2016-08"), PARTITION("2016-09"), PARTITION("2016-10"), PARTITION("2016-11"), PARTITION("2016-12"), 
+	PARTITION("2017-01"), PARTITION("2017-02"), PARTITION("2017-03"), PARTITION("2017-04"), PARTITION("2017-05"), PARTITION("2017-06"), PARTITION("2017-07"), PARTITION("2017-08"), PARTITION("2017-09"), PARTITION("2017-10"), PARTITION("2017-11"), PARTITION("2017-12"), 
+	PARTITION("2018-01"), PARTITION("2018-02"), PARTITION("2018-03"), PARTITION("2018-04"), PARTITION("2018-05"), PARTITION("2018-06"), PARTITION("2018-07"), PARTITION("2018-08"), PARTITION("2018-09"), PARTITION("2018-10"), PARTITION("2018-11"), PARTITION("2018-12"), 
+	PARTITION("2019-01"), PARTITION("2019-02"), PARTITION("2019-03"), PARTITION("2019-04"), PARTITION("2019-05"), PARTITION("2019-06"), PARTITION("2019-07"), PARTITION("2019-08"), PARTITION("2019-09"), PARTITION("2019-10"), PARTITION("2019-11"), PARTITION("2019-12"), 
+	PARTITION("2020-01"), PARTITION("2020-02"), PARTITION("2020-03"), PARTITION("2020-04"), PARTITION("2020-05"), PARTITION("2020-06"), PARTITION("2020-07"), PARTITION("2020-08"), PARTITION("2020-09"), PARTITION("2020-10"), PARTITION("2020-11"), PARTITION("2020-12"), 
+	PARTITION("2021-01"), PARTITION("2021-02"), PARTITION("2021-03"), PARTITION("2021-04"), PARTITION("2021-05"), PARTITION("2021-06"), PARTITION("2021-07"), PARTITION("2021-08"), PARTITION("2021-09"), PARTITION("2021-10"), PARTITION("2021-11"), PARTITION("2021-12"), 
+	PARTITION("2022-01"), PARTITION("2022-02"), PARTITION("2022-03"), PARTITION("2022-04"), PARTITION("2022-05"), PARTITION("2022-06"), PARTITION("2022-07"), PARTITION("2022-08"), PARTITION("2022-09"), PARTITION("2022-10"), PARTITION("2022-11"), PARTITION("2022-12"), 
+	PARTITION("2023-01"), PARTITION("2023-02"), PARTITION("2023-03"), PARTITION("2023-04"), PARTITION("2023-05"), PARTITION("2023-06"), PARTITION("2023-07"), PARTITION("2023-08"), PARTITION("2023-09"), PARTITION("2023-10"), PARTITION("2023-11"), PARTITION("2023-12"), 
+	PARTITION("2024-01"), PARTITION("2024-02"), PARTITION("2024-03"), PARTITION("2024-04"), PARTITION("2024-05"), PARTITION("2024-06"), PARTITION("2024-07"), PARTITION("2024-08"), PARTITION("2024-09"), PARTITION("2024-10"), PARTITION("2024-11"), PARTITION("2024-12"), 
+	PARTITION("2025-01"), PARTITION("2025-02"), PARTITION("2025-03"), PARTITION("2025-04"), PARTITION("2025-05"), PARTITION("2025-06"), PARTITION("2025-07"), PARTITION("2025-08"), PARTITION("2025-09"), PARTITION("2025-10"), PARTITION("2025-11"), PARTITION("2025-12"), 
+	PARTITION("2026-01"), PARTITION("2026-02"), PARTITION("2026-03"), PARTITION("2026-04"), PARTITION("2026-05"), PARTITION("2026-06"), PARTITION("2026-07"), PARTITION("2026-08"), PARTITION("2026-09"), PARTITION("2026-10"), PARTITION("2026-11"), PARTITION("2026-12"), 
+	PARTITION("2027-01"), PARTITION("2027-02"), PARTITION("2027-03"), PARTITION("2027-04"), PARTITION("2027-05"), PARTITION("2027-06"), PARTITION("2027-07"), PARTITION("2027-08"), PARTITION("2027-09"), PARTITION("2027-10"), PARTITION("2027-11"), PARTITION("2027-12"); 
+	
+
+INSERT INTO csp.CSP_GCP_PricingInfo([Id],[ServiceVersionId],[EffectiveDate],[Summary],[PricingExpressionId],[AggregationInfoId],[CurrencyConversionRate],[HashKey],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION ("2016-01")
+SELECT [Id],[ServiceVersionId],[EffectiveDate],[Summary],[PricingExpressionId],[AggregationInfoId],[CurrencyConversionRate],[HashKey],@insertDateTime FROM @GCP_PricingInfo;
+
+
+@GCP_PricingExpressionTierRates = 
+	EXTRACT
+		[PricingExpressionId] long,
+		[TierRateId] long
+	FROM @filePath + "GCP_PricingExpressionTierRates.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_PricingExpressionTierRates;
+
+INSERT INTO csp.CSP_GCP_PricingExpressionTierRates([PricingExpressionId], [TierRateId], InsertDateTime)
+SELECT [PricingExpressionId], [TierRateId],@insertDateTime FROM @GCP_PricingExpressionTierRates;
+
+
+@GCP_PricingExpression = 
+	EXTRACT
+		[Id] long,
+		[ServiceVersionId] int,
+		[UsageUnit] string,
+		[UsageUnitDescription] string,
+		[BaseUnit] string,
+		[BaseUnitDescription] string,
+		[BaseUnitConversionFactor] decimal,
+		[DisplayQuantity] float,
+		[HashKey] string
+	FROM @filePath + "GCP_PricingExpression.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_PricingExpression;
+
+INSERT INTO csp.CSP_GCP_PricingExpression([Id],[ServiceVersionId],[UsageUnit],[UsageUnitDescription],[BaseUnit],[BaseUnitDescription],[BaseUnitConversionFactor],[DisplayQuantity],[HashKey], InsertDateTime)
+SELECT [Id],[ServiceVersionId],[UsageUnit],[UsageUnitDescription],[BaseUnit],[BaseUnitDescription],[BaseUnitConversionFactor],[DisplayQuantity],[HashKey],@insertDateTime FROM @GCP_PricingExpression;
+
+
+@AWSCHINA_PriceRate = 
+	EXTRACT
+		[Id] long,
+		[PriceTermId] long,
+		[RateCode] string,
+		[Description] string,
+		[Unit] string,
+		[PricePerUnit] decimal,
+		[CurrencyCode] string,
+		[BeginRange] string,
+		[EndRange] string
+	FROM @filePath + "AWSCHINA_PriceRate.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_AWSCHINA_PriceRate;
+
+INSERT INTO csp.CSP_AWSCHINA_PriceRate([Id],[PriceTermId],[RateCode],[Description],[Unit],[PricePerUnit],[CurrencyCode],[BeginRange],[EndRange],InsertDateTime)
+SELECT [Id],[PriceTermId],[RateCode],[Description],[Unit],[PricePerUnit],[CurrencyCode],[BeginRange],[EndRange],@insertDateTime FROM @AWSCHINA_PriceRate;
+
+
+@AWSCHINA_PriceTerm = 
+	EXTRACT
+		[Id] long,
+		[ProductId] long,
+		[TermType] string,
+		[TermCode] string,
+		[EffectiveDate] DateTime
+	FROM @filePath + "AWSCHINA_PriceTerm.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@AWSCHINA_PriceTerm = 
+	SELECT * , EffectiveDate.ToString("yyyy-MM") AS EffectiveMonth FROM @AWSCHINA_PriceTerm;
+	
+TRUNCATE TABLE csp.CSP_AWSCHINA_PriceTerm
+	PARTITION("2014-01"), PARTITION("2014-02"), PARTITION("2014-03"), PARTITION("2014-04"), PARTITION("2014-05"), PARTITION("2014-06"), PARTITION("2014-07"), PARTITION("2014-08"), PARTITION("2014-09"), PARTITION("2014-10"), PARTITION("2014-11"), PARTITION("2014-12"), 
+	PARTITION("2015-01"), PARTITION("2015-02"), PARTITION("2015-03"), PARTITION("2015-04"), PARTITION("2015-05"), PARTITION("2015-06"), PARTITION("2015-07"), PARTITION("2015-08"), PARTITION("2015-09"), PARTITION("2015-10"), PARTITION("2015-11"), PARTITION("2015-12"), 
+	PARTITION("2016-01"), PARTITION("2016-02"), PARTITION("2016-03"), PARTITION("2016-04"), PARTITION("2016-05"), PARTITION("2016-06"), PARTITION("2016-07"), PARTITION("2016-08"), PARTITION("2016-09"), PARTITION("2016-10"), PARTITION("2016-11"), PARTITION("2016-12"), 
+	PARTITION("2017-01"), PARTITION("2017-02"), PARTITION("2017-03"), PARTITION("2017-04"), PARTITION("2017-05"), PARTITION("2017-06"), PARTITION("2017-07"), PARTITION("2017-08"), PARTITION("2017-09"), PARTITION("2017-10"), PARTITION("2017-11"), PARTITION("2017-12"), 
+	PARTITION("2018-01"), PARTITION("2018-02"), PARTITION("2018-03"), PARTITION("2018-04"), PARTITION("2018-05"), PARTITION("2018-06"), PARTITION("2018-07"), PARTITION("2018-08"), PARTITION("2018-09"), PARTITION("2018-10"), PARTITION("2018-11"), PARTITION("2018-12"), 
+	PARTITION("2019-01"), PARTITION("2019-02"), PARTITION("2019-03"), PARTITION("2019-04"), PARTITION("2019-05"), PARTITION("2019-06"), PARTITION("2019-07"), PARTITION("2019-08"), PARTITION("2019-09"), PARTITION("2019-10"), PARTITION("2019-11"), PARTITION("2019-12"), 
+	PARTITION("2020-01"), PARTITION("2020-02"), PARTITION("2020-03"), PARTITION("2020-04"), PARTITION("2020-05"), PARTITION("2020-06"), PARTITION("2020-07"), PARTITION("2020-08"), PARTITION("2020-09"), PARTITION("2020-10"), PARTITION("2020-11"), PARTITION("2020-12"), 
+	PARTITION("2021-01"), PARTITION("2021-02"), PARTITION("2021-03"), PARTITION("2021-04"), PARTITION("2021-05"), PARTITION("2021-06"), PARTITION("2021-07"), PARTITION("2021-08"), PARTITION("2021-09"), PARTITION("2021-10"), PARTITION("2021-11"), PARTITION("2021-12"), 
+	PARTITION("2022-01"), PARTITION("2022-02"), PARTITION("2022-03"), PARTITION("2022-04"), PARTITION("2022-05"), PARTITION("2022-06"), PARTITION("2022-07"), PARTITION("2022-08"), PARTITION("2022-09"), PARTITION("2022-10"), PARTITION("2022-11"), PARTITION("2022-12"), 
+	PARTITION("2023-01"), PARTITION("2023-02"), PARTITION("2023-03"), PARTITION("2023-04"), PARTITION("2023-05"), PARTITION("2023-06"), PARTITION("2023-07"), PARTITION("2023-08"), PARTITION("2023-09"), PARTITION("2023-10"), PARTITION("2023-11"), PARTITION("2023-12"), 
+	PARTITION("2024-01"), PARTITION("2024-02"), PARTITION("2024-03"), PARTITION("2024-04"), PARTITION("2024-05"), PARTITION("2024-06"), PARTITION("2024-07"), PARTITION("2024-08"), PARTITION("2024-09"), PARTITION("2024-10"), PARTITION("2024-11"), PARTITION("2024-12"), 
+	PARTITION("2025-01"), PARTITION("2025-02"), PARTITION("2025-03"), PARTITION("2025-04"), PARTITION("2025-05"), PARTITION("2025-06"), PARTITION("2025-07"), PARTITION("2025-08"), PARTITION("2025-09"), PARTITION("2025-10"), PARTITION("2025-11"), PARTITION("2025-12"), 
+	PARTITION("2026-01"), PARTITION("2026-02"), PARTITION("2026-03"), PARTITION("2026-04"), PARTITION("2026-05"), PARTITION("2026-06"), PARTITION("2026-07"), PARTITION("2026-08"), PARTITION("2026-09"), PARTITION("2026-10"), PARTITION("2026-11"), PARTITION("2026-12"), 
+	PARTITION("2027-01"), PARTITION("2027-02"), PARTITION("2027-03"), PARTITION("2027-04"), PARTITION("2027-05"), PARTITION("2027-06"), PARTITION("2027-07"), PARTITION("2027-08"), PARTITION("2027-09"), PARTITION("2027-10"), PARTITION("2027-11"), PARTITION("2027-12"); 
+	
+INSERT INTO csp.CSP_AWSCHINA_PriceTerm([Id],[ProductId],[TermType],[TermCode],[EffectiveDate],[EffectiveMonth],[InsertDateTime])
+ON INTEGRITY VIOLATION MOVE TO PARTITION ("2014-01")
+SELECT [Id],[ProductId],[TermType],[TermCode],[EffectiveDate],[EffectiveMonth],@insertDateTime FROM @AWSCHINA_PriceTerm;
+
+
+@AWSCHINA_PriceTermAttributes = 
+	EXTRACT
+		[Id] long,
+		[PriceTermId] long,
+		[Name] string,
+		[Value] string
+	FROM @filePath + "AWSCHINA_PriceTermAttributes.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_AWSCHINA_PriceTermAttributes;
+
+INSERT INTO csp.CSP_AWSCHINA_PriceTermAttributes([Id], [PriceTermId], [Name],[Value], InsertDateTime)
+SELECT [Id], [PriceTermId], [Name],[Value],@insertDateTime FROM @AWSCHINA_PriceTermAttributes;
+
+
+@AWSCHINA_ProductAttributes = 
+	EXTRACT
+		[Id] long,
+		[ProductId] long,
+		[Name] string,
+		[Value] string
+	FROM @filePath + "AWSCHINA_ProductAttributes.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_AWSCHINA_ProductAttributes;
+
+INSERT INTO csp.CSP_AWSCHINA_ProductAttributes([Id], [ProductId], [Name], [Value],InsertDateTime)
+SELECT [Id], [ProductId], [Name], [Value],@insertDateTime FROM @AWSCHINA_ProductAttributes;
+
+
+@AWSCHINA_ProductPriceDetail = 
+	EXTRACT
+		[Id] long,
+		[OfferCode] string,
+		[OfferVersionId] int,
+		[OfferVersion] string,
+		[PublicationDate] DateTime?,
+		[EffectiveBeginDate] DateTime,
+		[EffectiveEndDate] DateTime?,
+		[Sku] string,
+		[ProductFamily] string,
+		[TermCode] string,
+		[TermType] string,
+		[TermEffectiveDate] DateTime,
+		[RateCode] string,
+		[RateDescription] string,
+		[RateUnit] string,
+		[PricePerUnit] decimal,
+		[CurrencyCode] string,
+		[BeginRange] string,
+		[EndRange] string,
+		[AcceleratorSize] string,
+		[AcceleratorType] string,
+		[AccessType] string,
+		[AccountAssistance] string,
+		[ActivityType] string,
+		[AddonFeature] string,
+		[AlarmType] string,
+		[ArchitecturalReview] string,
+		[ArchitectureSupport] string,
+		[AttachmentType] string,
+		[AutomaticLabel] string,
+		[Availability] string,
+		[AvailabilityZone] string,
+		[AwsResource] string,
+		[BestPractices] string,
+		[BitRate] string,
+		[BrokerEngine] string,
+		[Bundle] string,
+		[CacheEngine] string,
+		[CacheMemorySizeGb] string,
+		[CapacityStatus] string,
+		[CaseSeverityResponseTimes] string,
+		[Category] string,
+		[ClassificationType] string,
+		[ClockSpeed] string,
+		[CloudSearchVersion] string,
+		[Codec] string,
+		[Comments] string,
+		[ComputeFamily] string,
+		[ComputeType] string,
+		[ContentSource] string,
+		[ContentType] string,
+		[Country] string,
+		[CountsAgainstQuota] string,
+		[CpuType] string,
+		[CurrentGeneration] string,
+		[CustomerServiceAndCommunities] string,
+		[Data] string,
+		[DataAction] string,
+		[DatabaseEdition] string,
+		[DatabaseEngine] string,
+		[DataTransfer] string,
+		[DataTransferOut] string,
+		[DataTransferQuota] string,
+		[DedicatedEbsThroughput] string,
+		[DeploymentLocation] string,
+		[DeploymentModel] string,
+		[DeploymentOption] string,
+		[Description] string,
+		[Device] string,
+		[DeviceOs] string,
+		[DeviceType] string,
+		[DirectConnectLocation] string,
+		[DirectorySize] string,
+		[DirectoryType] string,
+		[DirectoryTypeDescription] string,
+		[Durability] string,
+		[EbsOptimized] string,
+		[Ecu] string,
+		[Edition] string,
+		[ElasticGpuType] string,
+		[ElasticGraphicsType] string,
+		[Endpoint] string,
+		[EndpointType] string,
+		[Engine] string,
+		[EngineCode] string,
+		[EnhancedNetworkingSupport] string,
+		[EnhancedNetworkingSupported] string,
+		[EventType] string,
+		[ExecutionFrequency] string,
+		[ExecutionLocation] string,
+		[ExecutionMode] string,
+		[Feature] string,
+		[FeeCode] string,
+		[FeeDescription] string,
+		[FlowType] string,
+		[FrameRate] string,
+		[FreeOverage] string,
+		[FreeQueryTypes] string,
+		[FreeTier] string,
+		[FreeTrial] string,
+		[FreeUsageIncluded] string,
+		[FrequencyMode] string,
+		[FromLocation] string,
+		[FromLocationType] string,
+		[GeoregionCode] string,
+		[Gets] string,
+		[Gpu] string,
+		[GpuMemory] string,
+		[GraphQLOperation] string,
+		[Group] string,
+		[GroupDescription] string,
+		[HighAvailability] string,
+		[IncludedEvents] string,
+		[IncludedServices] string,
+		[IndexingSource] string,
+		[Input] string,
+		[InputMode] string,
+		[Instance] string,
+		[InstanceCapacityMedium] string,
+		[InstanceCapacityLarge] string,
+		[InstanceCapacityXlarge] string,
+		[InstanceCapacity2xlarge] string,
+		[InstanceCapacity4xlarge] string,
+		[InstanceCapacity8xlarge] string,
+		[InstanceCapacity9xlarge] string,
+		[InstanceCapacity10xlarge] string,
+		[InstanceCapacity12xlarge] string,
+		[InstanceCapacity16xlarge] string,
+		[InstanceCapacity18xlarge] string,
+		[InstanceCapacity24xlarge] string,
+		[InstanceCapacity32xlarge] string,
+		[InstanceFamily] string,
+		[InstanceFunction] string,
+		[InstanceSku] string,
+		[InstanceStorageGb] string,
+		[InstanceType] string,
+		[InstanceTypeFamily] string,
+		[IntelAvxAvailable] string,
+		[IntelAvx2Available] string,
+		[IntelTurboAvailable] string,
+		[Io] string,
+		[isShadow] string,
+		[isWebSocket] string,
+		[Jobnshipp] string,
+		[LabelingTaskType] string,
+		[LaunchSupport] string,
+		[License] string,
+		[LicenseModel] string,
+		[LicenseType] string,
+		[LineType] string,
+		[Location] string,
+		[LocationType] string,
+		[LogsSource] string,
+		[LogsType] string,
+		[MachineLearningProcess] string,
+		[MailboxStorage] string,
+		[MaximumCapacity] string,
+		[MaximumExtendedStorage] string,
+		[MaximumStorageVolume] string,
+		[MaxIopsBurstPerformance] string,
+		[MaxIopsVolume] string,
+		[MaxThroughputVolume] string,
+		[MaxVolumeSize] string,
+		[Memory] string,
+		[MemoryGib] string,
+		[MemoryType] string,
+		[MessageDeliveryFrequency] string,
+		[MessageDeliveryOrder] string,
+		[MeteringType] string,
+		[MeterMode] string,
+		[MinimumStorageVolume] string,
+		[MinVolumeSize] string,
+		[NetworkPerformance] string,
+		[NormalizationSizeFactor] string,
+		[Offer] string,
+		[OperatingSystem] string,
+		[Operation] string,
+		[OperationsSupport] string,
+		[OperationType] string,
+		[Origin] string,
+		[OsLicenseModel] string,
+		[Output] string,
+		[OutputMode] string,
+		[OverageType] string,
+		[PhysicalCores] string,
+		[PhysicalCpu] string,
+		[PhysicalGpu] string,
+		[PhysicalProcessor] string,
+		[PlanType] string,
+		[PortSpeed] string,
+		[PreInstalledSw] string,
+		[PricingUnit] string,
+		[ProactiveGuidance] string,
+		[ProcessorArchitecture] string,
+		[ProcessorFeatures] string,
+		[ProductSchemaDescription] string,
+		[ProgrammaticCaseManagement] string,
+		[Protocol] string,
+		[Provisioned] string,
+		[QueueType] string,
+		[RealTimeOperation] string,
+		[Recipient] string,
+		[ReleaseType] string,
+		[RequestDescription] string,
+		[RequestType] string,
+		[ReserveType] string,
+		[Resolution] string,
+		[ResourceEndpoint] string,
+		[ResourceType] string,
+		[RootVolume] string,
+		[RoutingTarget] string,
+		[RoutingType] string,
+		[RunningMode] string,
+		[ServerLocation] string,
+		[ServiceCode] string,
+		[ServiceName] string,
+		[SingleOrDualPass] string,
+		[SnowballType] string,
+		[Sockets] string,
+		[SoftwareIncluded] string,
+		[SoftwareType] string,
+		[StandardStorageRetentionIncluded] string,
+		[Steps] string,
+		[Storage] string,
+		[StorageClass] string,
+		[StorageDescription] string,
+		[StorageFamily] string,
+		[StorageMedia] string,
+		[StorageType] string,
+		[SubscriptionType] string,
+		[SupportedModes] string,
+		[TechnicalSupport] string,
+		[Tenancy] string,
+		[TenancySupport] string,
+		[ThirdPartySoftwareSupport] string,
+		[ThroughputClass] string,
+		[Tier] string,
+		[TierType] string,
+		[ToCountry] string,
+		[ToLocation] string,
+		[ToLocationType] string,
+		[Training] string,
+		[TranscodingResult] string,
+		[TransferType] string,
+		[TrialProduct] string,
+		[Type] string,
+		[UpfrontCommitment] string,
+		[UsageFamily] string,
+		[UsageType] string,
+		[UserVolume] string,
+		[Vcpu] string,
+		[Version] string,
+		[VideoCodec] string,
+		[VideoFrameRate] string,
+		[VideoMemoryGib] string,
+		[VideoQuality] string,
+		[VideoQualitySetting] string,
+		[VideoResolution] string,
+		[VirtualInterfaceType] string,
+		[VolumeType] string,
+		[VqSetting] string,
+		[WhoCanOpenCases] string,
+		[WithActiveUsers] string,
+		[WorkforceType] string,
+		[LeaseContractLength] string,
+		[OfferingClass] string,
+		[PurchaseOption] string,
+		[Restriction] string
+	FROM @filePath + "AWSCHINA_ProductPriceDetail.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+
+@AWSCHINA_ProductPriceDetail = 
+	SELECT * ,EffectiveBeginDate.ToString("yyyy-MM") AS EffectiveBeginMonth FROM @AWSCHINA_ProductPriceDetail;
+
+TRUNCATE TABLE csp.CSP_AWSCHINA_ProductPriceDetail
+	PARTITION("2016-01"), PARTITION("2016-02"), PARTITION("2016-03"), PARTITION("2016-04"), PARTITION("2016-05"), PARTITION("2016-06"), PARTITION("2016-07"), PARTITION("2016-08"), PARTITION("2016-09"), PARTITION("2016-10"), PARTITION("2016-11"), PARTITION("2016-12"), 
+	PARTITION("2017-01"), PARTITION("2017-02"), PARTITION("2017-03"), PARTITION("2017-04"), PARTITION("2017-05"), PARTITION("2017-06"), PARTITION("2017-07"), PARTITION("2017-08"), PARTITION("2017-09"), PARTITION("2017-10"), PARTITION("2017-11"), PARTITION("2017-12"), 
+	PARTITION("2018-01"), PARTITION("2018-02"), PARTITION("2018-03"), PARTITION("2018-04"), PARTITION("2018-05"), PARTITION("2018-06"), PARTITION("2018-07"), PARTITION("2018-08"), PARTITION("2018-09"), PARTITION("2018-10"), PARTITION("2018-11"), PARTITION("2018-12"), 
+	PARTITION("2019-01"), PARTITION("2019-02"), PARTITION("2019-03"), PARTITION("2019-04"), PARTITION("2019-05"), PARTITION("2019-06"), PARTITION("2019-07"), PARTITION("2019-08"), PARTITION("2019-09"), PARTITION("2019-10"), PARTITION("2019-11"), PARTITION("2019-12"), 
+	PARTITION("2020-01"), PARTITION("2020-02"), PARTITION("2020-03"), PARTITION("2020-04"), PARTITION("2020-05"), PARTITION("2020-06"), PARTITION("2020-07"), PARTITION("2020-08"), PARTITION("2020-09"), PARTITION("2020-10"), PARTITION("2020-11"), PARTITION("2020-12"), 
+	PARTITION("2021-01"), PARTITION("2021-02"), PARTITION("2021-03"), PARTITION("2021-04"), PARTITION("2021-05"), PARTITION("2021-06"), PARTITION("2021-07"), PARTITION("2021-08"), PARTITION("2021-09"), PARTITION("2021-10"), PARTITION("2021-11"), PARTITION("2021-12"), 
+	PARTITION("2022-01"), PARTITION("2022-02"), PARTITION("2022-03"), PARTITION("2022-04"), PARTITION("2022-05"), PARTITION("2022-06"), PARTITION("2022-07"), PARTITION("2022-08"), PARTITION("2022-09"), PARTITION("2022-10"), PARTITION("2022-11"), PARTITION("2022-12"), 
+	PARTITION("2023-01"), PARTITION("2023-02"), PARTITION("2023-03"), PARTITION("2023-04"), PARTITION("2023-05"), PARTITION("2023-06"), PARTITION("2023-07"), PARTITION("2023-08"), PARTITION("2023-09"), PARTITION("2023-10"), PARTITION("2023-11"), PARTITION("2023-12"), 
+	PARTITION("2024-01"), PARTITION("2024-02"), PARTITION("2024-03"), PARTITION("2024-04"), PARTITION("2024-05"), PARTITION("2024-06"), PARTITION("2024-07"), PARTITION("2024-08"), PARTITION("2024-09"), PARTITION("2024-10"), PARTITION("2024-11"), PARTITION("2024-12"), 
+	PARTITION("2025-01"), PARTITION("2025-02"), PARTITION("2025-03"), PARTITION("2025-04"), PARTITION("2025-05"), PARTITION("2025-06"), PARTITION("2025-07"), PARTITION("2025-08"), PARTITION("2025-09"), PARTITION("2025-10"), PARTITION("2025-11"), PARTITION("2025-12"), 
+	PARTITION("2026-01"), PARTITION("2026-02"), PARTITION("2026-03"), PARTITION("2026-04"), PARTITION("2026-05"), PARTITION("2026-06"), PARTITION("2026-07"), PARTITION("2026-08"), PARTITION("2026-09"), PARTITION("2026-10"), PARTITION("2026-11"), PARTITION("2026-12"), 
+	PARTITION("2027-01"), PARTITION("2027-02"), PARTITION("2027-03"), PARTITION("2027-04"), PARTITION("2027-05"), PARTITION("2027-06"), PARTITION("2027-07"), PARTITION("2027-08"), PARTITION("2027-09"), PARTITION("2027-10"), PARTITION("2027-11"), PARTITION("2027-12"); 
+	
+INSERT INTO csp.CSP_AWSCHINA_ProductPriceDetail([Id],[OfferCode],[OfferVersionId],[OfferVersion],[PublicationDate],[EffectiveBeginDate],[EffectiveBeginMonth],[EffectiveEndDate],[Sku],[ProductFamily],[TermCode],[TermType],[TermEffectiveDate],[RateCode],[RateDescription],[RateUnit],[PricePerUnit],[CurrencyCode],[BeginRange],[EndRange],[AcceleratorSize],[AcceleratorType],[AccessType],[AccountAssistance],[ActivityType],[AddonFeature],[AlarmType],[ArchitecturalReview],[ArchitectureSupport],[AttachmentType],[AutomaticLabel],[Availability],[AvailabilityZone],[AwsResource],[BestPractices],[BitRate],[BrokerEngine],[Bundle],[CacheEngine],[CacheMemorySizeGb],[CapacityStatus],[CaseSeverityResponseTimes],[Category],[ClassificationType],[ClockSpeed],[CloudSearchVersion],[Codec],[Comments],[ComputeFamily],[ComputeType],[ContentSource],[ContentType],[Country],[CountsAgainstQuota],[CpuType],[CurrentGeneration],[CustomerServiceAndCommunities],[Data],[DataAction],[DatabaseEdition],[DatabaseEngine],[DataTransfer],[DataTransferOut],[DataTransferQuota],[DedicatedEbsThroughput],[DeploymentLocation],[DeploymentModel],[DeploymentOption],[Description],[Device],[DeviceOs],[DeviceType],[DirectConnectLocation],[DirectorySize],[DirectoryType],[DirectoryTypeDescription],[Durability],[EbsOptimized],[Ecu],[Edition],[ElasticGpuType],[ElasticGraphicsType],[Endpoint],[EndpointType],[Engine],[EngineCode],[EnhancedNetworkingSupport],[EnhancedNetworkingSupported],[EventType],[ExecutionFrequency],[ExecutionLocation],[ExecutionMode],[Feature],[FeeCode],[FeeDescription],[FlowType],[FrameRate],[FreeOverage],[FreeQueryTypes],[FreeTier],[FreeTrial],[FreeUsageIncluded],[FrequencyMode],[FromLocation],[FromLocationType],[GeoregionCode],[Gets],[Gpu],[GpuMemory],[GraphQLOperation],[Group],[GroupDescription],[HighAvailability],[IncludedEvents],[IncludedServices],[IndexingSource],[Input],[InputMode],[Instance],[InstanceCapacityMedium],[InstanceCapacityLarge],[InstanceCapacityXlarge],[InstanceCapacity2xlarge],[InstanceCapacity4xlarge],[InstanceCapacity8xlarge],[InstanceCapacity9xlarge],[InstanceCapacity10xlarge],[InstanceCapacity12xlarge],[InstanceCapacity16xlarge],[InstanceCapacity18xlarge],[InstanceCapacity24xlarge],[InstanceCapacity32xlarge],[InstanceFamily],[InstanceFunction],[InstanceSku],[InstanceStorageGb],[InstanceType],[InstanceTypeFamily],[IntelAvxAvailable],[IntelAvx2Available],[IntelTurboAvailable],[Io],[isShadow],[isWebSocket],[Jobnshipp],[LabelingTaskType],[LaunchSupport],[License],[LicenseModel],[LicenseType],[LineType],[Location],[LocationType],[LogsSource],[LogsType],[MachineLearningProcess],[MailboxStorage],[MaximumCapacity],[MaximumExtendedStorage],[MaximumStorageVolume],[MaxIopsBurstPerformance],[MaxIopsVolume],[MaxThroughputVolume],[MaxVolumeSize],[Memory],[MemoryGib],[MemoryType],[MessageDeliveryFrequency],[MessageDeliveryOrder],[MeteringType],[MeterMode],[MinimumStorageVolume],[MinVolumeSize],[NetworkPerformance],[NormalizationSizeFactor],[Offer],[OperatingSystem],[Operation],[OperationsSupport],[OperationType],[Origin],[OsLicenseModel],[Output],[OutputMode],[OverageType],[PhysicalCores],[PhysicalCpu],[PhysicalGpu],[PhysicalProcessor],[PlanType],[PortSpeed],[PreInstalledSw],[PricingUnit],[ProactiveGuidance],[ProcessorArchitecture],[ProcessorFeatures],[ProductSchemaDescription],[ProgrammaticCaseManagement],[Protocol],[Provisioned],[QueueType],[RealTimeOperation],[Recipient],[ReleaseType],[RequestDescription],[RequestType],[ReserveType],[Resolution],[ResourceEndpoint],[ResourceType],[RootVolume],[RoutingTarget],[RoutingType],[RunningMode],[ServerLocation],[ServiceCode],[ServiceName],[SingleOrDualPass],[SnowballType],[Sockets],[SoftwareIncluded],[SoftwareType],[StandardStorageRetentionIncluded],[Steps],[Storage],[StorageClass],[StorageDescription],[StorageFamily],[StorageMedia],[StorageType],[SubscriptionType],[SupportedModes],[TechnicalSupport],[Tenancy],[TenancySupport],[ThirdPartySoftwareSupport],[ThroughputClass],[Tier],[TierType],[ToCountry],[ToLocation],[ToLocationType],[Training],[TranscodingResult],[TransferType],[TrialProduct],[Type],[UpfrontCommitment],[UsageFamily],[UsageType],[UserVolume],[Vcpu],[Version],[VideoCodec],[VideoFrameRate],[VideoMemoryGib],[VideoQuality],[VideoQualitySetting],[VideoResolution],[VirtualInterfaceType],[VolumeType],[VqSetting],[WhoCanOpenCases],[WithActiveUsers],[WorkforceType],[LeaseContractLength],[OfferingClass],[PurchaseOption],[Restriction],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION ("2016-01")
+SELECT [Id],[OfferCode],[OfferVersionId],[OfferVersion],[PublicationDate],[EffectiveBeginDate],[EffectiveBeginMonth],[EffectiveEndDate],[Sku],[ProductFamily],[TermCode],[TermType],[TermEffectiveDate],[RateCode],[RateDescription],[RateUnit],[PricePerUnit],[CurrencyCode],[BeginRange],[EndRange],[AcceleratorSize],[AcceleratorType],[AccessType],[AccountAssistance],[ActivityType],[AddonFeature],[AlarmType],[ArchitecturalReview],[ArchitectureSupport],[AttachmentType],[AutomaticLabel],[Availability],[AvailabilityZone],[AwsResource],[BestPractices],[BitRate],[BrokerEngine],[Bundle],[CacheEngine],[CacheMemorySizeGb],[CapacityStatus],[CaseSeverityResponseTimes],[Category],[ClassificationType],[ClockSpeed],[CloudSearchVersion],[Codec],[Comments],[ComputeFamily],[ComputeType],[ContentSource],[ContentType],[Country],[CountsAgainstQuota],[CpuType],[CurrentGeneration],[CustomerServiceAndCommunities],[Data],[DataAction],[DatabaseEdition],[DatabaseEngine],[DataTransfer],[DataTransferOut],[DataTransferQuota],[DedicatedEbsThroughput],[DeploymentLocation],[DeploymentModel],[DeploymentOption],[Description],[Device],[DeviceOs],[DeviceType],[DirectConnectLocation],[DirectorySize],[DirectoryType],[DirectoryTypeDescription],[Durability],[EbsOptimized],[Ecu],[Edition],[ElasticGpuType],[ElasticGraphicsType],[Endpoint],[EndpointType],[Engine],[EngineCode],[EnhancedNetworkingSupport],[EnhancedNetworkingSupported],[EventType],[ExecutionFrequency],[ExecutionLocation],[ExecutionMode],[Feature],[FeeCode],[FeeDescription],[FlowType],[FrameRate],[FreeOverage],[FreeQueryTypes],[FreeTier],[FreeTrial],[FreeUsageIncluded],[FrequencyMode],[FromLocation],[FromLocationType],[GeoregionCode],[Gets],[Gpu],[GpuMemory],[GraphQLOperation],[Group],[GroupDescription],[HighAvailability],[IncludedEvents],[IncludedServices],[IndexingSource],[Input],[InputMode],[Instance],[InstanceCapacityMedium],[InstanceCapacityLarge],[InstanceCapacityXlarge],[InstanceCapacity2xlarge],[InstanceCapacity4xlarge],[InstanceCapacity8xlarge],[InstanceCapacity9xlarge],[InstanceCapacity10xlarge],[InstanceCapacity12xlarge],[InstanceCapacity16xlarge],[InstanceCapacity18xlarge],[InstanceCapacity24xlarge],[InstanceCapacity32xlarge],[InstanceFamily],[InstanceFunction],[InstanceSku],[InstanceStorageGb],[InstanceType],[InstanceTypeFamily],[IntelAvxAvailable],[IntelAvx2Available],[IntelTurboAvailable],[Io],[isShadow],[isWebSocket],[Jobnshipp],[LabelingTaskType],[LaunchSupport],[License],[LicenseModel],[LicenseType],[LineType],[Location],[LocationType],[LogsSource],[LogsType],[MachineLearningProcess],[MailboxStorage],[MaximumCapacity],[MaximumExtendedStorage],[MaximumStorageVolume],[MaxIopsBurstPerformance],[MaxIopsVolume],[MaxThroughputVolume],[MaxVolumeSize],[Memory],[MemoryGib],[MemoryType],[MessageDeliveryFrequency],[MessageDeliveryOrder],[MeteringType],[MeterMode],[MinimumStorageVolume],[MinVolumeSize],[NetworkPerformance],[NormalizationSizeFactor],[Offer],[OperatingSystem],[Operation],[OperationsSupport],[OperationType],[Origin],[OsLicenseModel],[Output],[OutputMode],[OverageType],[PhysicalCores],[PhysicalCpu],[PhysicalGpu],[PhysicalProcessor],[PlanType],[PortSpeed],[PreInstalledSw],[PricingUnit],[ProactiveGuidance],[ProcessorArchitecture],[ProcessorFeatures],[ProductSchemaDescription],[ProgrammaticCaseManagement],[Protocol],[Provisioned],[QueueType],[RealTimeOperation],[Recipient],[ReleaseType],[RequestDescription],[RequestType],[ReserveType],[Resolution],[ResourceEndpoint],[ResourceType],[RootVolume],[RoutingTarget],[RoutingType],[RunningMode],[ServerLocation],[ServiceCode],[ServiceName],[SingleOrDualPass],[SnowballType],[Sockets],[SoftwareIncluded],[SoftwareType],[StandardStorageRetentionIncluded],[Steps],[Storage],[StorageClass],[StorageDescription],[StorageFamily],[StorageMedia],[StorageType],[SubscriptionType],[SupportedModes],[TechnicalSupport],[Tenancy],[TenancySupport],[ThirdPartySoftwareSupport],[ThroughputClass],[Tier],[TierType],[ToCountry],[ToLocation],[ToLocationType],[Training],[TranscodingResult],[TransferType],[TrialProduct],[Type],[UpfrontCommitment],[UsageFamily],[UsageType],[UserVolume],[Vcpu],[Version],[VideoCodec],[VideoFrameRate],[VideoMemoryGib],[VideoQuality],[VideoQualitySetting],[VideoResolution],[VirtualInterfaceType],[VolumeType],[VqSetting],[WhoCanOpenCases],[WithActiveUsers],[WorkforceType],[LeaseContractLength],[OfferingClass],[PurchaseOption],[Restriction],@insertDateTime FROM @AWSCHINA_ProductPriceDetail;
+
+
+
+@AWS_ProductPriceDetail = 
+	EXTRACT
+		[Id] long,
+		[OfferCode] string,
+		[OfferVersionId] int,
+		[OfferVersion] string,
+		[PublicationDate] DateTime?,
+		[EffectiveBeginDate] DateTime,
+		[EffectiveEndDate] DateTime?,
+		[Sku] string,
+		[ProductFamily] string,
+		[TermCode] string,
+		[TermType] string,
+		[TermEffectiveDate] DateTime,
+		[RateCode] string,
+		[RateDescription] string,
+		[RateUnit] string,
+		[PricePerUnit] decimal,
+		[CurrencyCode] string,
+		[BeginRange] string,
+		[EndRange] string,
+		[AcceleratorSize] string,
+		[AcceleratorType] string,
+		[AccessType] string,
+		[AccountAssistance] string,
+		[ActivityType] string,
+		[AddonFeature] string,
+		[AlarmType] string,
+		[ArchitecturalReview] string,
+		[ArchitectureSupport] string,
+		[AttachmentType] string,
+		[AutomaticLabel] string,
+		[Availability] string,
+		[AvailabilityZone] string,
+		[AwsResource] string,
+		[BestPractices] string,
+		[BitRate] string,
+		[BrokerEngine] string,
+		[Bundle] string,
+		[CacheEngine] string,
+		[CacheMemorySizeGb] string,
+		[CapacityStatus] string,
+		[CaseSeverityResponseTimes] string,
+		[Category] string,
+		[ClassificationType] string,
+		[ClockSpeed] string,
+		[CloudSearchVersion] string,
+		[Codec] string,
+		[Comments] string,
+		[ComputeFamily] string,
+		[ComputeType] string,
+		[ContentSource] string,
+		[ContentType] string,
+		[Country] string,
+		[CountsAgainstQuota] string,
+		[CpuType] string,
+		[CurrentGeneration] string,
+		[CustomerServiceAndCommunities] string,
+		[Data] string,
+		[DataAction] string,
+		[DatabaseEdition] string,
+		[DatabaseEngine] string,
+		[DataTransfer] string,
+		[DataTransferOut] string,
+		[DataTransferQuota] string,
+		[DedicatedEbsThroughput] string,
+		[DeploymentLocation] string,
+		[DeploymentModel] string,
+		[DeploymentOption] string,
+		[Description] string,
+		[Device] string,
+		[DeviceOs] string,
+		[DeviceType] string,
+		[DirectConnectLocation] string,
+		[DirectorySize] string,
+		[DirectoryType] string,
+		[DirectoryTypeDescription] string,
+		[Durability] string,
+		[EbsOptimized] string,
+		[Ecu] string,
+		[Edition] string,
+		[ElasticGpuType] string,
+		[ElasticGraphicsType] string,
+		[Endpoint] string,
+		[EndpointType] string,
+		[Engine] string,
+		[EngineCode] string,
+		[EnhancedNetworkingSupport] string,
+		[EnhancedNetworkingSupported] string,
+		[EventType] string,
+		[ExecutionFrequency] string,
+		[ExecutionLocation] string,
+		[ExecutionMode] string,
+		[Feature] string,
+		[FeeCode] string,
+		[FeeDescription] string,
+		[FlowType] string,
+		[FrameRate] string,
+		[FreeOverage] string,
+		[FreeQueryTypes] string,
+		[FreeTier] string,
+		[FreeTrial] string,
+		[FreeUsageIncluded] string,
+		[FrequencyMode] string,
+		[FromLocation] string,
+		[FromLocationType] string,
+		[GeoregionCode] string,
+		[Gets] string,
+		[Gpu] string,
+		[GpuMemory] string,
+		[GraphQLOperation] string,
+		[Group] string,
+		[GroupDescription] string,
+		[HighAvailability] string,
+		[IncludedEvents] string,
+		[IncludedServices] string,
+		[IndexingSource] string,
+		[Input] string,
+		[InputMode] string,
+		[Instance] string,
+		[InstanceCapacityMedium] string,
+		[InstanceCapacityLarge] string,
+		[InstanceCapacityXlarge] string,
+		[InstanceCapacity2xlarge] string,
+		[InstanceCapacity4xlarge] string,
+		[InstanceCapacity8xlarge] string,
+		[InstanceCapacity9xlarge] string,
+		[InstanceCapacity10xlarge] string,
+		[InstanceCapacity12xlarge] string,
+		[InstanceCapacity16xlarge] string,
+		[InstanceCapacity18xlarge] string,
+		[InstanceCapacity24xlarge] string,
+		[InstanceCapacity32xlarge] string,
+		[InstanceFamily] string,
+		[InstanceFunction] string,
+		[InstanceSku] string,
+		[InstanceStorageGb] string,
+		[InstanceType] string,
+		[InstanceTypeFamily] string,
+		[IntelAvxAvailable] string,
+		[IntelAvx2Available] string,
+		[IntelTurboAvailable] string,
+		[Io] string,
+		[isShadow] string,
+		[isWebSocket] string,
+		[Jobnshipp] string,
+		[LabelingTaskType] string,
+		[LaunchSupport] string,
+		[License] string,
+		[LicenseModel] string,
+		[LicenseType] string,
+		[LineType] string,
+		[Location] string,
+		[LocationType] string,
+		[LogsSource] string,
+		[LogsType] string,
+		[MachineLearningProcess] string,
+		[MailboxStorage] string,
+		[MaximumCapacity] string,
+		[MaximumExtendedStorage] string,
+		[MaximumStorageVolume] string,
+		[MaxIopsBurstPerformance] string,
+		[MaxIopsVolume] string,
+		[MaxThroughputVolume] string,
+		[MaxVolumeSize] string,
+		[Memory] string,
+		[MemoryGib] string,
+		[MemoryType] string,
+		[MessageDeliveryFrequency] string,
+		[MessageDeliveryOrder] string,
+		[MeteringType] string,
+		[MeterMode] string,
+		[MinimumStorageVolume] string,
+		[MinVolumeSize] string,
+		[NetworkPerformance] string,
+		[NormalizationSizeFactor] string,
+		[Offer] string,
+		[OperatingSystem] string,
+		[Operation] string,
+		[OperationsSupport] string,
+		[OperationType] string,
+		[Origin] string,
+		[OsLicenseModel] string,
+		[Output] string,
+		[OutputMode] string,
+		[OverageType] string,
+		[PhysicalCores] string,
+		[PhysicalCpu] string,
+		[PhysicalGpu] string,
+		[PhysicalProcessor] string,
+		[PlanType] string,
+		[PortSpeed] string,
+		[PreInstalledSw] string,
+		[PricingUnit] string,
+		[ProactiveGuidance] string,
+		[ProcessorArchitecture] string,
+		[ProcessorFeatures] string,
+		[ProductSchemaDescription] string,
+		[ProgrammaticCaseManagement] string,
+		[Protocol] string,
+		[Provisioned] string,
+		[QueueType] string,
+		[RealTimeOperation] string,
+		[Recipient] string,
+		[ReleaseType] string,
+		[RequestDescription] string,
+		[RequestType] string,
+		[ReserveType] string,
+		[Resolution] string,
+		[ResourceEndpoint] string,
+		[ResourceType] string,
+		[RootVolume] string,
+		[RoutingTarget] string,
+		[RoutingType] string,
+		[RunningMode] string,
+		[ServerLocation] string,
+		[ServiceCode] string,
+		[ServiceName] string,
+		[SingleOrDualPass] string,
+		[SnowballType] string,
+		[Sockets] string,
+		[SoftwareIncluded] string,
+		[SoftwareType] string,
+		[StandardStorageRetentionIncluded] string,
+		[Steps] string,
+		[Storage] string,
+		[StorageClass] string,
+		[StorageDescription] string,
+		[StorageFamily] string,
+		[StorageMedia] string,
+		[StorageType] string,
+		[SubscriptionType] string,
+		[SupportedModes] string,
+		[TechnicalSupport] string,
+		[Tenancy] string,
+		[TenancySupport] string,
+		[ThirdPartySoftwareSupport] string,
+		[ThroughputClass] string,
+		[Tier] string,
+		[TierType] string,
+		[ToCountry] string,
+		[ToLocation] string,
+		[ToLocationType] string,
+		[Training] string,
+		[TranscodingResult] string,
+		[TransferType] string,
+		[TrialProduct] string,
+		[Type] string,
+		[UpfrontCommitment] string,
+		[UsageFamily] string,
+		[UsageType] string,
+		[UserVolume] string,
+		[Vcpu] string,
+		[Version] string,
+		[VideoCodec] string,
+		[VideoFrameRate] string,
+		[VideoMemoryGib] string,
+		[VideoQuality] string,
+		[VideoQualitySetting] string,
+		[VideoResolution] string,
+		[VirtualInterfaceType] string,
+		[VolumeType] string,
+		[VqSetting] string,
+		[WhoCanOpenCases] string,
+		[WithActiveUsers] string,
+		[WorkforceType] string,
+		[LeaseContractLength] string,
+		[OfferingClass] string,
+		[PurchaseOption] string,
+		[Restriction] string
+	FROM @filePath + "AWS_ProductPriceDetail.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+
+@AWSCHINA_ProductPriceDetail = 
+	SELECT * ,EffectiveBeginDate.ToString("yyyy-MM") AS EffectiveBeginMonth FROM @AWS_ProductPriceDetail;
+
+TRUNCATE TABLE csp.CSP_AWS_ProductPriceDetail
+	PARTITION("2012-01"), PARTITION("2012-02"), PARTITION("2012-03"), PARTITION("2012-04"), PARTITION("2012-05"), PARTITION("2012-06"), PARTITION("2012-07"), PARTITION("2012-08"), PARTITION("2012-09"), PARTITION("2012-10"), PARTITION("2012-11"), PARTITION("2012-12"), 
+	PARTITION("2013-01"), PARTITION("2013-02"), PARTITION("2013-03"), PARTITION("2013-04"), PARTITION("2013-05"), PARTITION("2013-06"), PARTITION("2013-07"), PARTITION("2013-08"), PARTITION("2013-09"), PARTITION("2013-10"), PARTITION("2013-11"), PARTITION("2013-12"), 
+	PARTITION("2014-01"), PARTITION("2014-02"), PARTITION("2014-03"), PARTITION("2014-04"), PARTITION("2014-05"), PARTITION("2014-06"), PARTITION("2014-07"), PARTITION("2014-08"), PARTITION("2014-09"), PARTITION("2014-10"), PARTITION("2014-11"), PARTITION("2014-12"), 
+	PARTITION("2015-01"), PARTITION("2015-02"), PARTITION("2015-03"), PARTITION("2015-04"), PARTITION("2015-05"), PARTITION("2015-06"), PARTITION("2015-07"), PARTITION("2015-08"), PARTITION("2015-09"), PARTITION("2015-10"), PARTITION("2015-11"), PARTITION("2015-12"), 
+	PARTITION("2016-01"), PARTITION("2016-02"), PARTITION("2016-03"), PARTITION("2016-04"), PARTITION("2016-05"), PARTITION("2016-06"), PARTITION("2016-07"), PARTITION("2016-08"), PARTITION("2016-09"), PARTITION("2016-10"), PARTITION("2016-11"), PARTITION("2016-12"), 
+	PARTITION("2017-01"), PARTITION("2017-02"), PARTITION("2017-03"), PARTITION("2017-04"), PARTITION("2017-05"), PARTITION("2017-06"), PARTITION("2017-07"), PARTITION("2017-08"), PARTITION("2017-09"), PARTITION("2017-10"), PARTITION("2017-11"), PARTITION("2017-12"), 
+	PARTITION("2018-01"), PARTITION("2018-02"), PARTITION("2018-03"), PARTITION("2018-04"), PARTITION("2018-05"), PARTITION("2018-06"), PARTITION("2018-07"), PARTITION("2018-08"), PARTITION("2018-09"), PARTITION("2018-10"), PARTITION("2018-11"), PARTITION("2018-12"), 
+	PARTITION("2019-01"), PARTITION("2019-02"), PARTITION("2019-03"), PARTITION("2019-04"), PARTITION("2019-05"), PARTITION("2019-06"), PARTITION("2019-07"), PARTITION("2019-08"), PARTITION("2019-09"), PARTITION("2019-10"), PARTITION("2019-11"), PARTITION("2019-12"), 
+	PARTITION("2020-01"), PARTITION("2020-02"), PARTITION("2020-03"), PARTITION("2020-04"), PARTITION("2020-05"), PARTITION("2020-06"), PARTITION("2020-07"), PARTITION("2020-08"), PARTITION("2020-09"), PARTITION("2020-10"), PARTITION("2020-11"), PARTITION("2020-12"), 
+	PARTITION("2021-01"), PARTITION("2021-02"), PARTITION("2021-03"), PARTITION("2021-04"), PARTITION("2021-05"), PARTITION("2021-06"), PARTITION("2021-07"), PARTITION("2021-08"), PARTITION("2021-09"), PARTITION("2021-10"), PARTITION("2021-11"), PARTITION("2021-12"), 
+	PARTITION("2022-01"), PARTITION("2022-02"), PARTITION("2022-03"), PARTITION("2022-04"), PARTITION("2022-05"), PARTITION("2022-06"), PARTITION("2022-07"), PARTITION("2022-08"), PARTITION("2022-09"), PARTITION("2022-10"), PARTITION("2022-11"), PARTITION("2022-12"), 
+	PARTITION("2023-01"), PARTITION("2023-02"), PARTITION("2023-03"), PARTITION("2023-04"), PARTITION("2023-05"), PARTITION("2023-06"), PARTITION("2023-07"), PARTITION("2023-08"), PARTITION("2023-09"), PARTITION("2023-10"), PARTITION("2023-11"), PARTITION("2023-12"), 
+	PARTITION("2024-01"), PARTITION("2024-02"), PARTITION("2024-03"), PARTITION("2024-04"), PARTITION("2024-05"), PARTITION("2024-06"), PARTITION("2024-07"), PARTITION("2024-08"), PARTITION("2024-09"), PARTITION("2024-10"), PARTITION("2024-11"), PARTITION("2024-12"), 
+	PARTITION("2025-01"), PARTITION("2025-02"), PARTITION("2025-03"), PARTITION("2025-04"), PARTITION("2025-05"), PARTITION("2025-06"), PARTITION("2025-07"), PARTITION("2025-08"), PARTITION("2025-09"), PARTITION("2025-10"), PARTITION("2025-11"), PARTITION("2025-12"), 
+	PARTITION("2026-01"), PARTITION("2026-02"), PARTITION("2026-03"), PARTITION("2026-04"), PARTITION("2026-05"), PARTITION("2026-06"), PARTITION("2026-07"), PARTITION("2026-08"), PARTITION("2026-09"), PARTITION("2026-10"), PARTITION("2026-11"), PARTITION("2026-12"), 
+	PARTITION("2027-01"), PARTITION("2027-02"), PARTITION("2027-03"), PARTITION("2027-04"), PARTITION("2027-05"), PARTITION("2027-06"), PARTITION("2027-07"), PARTITION("2027-08"), PARTITION("2027-09"), PARTITION("2027-10"), PARTITION("2027-11"), PARTITION("2027-12"); 
+	
+INSERT INTO csp.CSP_AWS_ProductPriceDetail([Id],[OfferCode],[OfferVersionId],[OfferVersion],[PublicationDate],[EffectiveBeginDate],[EffectiveBeginMonth],[EffectiveEndDate],[Sku],[ProductFamily],[TermCode],[TermType],[TermEffectiveDate],[RateCode],[RateDescription],[RateUnit],[PricePerUnit],[CurrencyCode],[BeginRange],[EndRange],[AcceleratorSize],[AcceleratorType],[AccessType],[AccountAssistance],[ActivityType],[AddonFeature],[AlarmType],[ArchitecturalReview],[ArchitectureSupport],[AttachmentType],[AutomaticLabel],[Availability],[AvailabilityZone],[AwsResource],[BestPractices],[BitRate],[BrokerEngine],[Bundle],[CacheEngine],[CacheMemorySizeGb],[CapacityStatus],[CaseSeverityResponseTimes],[Category],[ClassificationType],[ClockSpeed],[CloudSearchVersion],[Codec],[Comments],[ComputeFamily],[ComputeType],[ContentSource],[ContentType],[Country],[CountsAgainstQuota],[CpuType],[CurrentGeneration],[CustomerServiceAndCommunities],[Data],[DataAction],[DatabaseEdition],[DatabaseEngine],[DataTransfer],[DataTransferOut],[DataTransferQuota],[DedicatedEbsThroughput],[DeploymentLocation],[DeploymentModel],[DeploymentOption],[Description],[Device],[DeviceOs],[DeviceType],[DirectConnectLocation],[DirectorySize],[DirectoryType],[DirectoryTypeDescription],[Durability],[EbsOptimized],[Ecu],[Edition],[ElasticGpuType],[ElasticGraphicsType],[Endpoint],[EndpointType],[Engine],[EngineCode],[EnhancedNetworkingSupport],[EnhancedNetworkingSupported],[EventType],[ExecutionFrequency],[ExecutionLocation],[ExecutionMode],[Feature],[FeeCode],[FeeDescription],[FlowType],[FrameRate],[FreeOverage],[FreeQueryTypes],[FreeTier],[FreeTrial],[FreeUsageIncluded],[FrequencyMode],[FromLocation],[FromLocationType],[GeoregionCode],[Gets],[Gpu],[GpuMemory],[GraphQLOperation],[Group],[GroupDescription],[HighAvailability],[IncludedEvents],[IncludedServices],[IndexingSource],[Input],[InputMode],[Instance],[InstanceCapacityMedium],[InstanceCapacityLarge],[InstanceCapacityXlarge],[InstanceCapacity2xlarge],[InstanceCapacity4xlarge],[InstanceCapacity8xlarge],[InstanceCapacity9xlarge],[InstanceCapacity10xlarge],[InstanceCapacity12xlarge],[InstanceCapacity16xlarge],[InstanceCapacity18xlarge],[InstanceCapacity24xlarge],[InstanceCapacity32xlarge],[InstanceFamily],[InstanceFunction],[InstanceSku],[InstanceStorageGb],[InstanceType],[InstanceTypeFamily],[IntelAvxAvailable],[IntelAvx2Available],[IntelTurboAvailable],[Io],[isShadow],[isWebSocket],[Jobnshipp],[LabelingTaskType],[LaunchSupport],[License],[LicenseModel],[LicenseType],[LineType],[Location],[LocationType],[LogsSource],[LogsType],[MachineLearningProcess],[MailboxStorage],[MaximumCapacity],[MaximumExtendedStorage],[MaximumStorageVolume],[MaxIopsBurstPerformance],[MaxIopsVolume],[MaxThroughputVolume],[MaxVolumeSize],[Memory],[MemoryGib],[MemoryType],[MessageDeliveryFrequency],[MessageDeliveryOrder],[MeteringType],[MeterMode],[MinimumStorageVolume],[MinVolumeSize],[NetworkPerformance],[NormalizationSizeFactor],[Offer],[OperatingSystem],[Operation],[OperationsSupport],[OperationType],[Origin],[OsLicenseModel],[Output],[OutputMode],[OverageType],[PhysicalCores],[PhysicalCpu],[PhysicalGpu],[PhysicalProcessor],[PlanType],[PortSpeed],[PreInstalledSw],[PricingUnit],[ProactiveGuidance],[ProcessorArchitecture],[ProcessorFeatures],[ProductSchemaDescription],[ProgrammaticCaseManagement],[Protocol],[Provisioned],[QueueType],[RealTimeOperation],[Recipient],[ReleaseType],[RequestDescription],[RequestType],[ReserveType],[Resolution],[ResourceEndpoint],[ResourceType],[RootVolume],[RoutingTarget],[RoutingType],[RunningMode],[ServerLocation],[ServiceCode],[ServiceName],[SingleOrDualPass],[SnowballType],[Sockets],[SoftwareIncluded],[SoftwareType],[StandardStorageRetentionIncluded],[Steps],[Storage],[StorageClass],[StorageDescription],[StorageFamily],[StorageMedia],[StorageType],[SubscriptionType],[SupportedModes],[TechnicalSupport],[Tenancy],[TenancySupport],[ThirdPartySoftwareSupport],[ThroughputClass],[Tier],[TierType],[ToCountry],[ToLocation],[ToLocationType],[Training],[TranscodingResult],[TransferType],[TrialProduct],[Type],[UpfrontCommitment],[UsageFamily],[UsageType],[UserVolume],[Vcpu],[Version],[VideoCodec],[VideoFrameRate],[VideoMemoryGib],[VideoQuality],[VideoQualitySetting],[VideoResolution],[VirtualInterfaceType],[VolumeType],[VqSetting],[WhoCanOpenCases],[WithActiveUsers],[WorkforceType],[LeaseContractLength],[OfferingClass],[PurchaseOption],[Restriction],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION ("2012-01")
+SELECT [Id],[OfferCode],[OfferVersionId],[OfferVersion],[PublicationDate],[EffectiveBeginDate],[EffectiveBeginMonth],[EffectiveEndDate],[Sku],[ProductFamily],[TermCode],[TermType],[TermEffectiveDate],[RateCode],[RateDescription],[RateUnit],[PricePerUnit],[CurrencyCode],[BeginRange],[EndRange],[AcceleratorSize],[AcceleratorType],[AccessType],[AccountAssistance],[ActivityType],[AddonFeature],[AlarmType],[ArchitecturalReview],[ArchitectureSupport],[AttachmentType],[AutomaticLabel],[Availability],[AvailabilityZone],[AwsResource],[BestPractices],[BitRate],[BrokerEngine],[Bundle],[CacheEngine],[CacheMemorySizeGb],[CapacityStatus],[CaseSeverityResponseTimes],[Category],[ClassificationType],[ClockSpeed],[CloudSearchVersion],[Codec],[Comments],[ComputeFamily],[ComputeType],[ContentSource],[ContentType],[Country],[CountsAgainstQuota],[CpuType],[CurrentGeneration],[CustomerServiceAndCommunities],[Data],[DataAction],[DatabaseEdition],[DatabaseEngine],[DataTransfer],[DataTransferOut],[DataTransferQuota],[DedicatedEbsThroughput],[DeploymentLocation],[DeploymentModel],[DeploymentOption],[Description],[Device],[DeviceOs],[DeviceType],[DirectConnectLocation],[DirectorySize],[DirectoryType],[DirectoryTypeDescription],[Durability],[EbsOptimized],[Ecu],[Edition],[ElasticGpuType],[ElasticGraphicsType],[Endpoint],[EndpointType],[Engine],[EngineCode],[EnhancedNetworkingSupport],[EnhancedNetworkingSupported],[EventType],[ExecutionFrequency],[ExecutionLocation],[ExecutionMode],[Feature],[FeeCode],[FeeDescription],[FlowType],[FrameRate],[FreeOverage],[FreeQueryTypes],[FreeTier],[FreeTrial],[FreeUsageIncluded],[FrequencyMode],[FromLocation],[FromLocationType],[GeoregionCode],[Gets],[Gpu],[GpuMemory],[GraphQLOperation],[Group],[GroupDescription],[HighAvailability],[IncludedEvents],[IncludedServices],[IndexingSource],[Input],[InputMode],[Instance],[InstanceCapacityMedium],[InstanceCapacityLarge],[InstanceCapacityXlarge],[InstanceCapacity2xlarge],[InstanceCapacity4xlarge],[InstanceCapacity8xlarge],[InstanceCapacity9xlarge],[InstanceCapacity10xlarge],[InstanceCapacity12xlarge],[InstanceCapacity16xlarge],[InstanceCapacity18xlarge],[InstanceCapacity24xlarge],[InstanceCapacity32xlarge],[InstanceFamily],[InstanceFunction],[InstanceSku],[InstanceStorageGb],[InstanceType],[InstanceTypeFamily],[IntelAvxAvailable],[IntelAvx2Available],[IntelTurboAvailable],[Io],[isShadow],[isWebSocket],[Jobnshipp],[LabelingTaskType],[LaunchSupport],[License],[LicenseModel],[LicenseType],[LineType],[Location],[LocationType],[LogsSource],[LogsType],[MachineLearningProcess],[MailboxStorage],[MaximumCapacity],[MaximumExtendedStorage],[MaximumStorageVolume],[MaxIopsBurstPerformance],[MaxIopsVolume],[MaxThroughputVolume],[MaxVolumeSize],[Memory],[MemoryGib],[MemoryType],[MessageDeliveryFrequency],[MessageDeliveryOrder],[MeteringType],[MeterMode],[MinimumStorageVolume],[MinVolumeSize],[NetworkPerformance],[NormalizationSizeFactor],[Offer],[OperatingSystem],[Operation],[OperationsSupport],[OperationType],[Origin],[OsLicenseModel],[Output],[OutputMode],[OverageType],[PhysicalCores],[PhysicalCpu],[PhysicalGpu],[PhysicalProcessor],[PlanType],[PortSpeed],[PreInstalledSw],[PricingUnit],[ProactiveGuidance],[ProcessorArchitecture],[ProcessorFeatures],[ProductSchemaDescription],[ProgrammaticCaseManagement],[Protocol],[Provisioned],[QueueType],[RealTimeOperation],[Recipient],[ReleaseType],[RequestDescription],[RequestType],[ReserveType],[Resolution],[ResourceEndpoint],[ResourceType],[RootVolume],[RoutingTarget],[RoutingType],[RunningMode],[ServerLocation],[ServiceCode],[ServiceName],[SingleOrDualPass],[SnowballType],[Sockets],[SoftwareIncluded],[SoftwareType],[StandardStorageRetentionIncluded],[Steps],[Storage],[StorageClass],[StorageDescription],[StorageFamily],[StorageMedia],[StorageType],[SubscriptionType],[SupportedModes],[TechnicalSupport],[Tenancy],[TenancySupport],[ThirdPartySoftwareSupport],[ThroughputClass],[Tier],[TierType],[ToCountry],[ToLocation],[ToLocationType],[Training],[TranscodingResult],[TransferType],[TrialProduct],[Type],[UpfrontCommitment],[UsageFamily],[UsageType],[UserVolume],[Vcpu],[Version],[VideoCodec],[VideoFrameRate],[VideoMemoryGib],[VideoQuality],[VideoQualitySetting],[VideoResolution],[VirtualInterfaceType],[VolumeType],[VqSetting],[WhoCanOpenCases],[WithActiveUsers],[WorkforceType],[LeaseContractLength],[OfferingClass],[PurchaseOption],[Restriction],@insertDateTime FROM @AWS_ProductPriceDetail;
+
+
+
+@AWS_ProductAttributes = 
+	EXTRACT
+		[Id] long,
+		[ProductId] long,
+		[Name] string,
+		[Value] string
+	FROM @filePath + "AWS_ProductAttributes.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@AWS_ProductAttributes = 
+	SELECT * , rn/5000000 AS [_PartitionNumber] FROM
+		(SELECT * ,ROW_NUMBER() OVER(ORDER BY [Id] ASC) AS rn FROM @AWS_ProductAttributes) AS temp;
+
+TRUNCATE TABLE csp.CSP_AWS_ProductAttributes PARTITION(0),
+	PARTITION(1),PARTITION(2),PARTITION(3),PARTITION(4),PARTITION(5),PARTITION(6),PARTITION(7),PARTITION(8),PARTITION(9),PARTITION(10),
+	PARTITION(11),PARTITION(12),PARTITION(13),PARTITION(14),PARTITION(15),PARTITION(16),PARTITION(17),PARTITION(18),PARTITION(19),PARTITION(20),
+	PARTITION(21),PARTITION(22),PARTITION(23),PARTITION(24),PARTITION(25),PARTITION(26),PARTITION(27),PARTITION(28),PARTITION(29),PARTITION(30),
+	PARTITION(31),PARTITION(32),PARTITION(33),PARTITION(34),PARTITION(35),PARTITION(36),PARTITION(37),PARTITION(38),PARTITION(39),PARTITION(40),
+	PARTITION(41),PARTITION(42),PARTITION(43),PARTITION(44),PARTITION(45),PARTITION(46),PARTITION(47),PARTITION(48),PARTITION(49),PARTITION(50),
+	PARTITION(51),PARTITION(52),PARTITION(53),PARTITION(54),PARTITION(55),PARTITION(56),PARTITION(57),PARTITION(58),PARTITION(59),PARTITION(60),
+	PARTITION(61),PARTITION(62),PARTITION(63),PARTITION(64),PARTITION(65),PARTITION(66),PARTITION(67),PARTITION(68),PARTITION(69),PARTITION(70),
+	PARTITION(71),PARTITION(72),PARTITION(73),PARTITION(74),PARTITION(75),PARTITION(76),PARTITION(77),PARTITION(78),PARTITION(79),PARTITION(80),
+	PARTITION(81),PARTITION(82),PARTITION(83),PARTITION(84),PARTITION(85),PARTITION(86),PARTITION(87),PARTITION(88),PARTITION(89),PARTITION(90),
+	PARTITION(91),PARTITION(92),PARTITION(93),PARTITION(94),PARTITION(95),PARTITION(96),PARTITION(97),PARTITION(98),PARTITION(99),PARTITION(100),
+	PARTITION(101),PARTITION(102),PARTITION(103),PARTITION(104),PARTITION(105),PARTITION(106),PARTITION(107),PARTITION(108),PARTITION(109),PARTITION(110),
+	PARTITION(111),PARTITION(112),PARTITION(113),PARTITION(114),PARTITION(115),PARTITION(116),PARTITION(117),PARTITION(118),PARTITION(119),PARTITION(120),
+	PARTITION(121),PARTITION(122),PARTITION(123),PARTITION(124),PARTITION(125),PARTITION(126),PARTITION(127),PARTITION(128),PARTITION(129),PARTITION(130),
+	PARTITION(131),PARTITION(132),PARTITION(133),PARTITION(134),PARTITION(135),PARTITION(136),PARTITION(137),PARTITION(138),PARTITION(139),PARTITION(140),
+	PARTITION(141),PARTITION(142),PARTITION(143),PARTITION(144),PARTITION(145),PARTITION(146),PARTITION(147),PARTITION(148),PARTITION(149),PARTITION(150),
+	PARTITION(151),PARTITION(152),PARTITION(153),PARTITION(154),PARTITION(155),PARTITION(156),PARTITION(157),PARTITION(158),PARTITION(159),PARTITION(160),
+	PARTITION(161),PARTITION(162),PARTITION(163),PARTITION(164),PARTITION(165),PARTITION(166),PARTITION(167),PARTITION(168),PARTITION(169),PARTITION(170),
+	PARTITION(171),PARTITION(172),PARTITION(173),PARTITION(174),PARTITION(175),PARTITION(176),PARTITION(177),PARTITION(178),PARTITION(179),PARTITION(180),
+	PARTITION(181),PARTITION(182),PARTITION(183),PARTITION(184),PARTITION(185),PARTITION(186),PARTITION(187),PARTITION(188),PARTITION(189),PARTITION(190),
+	PARTITION(191),PARTITION(192),PARTITION(193),PARTITION(194),PARTITION(195),PARTITION(196),PARTITION(197),PARTITION(198),PARTITION(199),PARTITION(200);
+
+INSERT INTO csp.CSP_AWS_ProductAttributes([Id], [ProductId], [Name],[Value],[InsertDateTime],[_PartitionNumber])
+ON INTEGRITY VIOLATION MOVE TO PARTITION (0)
+SELECT [Id], [ProductId], [Name],[Value], @insertDateTime,[_PartitionNumber] FROM @AWS_ProductAttributes;
+
+
+@AWS_Product = 
+	EXTRACT
+		[Id] long,
+		[OfferVersionId] int,
+		[Sku] string,
+		[ProductFamily] string
+	FROM @filePath + "AWS_Product.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@AWS_Product = 
+	SELECT * , rn/5000000 AS [_PartitionNumber] FROM
+		(SELECT * ,ROW_NUMBER() OVER(ORDER BY [Id] ASC) AS rn FROM @AWS_Product) AS temp;
+	
+TRUNCATE TABLE csp.CSP_AWS_Product PARTITION(0),
+	PARTITION(1),PARTITION(2),PARTITION(3),PARTITION(4),PARTITION(5),PARTITION(6),PARTITION(7),PARTITION(8),PARTITION(9),PARTITION(10),
+	PARTITION(11),PARTITION(12),PARTITION(13),PARTITION(14),PARTITION(15),PARTITION(16),PARTITION(17),PARTITION(18),PARTITION(19),PARTITION(20),
+	PARTITION(21),PARTITION(22),PARTITION(23),PARTITION(24),PARTITION(25),PARTITION(26),PARTITION(27),PARTITION(28),PARTITION(29),PARTITION(30),
+	PARTITION(31),PARTITION(32),PARTITION(33),PARTITION(34),PARTITION(35),PARTITION(36),PARTITION(37),PARTITION(38),PARTITION(39),PARTITION(40),
+	PARTITION(41),PARTITION(42),PARTITION(43),PARTITION(44),PARTITION(45),PARTITION(46),PARTITION(47),PARTITION(48),PARTITION(49),PARTITION(50);
+
+INSERT INTO csp.CSP_AWS_Product([Id], [OfferVersionId], [Sku], [InsertDateTime],[ProductFamily])
+ON INTEGRITY VIOLATION MOVE TO PARTITION (0)
+SELECT [Id], [OfferVersionId], [Sku], @insertDateTime,[ProductFamily] FROM @AWS_Product;
+
+
+@AWS_PriceTermAttributes = 
+	EXTRACT
+		[Id] long,
+		[PriceTermId] long,
+		[Name] string,
+		[Value] string
+	FROM @filePath + "AWS_PriceTermAttributes.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@AWS_PriceTermAttributes = 
+	SELECT * , rn/5000000 AS [_PartitionNumber] FROM
+		(SELECT * ,ROW_NUMBER() OVER(ORDER BY [Id] ASC) AS rn FROM @AWS_PriceTermAttributes) AS temp;
+	
+TRUNCATE TABLE csp.CSP_AWS_PriceTermAttributes PARTITION (0),
+	PARTITION(1),PARTITION(2),PARTITION(3),PARTITION(4),PARTITION(5),PARTITION(6),PARTITION(7),PARTITION(8),PARTITION(9),PARTITION(10),
+	PARTITION(11),PARTITION(12),PARTITION(13),PARTITION(14),PARTITION(15),PARTITION(16),PARTITION(17),PARTITION(18),PARTITION(19),PARTITION(20),
+	PARTITION(21),PARTITION(22),PARTITION(23),PARTITION(24),PARTITION(25),PARTITION(26),PARTITION(27),PARTITION(28),PARTITION(29),PARTITION(30),
+	PARTITION(31),PARTITION(32),PARTITION(33),PARTITION(34),PARTITION(35),PARTITION(36),PARTITION(37),PARTITION(38),PARTITION(39),PARTITION(40),
+	PARTITION(41),PARTITION(42),PARTITION(43),PARTITION(44),PARTITION(45),PARTITION(46),PARTITION(47),PARTITION(48),PARTITION(49),PARTITION(50),
+	PARTITION(51),PARTITION(52),PARTITION(53),PARTITION(54),PARTITION(55),PARTITION(56),PARTITION(57),PARTITION(58),PARTITION(59),PARTITION(60),
+	PARTITION(61),PARTITION(62),PARTITION(63),PARTITION(64),PARTITION(65),PARTITION(66),PARTITION(67),PARTITION(68),PARTITION(69),PARTITION(70),
+	PARTITION(71),PARTITION(72),PARTITION(73),PARTITION(74),PARTITION(75),PARTITION(76),PARTITION(77),PARTITION(78),PARTITION(79),PARTITION(80);
+
+INSERT INTO csp.CSP_AWS_PriceTermAttributes([Id], [PriceTermId], [Name], [Value],[InsertDateTime],[_PartitionNumber])
+ON INTEGRITY VIOLATION MOVE TO PARTITION (0)
+SELECT [Id], [PriceTermId], [Name], [Value], @insertDateTime,[_PartitionNumber] FROM @AWS_PriceTermAttributes;
+
+
+@AWS_PriceTerm = 
+	EXTRACT
+		[Id] long,
+		[ProductId] long,
+		[TermType] string,
+		[TermCode] string,
+		[EffectiveDate] DateTime
+	FROM @filePath + "AWS_PriceTerm.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@AWS_PriceTerm = 
+	SELECT *,EffectiveDate.ToString("yyyy-MM") AS EffectiveMonth FROM AWS_PriceTerm;
+	
+TRUNCATE TABLE csp.CSP_AWS_PriceTerm
+	PARTITION("2012-01"), PARTITION("2012-02"), PARTITION("2012-03"), PARTITION("2012-04"), PARTITION("2012-05"), PARTITION("2012-06"), PARTITION("2012-07"), PARTITION("2012-08"), PARTITION("2012-09"), PARTITION("2012-10"), PARTITION("2012-11"), PARTITION("2012-12"), 
+	PARTITION("2013-01"), PARTITION("2013-02"), PARTITION("2013-03"), PARTITION("2013-04"), PARTITION("2013-05"), PARTITION("2013-06"), PARTITION("2013-07"), PARTITION("2013-08"), PARTITION("2013-09"), PARTITION("2013-10"), PARTITION("2013-11"), PARTITION("2013-12"), 
+	PARTITION("2014-01"), PARTITION("2014-02"), PARTITION("2014-03"), PARTITION("2014-04"), PARTITION("2014-05"), PARTITION("2014-06"), PARTITION("2014-07"), PARTITION("2014-08"), PARTITION("2014-09"), PARTITION("2014-10"), PARTITION("2014-11"), PARTITION("2014-12"), 
+	PARTITION("2015-01"), PARTITION("2015-02"), PARTITION("2015-03"), PARTITION("2015-04"), PARTITION("2015-05"), PARTITION("2015-06"), PARTITION("2015-07"), PARTITION("2015-08"), PARTITION("2015-09"), PARTITION("2015-10"), PARTITION("2015-11"), PARTITION("2015-12"), 
+	PARTITION("2016-01"), PARTITION("2016-02"), PARTITION("2016-03"), PARTITION("2016-04"), PARTITION("2016-05"), PARTITION("2016-06"), PARTITION("2016-07"), PARTITION("2016-08"), PARTITION("2016-09"), PARTITION("2016-10"), PARTITION("2016-11"), PARTITION("2016-12"), 
+	PARTITION("2017-01"), PARTITION("2017-02"), PARTITION("2017-03"), PARTITION("2017-04"), PARTITION("2017-05"), PARTITION("2017-06"), PARTITION("2017-07"), PARTITION("2017-08"), PARTITION("2017-09"), PARTITION("2017-10"), PARTITION("2017-11"), PARTITION("2017-12"), 
+	PARTITION("2018-01"), PARTITION("2018-02"), PARTITION("2018-03"), PARTITION("2018-04"), PARTITION("2018-05"), PARTITION("2018-06"), PARTITION("2018-07"), PARTITION("2018-08"), PARTITION("2018-09"), PARTITION("2018-10"), PARTITION("2018-11"), PARTITION("2018-12"), 
+	PARTITION("2019-01"), PARTITION("2019-02"), PARTITION("2019-03"), PARTITION("2019-04"), PARTITION("2019-05"), PARTITION("2019-06"), PARTITION("2019-07"), PARTITION("2019-08"), PARTITION("2019-09"), PARTITION("2019-10"), PARTITION("2019-11"), PARTITION("2019-12"), 
+	PARTITION("2020-01"), PARTITION("2020-02"), PARTITION("2020-03"), PARTITION("2020-04"), PARTITION("2020-05"), PARTITION("2020-06"), PARTITION("2020-07"), PARTITION("2020-08"), PARTITION("2020-09"), PARTITION("2020-10"), PARTITION("2020-11"), PARTITION("2020-12"), 
+	PARTITION("2021-01"), PARTITION("2021-02"), PARTITION("2021-03"), PARTITION("2021-04"), PARTITION("2021-05"), PARTITION("2021-06"), PARTITION("2021-07"), PARTITION("2021-08"), PARTITION("2021-09"), PARTITION("2021-10"), PARTITION("2021-11"), PARTITION("2021-12"), 
+	PARTITION("2022-01"), PARTITION("2022-02"), PARTITION("2022-03"), PARTITION("2022-04"), PARTITION("2022-05"), PARTITION("2022-06"), PARTITION("2022-07"), PARTITION("2022-08"), PARTITION("2022-09"), PARTITION("2022-10"), PARTITION("2022-11"), PARTITION("2022-12"), 
+	PARTITION("2023-01"), PARTITION("2023-02"), PARTITION("2023-03"), PARTITION("2023-04"), PARTITION("2023-05"), PARTITION("2023-06"), PARTITION("2023-07"), PARTITION("2023-08"), PARTITION("2023-09"), PARTITION("2023-10"), PARTITION("2023-11"), PARTITION("2023-12"), 
+	PARTITION("2024-01"), PARTITION("2024-02"), PARTITION("2024-03"), PARTITION("2024-04"), PARTITION("2024-05"), PARTITION("2024-06"), PARTITION("2024-07"), PARTITION("2024-08"), PARTITION("2024-09"), PARTITION("2024-10"), PARTITION("2024-11"), PARTITION("2024-12"), 
+	PARTITION("2025-01"), PARTITION("2025-02"), PARTITION("2025-03"), PARTITION("2025-04"), PARTITION("2025-05"), PARTITION("2025-06"), PARTITION("2025-07"), PARTITION("2025-08"), PARTITION("2025-09"), PARTITION("2025-10"), PARTITION("2025-11"), PARTITION("2025-12"), 
+	PARTITION("2026-01"), PARTITION("2026-02"), PARTITION("2026-03"), PARTITION("2026-04"), PARTITION("2026-05"), PARTITION("2026-06"), PARTITION("2026-07"), PARTITION("2026-08"), PARTITION("2026-09"), PARTITION("2026-10"), PARTITION("2026-11"), PARTITION("2026-12"), 
+	PARTITION("2027-01"), PARTITION("2027-02"), PARTITION("2027-03"), PARTITION("2027-04"), PARTITION("2027-05"), PARTITION("2027-06"), PARTITION("2027-07"), PARTITION("2027-08"), PARTITION("2027-09"), PARTITION("2027-10"), PARTITION("2027-11"), PARTITION("2027-12"); 
+	
+INSERT INTO csp.CSP_AWS_PriceTerm([Id],[ProductId],[TermType],[TermCode],[EffectiveDate],EffectiveMonth,InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION ("2012-01")
+SELECT [Id],[ProductId],[TermType],[TermCode],[EffectiveDate],EffectiveMonth,@insertDateTime FROM @AWS_PriceTerm;
+
+
+@AWS_PriceRate = 
+	EXTRACT
+		[Id] long,
+		[PriceTermId] long,
+		[RateCode] string,
+		[Description] string,
+		[Unit] string,
+		[PricePerUnit] decimal,
+		[CurrencyCode] string,
+		[BeginRange] string,
+		[EndRange] string
+	FROM @filePath + "AWS_PriceRate.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+@AWS_PriceRate = 
+	SELECT * , rn/5000000 AS [_PartitionNumber] FROM
+		(SELECT * ,ROW_NUMBER() OVER(ORDER BY [Id] ASC) AS rn FROM @AWS_PriceRate) AS temp;
+	
+TRUNCATE TABLE csp.CSP_AWS_PriceRate PARTITION(0),
+	PARTITION(1),PARTITION(2),PARTITION(3),PARTITION(4),PARTITION(5),PARTITION(6),PARTITION(7),PARTITION(8),PARTITION(9),PARTITION(10),
+	PARTITION(11),PARTITION(12),PARTITION(13),PARTITION(14),PARTITION(15),PARTITION(16),PARTITION(17),PARTITION(18),PARTITION(19),PARTITION(20),
+	PARTITION(21),PARTITION(22),PARTITION(23),PARTITION(24),PARTITION(25),PARTITION(26),PARTITION(27),PARTITION(28),PARTITION(29),PARTITION(30),
+	PARTITION(31),PARTITION(32),PARTITION(33),PARTITION(34),PARTITION(35),PARTITION(36),PARTITION(37),PARTITION(38),PARTITION(39),PARTITION(40),
+	PARTITION(41),PARTITION(42),PARTITION(43),PARTITION(44),PARTITION(45),PARTITION(46),PARTITION(47),PARTITION(48),PARTITION(49),PARTITION(50),
+	PARTITION(51),PARTITION(52),PARTITION(53),PARTITION(54),PARTITION(55),PARTITION(56),PARTITION(57),PARTITION(58),PARTITION(59),PARTITION(60),
+	PARTITION(61),PARTITION(62),PARTITION(63),PARTITION(64),PARTITION(65),PARTITION(66),PARTITION(67),PARTITION(68),PARTITION(69),PARTITION(70),
+	PARTITION(71),PARTITION(72),PARTITION(73),PARTITION(74),PARTITION(75),PARTITION(76),PARTITION(77),PARTITION(78),PARTITION(79),PARTITION(80),
+	PARTITION(81),PARTITION(82),PARTITION(83),PARTITION(84),PARTITION(85),PARTITION(86),PARTITION(87),PARTITION(88),PARTITION(89),PARTITION(90),
+	PARTITION(91),PARTITION(92),PARTITION(93),PARTITION(94),PARTITION(95),PARTITION(96),PARTITION(97),PARTITION(98),PARTITION(99),PARTITION(100);
+
+INSERT INTO csp.CSP_AWS_PriceRate([Id],[PriceTermId],[RateCode],[Description],[Unit],[PricePerUnit],[CurrencyCode],[BeginRange],[EndRange],[_PartitionNumber],InsertDateTime)
+ON INTEGRITY VIOLATION MOVE TO PARTITION (0)
+SELECT [Id],[PriceTermId],[RateCode],[Description],[Unit],[PricePerUnit],[CurrencyCode],[BeginRange],[EndRange],[_PartitionNumber],@insertDateTime FROM @AWS_PriceRate;
+
+
+@AWS_SpotPriceHistory = 
+	EXTRACT
+		[ReportType] string,
+		[Region_AvailZone] string,
+		[InstanceType] string,
+		[OSType] string,
+		[SpotPrice] float?,
+		[EffectiveDateUTC] DateTime,
+		[CaptureDatePST] DateTime
+	FROM @filePath + "AWS_SpotPriceHistory.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_AWS_SpotPriceHistory;
+
+INSERT INTO csp.CSP_AWS_SpotPriceHistory([ReportType],[Region_AvailZone],[InstanceType],[OSType],[SpotPrice],[EffectiveDateUTC],[CaptureDatePST],InsertDateTime)
+SELECT [ReportType],[Region_AvailZone],[InstanceType],[OSType],[SpotPrice],[EffectiveDateUTC],[CaptureDatePST],@insertDateTime FROM @AWS_SpotPriceHistory;
+
+
+@GCP_VMTypes_dual = 
+	EXTRACT
+		[MachineType] string,
+		[vCPUs] int?,
+		[MemoryGB] float?,
+		[UsageType] string,
+		[vCPU_SKUDescription_Prefix] string,
+		[Memory_SKUDescription_Prefix] string,
+		[Notes] string,
+		[DateAdded] DateTime?,
+		[DateModified] DateTime?
+	FROM @filePath + "GCP_VMTypes_dual.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_VMTypes_dual;
+
+INSERT INTO csp.CSP_GCP_VMTypes_dual([MachineType],[vCPUs],[MemoryGB],[UsageType],[vCPU_SKUDescription_Prefix],[Memory_SKUDescription_Prefix],[Notes],[DateAdded],[DateModified],InsertDateTime)
+SELECT [MachineType],[vCPUs],[MemoryGB],[UsageType],[vCPU_SKUDescription_Prefix],[Memory_SKUDescription_Prefix],[Notes],[DateAdded],[DateModified],@insertDateTime FROM @GCP_VMTypes_dual;
+
+
+@GCP_VMTypes_single = 
+	EXTRACT
+		[MachineType] string,
+		[vCPUs_GPUs] int?,
+		[MemoryGB] float?,
+		[UsageType] string,
+		[StartUsageAmount_RETIRED] int?,
+		[vCPU_GPU_SKUDescription_Prefix] string,
+		[Notes] string,
+		[DateAdded] DateTime?,
+		[DateModified] DateTime?
+	FROM @filePath + "GCP_VMTypes_single.tsv"
+	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
+	
+TRUNCATE TABLE csp.CSP_GCP_VMTypes_single;
+
+INSERT INTO csp.CSP_GCP_VMTypes_single([MachineType],[vCPUs_GPUs],[MemoryGB],[UsageType],[StartUsageAmount_RETIRED],[vCPU_GPU_SKUDescription_Prefix],[Notes],[DateAdded],[DateModified],InsertDateTime)
+SELECT [MachineType],[vCPUs_GPUs],[MemoryGB],[UsageType],[StartUsageAmount_RETIRED],[vCPU_GPU_SKUDescription_Prefix],[Notes],[DateAdded],[DateModified],@insertDateTime FROM @GCP_VMTypes_single;
+

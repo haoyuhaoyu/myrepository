@@ -1,0 +1,55 @@
+USE DATABASE Technology
+
+//Repos
+
+TRUNCATE TABLE [gh].[GitHubRepos];
+INSERT INTO [gh].[GitHubRepos] ()
+SELECT  FROM;
+
+//User
+
+TRUNCATE TABLE [gh].[GitHubUser];
+INSERT INTO [gh].[GitHubUser] ()
+SELECT  FROM;
+
+//PullRequest
+
+TRUNCATE TABLE [gh].[GitHubPullRequest];
+INSERT INTO [gh].[GitHubPullRequest] ()
+SELECT  FROM;
+
+//Issue
+
+TRUNCATE TABLE [gh].[GitHubIssue];
+INSERT INTO [gh].[GitHubIssue] ()
+SELECT  FROM;
+
+//PullRequestComment
+
+TRUNCATE TABLE [gh].[GitHubPullRequestComment];
+INSERT INTO [gh].[GitHubPullRequestComment] ()
+SELECT  FROM;
+
+//IssueComment
+
+TRUNCATE TABLE [gh].[GitHubIssueComment];
+INSERT INTO [gh].[GitHubIssueComment] ()
+SELECT  FROM;
+
+//ReposReadme
+
+TRUNCATE TABLE [gh].[GitHubReposReadme];
+INSERT INTO [gh].[GitHubReposReadme] ()
+SELECT  FROM;
+
+//ReposTopic
+
+TRUNCATE TABLE [gh].[GitHubReposTopic];
+INSERT INTO [gh].[GitHubReposTopic] ()
+SELECT  FROM;
+
+//UserOrganization
+
+TRUNCATE TABLE [gh].[GitHubUserOrganization];
+INSERT INTO [gh].[GitHubUserOrganization] ()
+SELECT  FROM;
