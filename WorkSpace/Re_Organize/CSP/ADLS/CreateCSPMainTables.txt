@@ -209,9 +209,10 @@ CREATE TABLE IF NOT EXISTS [csp].[CSP_AZURE_MeterPriceDetail](
 	[EffectiveStartDate] DateTime,
 	[EffectiveEndDate] DateTime,
 	[DataSourceId] int,
-	[InsertDateTime] DateTime?
+	[InsertDateTime] DateTime?,
+	INDEX PK_AZ_MeterPriceDetail CLUSTERED([ResourceGuid] ASC,[EffectiveStartDate] ASC,[DataSourceId] ASC)
 )
-DISTRIBUTED BY HASH ([ResourceGuid]);
+DISTRIBUTED BY HASH ([ResourceGuid],[EffectiveStartDate],[DataSourceId]);
 
 CREATE TABLE IF NOT EXISTS [csp].[CSP_AWSCHINA_Product](
 	[Id] long,
@@ -1072,9 +1073,11 @@ CREATE TABLE IF NOT EXISTS [csp].[CSP_AWS_SpotPriceHistory](
 	[InstanceType] string,
 	[OSType] string,
 	[SpotPrice] float?,
-	[EffectiveDateUTC] DateTime,
-	[CaptureDatePST] DateTime,
-	[InsertDateTime] DateTime?
+	[EffectiveDateUTC] DateTime?,
+	[CaptureDatePST] DateTime?,
+	[InsertDateTime] DateTime?,
+	[_Number] int,
+	INDEX PK_SPHistory CLUSTERED([_Number] ASC)
 )
 DISTRIBUTED BY HASH ([InstanceType]);
 
@@ -1088,7 +1091,9 @@ CREATE TABLE IF NOT EXISTS [csp].[CSP_GCP_VMTypes_dual](
 	[Notes] string,
 	[DateAdded] DateTime?,
 	[DateModified] DateTime?,
-	[InsertDateTime] DateTime?
+	[InsertDateTime] DateTime?,
+	[_Number] int,
+	INDEX PK_VMTypes_d CLUSTERED([_Number] ASC)
 )
 DISTRIBUTED BY HASH ([MachineType]);
 
@@ -1102,6 +1107,8 @@ CREATE TABLE IF NOT EXISTS [csp].[CSP_GCP_VMTypes_single](
 	[Notes] string,
 	[DateAdded] DateTime?,
 	[DateModified] DateTime?,
-	[InsertDateTime] DateTime?
+	[InsertDateTime] DateTime?,
+	[_Number] int,
+	INDEX PK_VMTypes_s CLUSTERED([_Number] ASC)
 )
 DISTRIBUTED BY HASH ([MachineType]);

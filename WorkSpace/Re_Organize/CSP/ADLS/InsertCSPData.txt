@@ -1035,7 +1035,7 @@ SELECT [Id],[OfferCode],[OfferVersionId],[OfferVersion],[PublicationDate],[Effec
 	FROM @filePath + "AWS_ProductPriceDetail.tsv"
 	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
 
-@AWSCHINA_ProductPriceDetail = 
+@AWS_ProductPriceDetail = 
 	SELECT * ,EffectiveBeginDate.ToString("yyyy-MM") AS EffectiveBeginMonth FROM @AWS_ProductPriceDetail;
 
 TRUNCATE TABLE csp.CSP_AWS_ProductPriceDetail
@@ -1072,7 +1072,7 @@ SELECT [Id],[OfferCode],[OfferVersionId],[OfferVersion],[PublicationDate],[Effec
 	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
 	
 @AWS_ProductAttributes = 
-	SELECT * , rn/5000000 AS [_PartitionNumber] FROM
+	SELECT * , (int)(rn/5000000) AS [_PartitionNumber] FROM
 		(SELECT * ,ROW_NUMBER() OVER(ORDER BY [Id] ASC) AS rn FROM @AWS_ProductAttributes) AS temp;
 
 TRUNCATE TABLE csp.CSP_AWS_ProductAttributes PARTITION(0),
@@ -1112,7 +1112,7 @@ SELECT [Id], [ProductId], [Name],[Value], @insertDateTime,[_PartitionNumber] FRO
 	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
 	
 @AWS_Product = 
-	SELECT * , rn/5000000 AS [_PartitionNumber] FROM
+	SELECT * , (int)(rn/5000000) AS [_PartitionNumber] FROM
 		(SELECT * ,ROW_NUMBER() OVER(ORDER BY [Id] ASC) AS rn FROM @AWS_Product) AS temp;
 	
 TRUNCATE TABLE csp.CSP_AWS_Product PARTITION(0),
@@ -1122,9 +1122,9 @@ TRUNCATE TABLE csp.CSP_AWS_Product PARTITION(0),
 	PARTITION(31),PARTITION(32),PARTITION(33),PARTITION(34),PARTITION(35),PARTITION(36),PARTITION(37),PARTITION(38),PARTITION(39),PARTITION(40),
 	PARTITION(41),PARTITION(42),PARTITION(43),PARTITION(44),PARTITION(45),PARTITION(46),PARTITION(47),PARTITION(48),PARTITION(49),PARTITION(50);
 
-INSERT INTO csp.CSP_AWS_Product([Id], [OfferVersionId], [Sku], [InsertDateTime],[ProductFamily])
+INSERT INTO csp.CSP_AWS_Product([Id], [OfferVersionId], [Sku], [InsertDateTime],[ProductFamily],[_PartitionNumber])
 ON INTEGRITY VIOLATION MOVE TO PARTITION (0)
-SELECT [Id], [OfferVersionId], [Sku], @insertDateTime,[ProductFamily] FROM @AWS_Product;
+SELECT [Id], [OfferVersionId], [Sku], @insertDateTime,[ProductFamily],[_PartitionNumber] FROM @AWS_Product;
 
 
 @AWS_PriceTermAttributes = 
@@ -1137,7 +1137,7 @@ SELECT [Id], [OfferVersionId], [Sku], @insertDateTime,[ProductFamily] FROM @AWS_
 	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
 	
 @AWS_PriceTermAttributes = 
-	SELECT * , rn/5000000 AS [_PartitionNumber] FROM
+	SELECT * , (int)(rn/5000000) AS [_PartitionNumber] FROM
 		(SELECT * ,ROW_NUMBER() OVER(ORDER BY [Id] ASC) AS rn FROM @AWS_PriceTermAttributes) AS temp;
 	
 TRUNCATE TABLE csp.CSP_AWS_PriceTermAttributes PARTITION (0),
@@ -1166,7 +1166,7 @@ SELECT [Id], [PriceTermId], [Name], [Value], @insertDateTime,[_PartitionNumber] 
 	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
 	
 @AWS_PriceTerm = 
-	SELECT *,EffectiveDate.ToString("yyyy-MM") AS EffectiveMonth FROM AWS_PriceTerm;
+	SELECT *,EffectiveDate.ToString("yyyy-MM") AS EffectiveMonth FROM @AWS_PriceTerm;
 	
 TRUNCATE TABLE csp.CSP_AWS_PriceTerm
 	PARTITION("2012-01"), PARTITION("2012-02"), PARTITION("2012-03"), PARTITION("2012-04"), PARTITION("2012-05"), PARTITION("2012-06"), PARTITION("2012-07"), PARTITION("2012-08"), PARTITION("2012-09"), PARTITION("2012-10"), PARTITION("2012-11"), PARTITION("2012-12"), 
@@ -1206,7 +1206,7 @@ SELECT [Id],[ProductId],[TermType],[TermCode],[EffectiveDate],EffectiveMonth,@in
 	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
 	
 @AWS_PriceRate = 
-	SELECT * , rn/5000000 AS [_PartitionNumber] FROM
+	SELECT * , (int)(rn/5000000) AS [_PartitionNumber] FROM
 		(SELECT * ,ROW_NUMBER() OVER(ORDER BY [Id] ASC) AS rn FROM @AWS_PriceRate) AS temp;
 	
 TRUNCATE TABLE csp.CSP_AWS_PriceRate PARTITION(0),
@@ -1233,15 +1233,18 @@ SELECT [Id],[PriceTermId],[RateCode],[Description],[Unit],[PricePerUnit],[Curren
 		[InstanceType] string,
 		[OSType] string,
 		[SpotPrice] float?,
-		[EffectiveDateUTC] DateTime,
-		[CaptureDatePST] DateTime
+		[EffectiveDateUTC] DateTime?,
+		[CaptureDatePST] DateTime?
 	FROM @filePath + "AWS_SpotPriceHistory.tsv"
 	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
 	
+@AWS_SpotPriceHistory = 
+	SELECT * , (int)(ROW_NUMBER() OVER(ORDER BY EffectiveDateUTC ASC,ReportType ASC)) AS rn FROM @AWS_SpotPriceHistory;
+	
 TRUNCATE TABLE csp.CSP_AWS_SpotPriceHistory;
 
-INSERT INTO csp.CSP_AWS_SpotPriceHistory([ReportType],[Region_AvailZone],[InstanceType],[OSType],[SpotPrice],[EffectiveDateUTC],[CaptureDatePST],InsertDateTime)
-SELECT [ReportType],[Region_AvailZone],[InstanceType],[OSType],[SpotPrice],[EffectiveDateUTC],[CaptureDatePST],@insertDateTime FROM @AWS_SpotPriceHistory;
+INSERT INTO csp.CSP_AWS_SpotPriceHistory([_Number],[ReportType],[Region_AvailZone],[InstanceType],[OSType],[SpotPrice],[EffectiveDateUTC],[CaptureDatePST],InsertDateTime)
+SELECT [rn],[ReportType],[Region_AvailZone],[InstanceType],[OSType],[SpotPrice],[EffectiveDateUTC],[CaptureDatePST],@insertDateTime FROM @AWS_SpotPriceHistory;
 
 
 @GCP_VMTypes_dual = 
@@ -1258,10 +1261,13 @@ SELECT [ReportType],[Region_AvailZone],[InstanceType],[OSType],[SpotPrice],[Effe
 	FROM @filePath + "GCP_VMTypes_dual.tsv"
 	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
 	
+@GCP_VMTypes_dual = 
+	SELECT * , (int)(ROW_NUMBER() OVER(ORDER BY DateModified ASC,MachineType ASC)) AS rn FROM @GCP_VMTypes_dual;
+	
 TRUNCATE TABLE csp.CSP_GCP_VMTypes_dual;
 
-INSERT INTO csp.CSP_GCP_VMTypes_dual([MachineType],[vCPUs],[MemoryGB],[UsageType],[vCPU_SKUDescription_Prefix],[Memory_SKUDescription_Prefix],[Notes],[DateAdded],[DateModified],InsertDateTime)
-SELECT [MachineType],[vCPUs],[MemoryGB],[UsageType],[vCPU_SKUDescription_Prefix],[Memory_SKUDescription_Prefix],[Notes],[DateAdded],[DateModified],@insertDateTime FROM @GCP_VMTypes_dual;
+INSERT INTO csp.CSP_GCP_VMTypes_dual([_Number],[MachineType],[vCPUs],[MemoryGB],[UsageType],[vCPU_SKUDescription_Prefix],[Memory_SKUDescription_Prefix],[Notes],[DateAdded],[DateModified],InsertDateTime)
+SELECT [rn],[MachineType],[vCPUs],[MemoryGB],[UsageType],[vCPU_SKUDescription_Prefix],[Memory_SKUDescription_Prefix],[Notes],[DateAdded],[DateModified],@insertDateTime FROM @GCP_VMTypes_dual;
 
 
 @GCP_VMTypes_single = 
@@ -1278,8 +1284,11 @@ SELECT [MachineType],[vCPUs],[MemoryGB],[UsageType],[vCPU_SKUDescription_Prefix]
 	FROM @filePath + "GCP_VMTypes_single.tsv"
 	USING Extractors.Tsv(rowDelimiter:"\n",quoting:false,skipFirstNRows:1);
 	
+@GCP_VMTypes_single = 
+	SELECT * , (int)(ROW_NUMBER() OVER(ORDER BY DateModified ASC,MachineType ASC)) AS rn FROM @GCP_VMTypes_single;
+	
 TRUNCATE TABLE csp.CSP_GCP_VMTypes_single;
 
-INSERT INTO csp.CSP_GCP_VMTypes_single([MachineType],[vCPUs_GPUs],[MemoryGB],[UsageType],[StartUsageAmount_RETIRED],[vCPU_GPU_SKUDescription_Prefix],[Notes],[DateAdded],[DateModified],InsertDateTime)
-SELECT [MachineType],[vCPUs_GPUs],[MemoryGB],[UsageType],[StartUsageAmount_RETIRED],[vCPU_GPU_SKUDescription_Prefix],[Notes],[DateAdded],[DateModified],@insertDateTime FROM @GCP_VMTypes_single;
+INSERT INTO csp.CSP_GCP_VMTypes_single([_Number],[MachineType],[vCPUs_GPUs],[MemoryGB],[UsageType],[StartUsageAmount_RETIRED],[vCPU_GPU_SKUDescription_Prefix],[Notes],[DateAdded],[DateModified],InsertDateTime)
+SELECT [rn],[MachineType],[vCPUs_GPUs],[MemoryGB],[UsageType],[StartUsageAmount_RETIRED],[vCPU_GPU_SKUDescription_Prefix],[Notes],[DateAdded],[DateModified],@insertDateTime FROM @GCP_VMTypes_single;
 
